@@ -279,7 +279,7 @@ public static class ModManager
             ? Loc.TrF("mod_risk.final_title", totalRisks)
             : Loc.Tr("mod_risk.final_title_safe");
         string msg = hasRisk
-            ? Loc.Tr("mod_risk.final_msg")
+            ? Loc.TrF("mod_risk.final_msg_fmt", totalRisks)
             : Loc.Tr("mod_risk.final_msg_safe");
 
         // 第一层最终确认

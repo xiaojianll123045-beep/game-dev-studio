@@ -1043,7 +1043,7 @@
   "mod_risk.open_folder": "Open mod folder",
   "mod_risk.final_title": "Final Confirmation",
   "mod_risk.final_title_safe": "📋 Final Confirmation (No Warnings)",
-  "mod_risk.final_msg": "This mod has high-risk operations.\n\nThe game developers and mod community assume no responsibility for this mod's behavior.\nContact the mod author or distributor for any damages.\nCan't find the author? Tough luck.\n\nLoading = you accept all risks and losses.",
+  "mod_risk.final_msg_fmt": "This mod has {0} high-risk operation(s).\n\nThe game developers and mod community assume no responsibility for this mod's behavior.\nContact the mod author or distributor for any damages.\nCan't find the author? Tough luck.\n\nLoading = you accept all risks and losses.",
   "mod_risk.final_msg_safe": "This mod passed basic security scan — no obvious dangerous operations found.\n\n⚠️ Static scanning cannot detect all risks. Malicious code may hide via string concatenation, encoding, dynamic loading, or reflection.\n\nThe game developers and mod community assume no responsibility.\n\nLoading = you accept all risks.",
   "mod_risk.final_accept": "I accept all risks, load it",
   "mod_risk.continue": "Continue loading",
