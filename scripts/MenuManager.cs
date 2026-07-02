@@ -447,7 +447,7 @@ public partial class MenuManager : Node
 
 	private void BuildAboutPanel(float cx, float cy)
 	{
-		float pw = 420, ph = 430;
+		float pw = 420, ph = 490;
 		_aboutPanel = MkPanel(cx - pw / 2, cy - ph / 2, pw, ph);
 		_aboutPanel.Visible = false;
 		_ui.AddChild(_aboutPanel);
@@ -460,6 +460,7 @@ public partial class MenuManager : Node
 			Loc.Tr("about.qq"),
 			Loc.Tr("about.email"),
 			Loc.Tr("about.group"),
+			Loc.Tr("about.github"),
 			Loc.Tr("about.ai_credit"),
 		};
 		float ly = 44;
