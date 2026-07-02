@@ -459,7 +459,8 @@ public partial class MenuManager : Node
 			Loc.Tr("about.dev"),
 			Loc.Tr("about.qq"),
 			Loc.Tr("about.email"),
-			Loc.Tr("about.group")
+			Loc.Tr("about.group"),
+			Loc.Tr("about.ai_credit"),
 		};
 		float ly = 44;
 		float editW = 300;

@@ -63,6 +63,7 @@ Mod examples 见 `mod_examples/` 目录。
 ## 致谢 / Credits
 
 - Godot Engine — 开源游戏引擎
+- **DeepSeek** — AI 辅助开发 / AI-assisted development
 - 所有 Mod 作者和贡献者
 - 每一位玩家 ❤️
 
