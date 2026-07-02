@@ -214,100 +214,191 @@ public static class ModManager
             ModAssemblyLoader.LoadAllFrom(asmDir, gm);
     }
 
-    /// <summary>扫描所有已加载 Mod 并显示风险确认弹窗</summary>
+    /// <summary>扫描 Mod 并显示风险确认弹窗</summary>
     public static void ScanAndConfirmMods(GameManager gm)
     {
-        var queue = new List<(ModManifest mod, ScanResult scan)>();
+        var risky = new List<(ModManifest mod, ScanResult scan)>();
+        var safe = new List<ModManifest>();
 
         foreach (var mod in LoadedMods)
         {
+            if (!EnabledMods.Contains(mod.Id)) continue;
             var scan = ModSecurityScanner.ScanMod(mod.Folder, mod.Id);
             if (scan.RiskLevel >= ModRiskLevel.Medium)
-                queue.Add((mod, scan));
+                risky.Add((mod, scan));
+            else if (mod.HasScripts)
+                safe.Add(mod);
         }
 
-        if (queue.Count == 0) return;
+        if (risky.Count == 0 && safe.Count == 0) return;
 
-        ShowNextScanWarning(gm, queue, 0);
+        if (risky.Count > 0)
+        {
+            ShowNextScanWarning(gm, risky, 0, () => ShowSafeConfirmAll(gm, safe));
+        }
+        else
+        {
+            ShowSafeConfirmAll(gm, safe);
+        }
     }
 
-    private static void ShowNextScanWarning(GameManager gm, List<(ModManifest mod, ScanResult scan)> queue, int idx)
+    private static void ShowSafeConfirmAll(GameManager gm, List<ModManifest> safeMods)
     {
-        if (idx >= queue.Count) return;
-        var (mod, scan) = queue[idx];
+        if (safeMods.Count == 0) return;
+        int idx = 0;
+        ShowNextSafeConfirm(gm, safeMods, idx);
+    }
 
-        string riskLabel = ModSecurityScanner.GetRiskLevelLabel(scan.RiskLevel);
-        string msg = BuildScanMessage(mod, scan);
-
-        Color titleColor = scan.RiskLevel switch
-        {
-            ModRiskLevel.Medium => new Color(1f, 0.7f, 0.1f),
-            ModRiskLevel.High => new Color(1f, 0.5f, 0.1f),
-            ModRiskLevel.Critical => new Color(1f, 0.2f, 0.1f),
-            ModRiskLevel.Dangerous => new Color(0.8f, 0.1f, 0.1f),
-            _ => Colors.White
-        };
-
+    private static void ShowNextSafeConfirm(GameManager gm, List<ModManifest> safeMods, int idx)
+    {
+        if (idx >= safeMods.Count) return;
+        var mod = safeMods[idx];
         gm.ShowChoicePopup(
-            $"⚠️ {Loc.Tr("mod_risk.title")}: {mod.Name} [{riskLabel}]",
-            msg,
-            Loc.Tr("mod_risk.confirm"),
-            Loc.Tr("mod_risk.reject"),
-            () => {
-                ConfirmedRiskyMods.Add(mod.Id);
-                if (!EnabledMods.Contains(mod.Id))
-                {
-                    EnabledMods.Add(mod.Id);
-                    SaveEnabledConfig();
-                    ApplyMod(mod, gm);
-                }
-                ShowNextScanWarning(gm, queue, idx + 1);
-            },
-            () => {
-                EnabledMods.Remove(mod.Id);
-                ShowNextScanWarning(gm, queue, idx + 1);
-            },
-            titleColor
+            $"📋 {Loc.Tr("mod_risk.final_title_safe")}: {mod.Name}",
+            Loc.Tr("mod_risk.final_msg_safe"),
+            Loc.Tr("mod_risk.continue"),
+            Loc.Tr("mod_risk.cancel"),
+            () => ShowNextSafeConfirm(gm, safeMods, idx + 1),
+            () => { EnabledMods.Remove(mod.Id); ShowNextSafeConfirm(gm, safeMods, idx + 1); },
+            new Color(0.8f, 0.9f, 0.8f)
         );
     }
 
-    private static string BuildScanMessage(ModManifest mod, ScanResult scan)
+    private static void OpenModFolder(string folder)
     {
-        var parts = new List<string>();
-        int totalRisks = scan.Patterns.Count + (scan.DllFiles.Count > 0 ? 1 : 0) + (scan.ScriptFiles.Count > 0 ? 1 : 0);
+        string abs = ProjectSettings.GlobalizePath(folder);
+        OS.ShellShowInFileManager(abs);
+    }
 
-        if (totalRisks >= 3)
-            parts.Add(Loc.Tr("mod_risk.summary_3"));
-        else if (totalRisks == 2)
-            parts.Add(Loc.Tr("mod_risk.summary_2"));
-        else if (totalRisks == 1)
-            parts.Add(Loc.Tr("mod_risk.summary_1"));
+    private static void ShowFinalConfirm(GameManager gm, ModManifest mod, ScanResult scan, Action onConfirm)
+    {
+        int totalRisks = scan.Patterns.Count + (scan.DllFiles.Count > 0 ? 1 : 0) + (scan.ScriptFiles.Count > 0 ? 1 : 0);
+        bool hasRisk = totalRisks > 0;
+
+        string title = hasRisk
+            ? Loc.TrF("mod_risk.final_title", totalRisks)
+            : Loc.Tr("mod_risk.final_title_safe");
+        string msg = hasRisk
+            ? Loc.Tr("mod_risk.final_msg")
+            : Loc.Tr("mod_risk.final_msg_safe");
+
+        // 第一层最终确认
+        gm.ShowChoicePopup(title, msg,
+            hasRisk ? Loc.Tr("mod_risk.final_accept") : Loc.Tr("mod_risk.continue"),
+            Loc.Tr("mod_risk.cancel"),
+            () =>
+            {
+                if (hasRisk && totalRisks >= 3)
+                {
+                    // 3+ 风险加一层嘲讽确认
+                    gm.ShowChoicePopup(
+                        Loc.Tr("mod_risk.troll_title"),
+                        Loc.Tr("mod_risk.troll_msg"),
+                        Loc.Tr("mod_risk.troll_confirm"),
+                        Loc.Tr("mod_risk.cancel"),
+                        () => ShowTimedConfirm(gm, mod, onConfirm),
+                        () => { },
+                        new Color(1f, 0.3f, 0.2f)
+                    );
+                }
+                else
+                {
+                    ShowTimedConfirm(gm, mod, onConfirm);
+                }
+            },
+            () => { },
+            hasRisk ? new Color(1f, 0.85f, 0.7f) : new Color(0.8f, 0.9f, 0.8f)
+        );
+    }
+
+    private static void ShowTimedConfirm(GameManager gm, ModManifest mod, Action onConfirm)
+    {
+        // 先显示等待提示
+        gm.ShowPopup(
+            Loc.Tr("mod_risk.timed_title"),
+            Loc.TrF("mod_risk.timed_wait", 5),
+            new Color(1f, 0.4f, 0.3f)
+        );
+
+        // 5秒后显示真正的确认按钮
+        var timer = new Timer { WaitTime = 5, OneShot = true };
+        gm.AddChild(timer);
+        timer.Timeout += () =>
+        {
+            timer.QueueFree();
+            gm.ShowChoicePopup(
+                Loc.Tr("mod_risk.timed_title"),
+                Loc.Tr("mod_risk.timed_msg"),
+                Loc.Tr("mod_risk.timed_ready"),
+                Loc.Tr("mod_risk.cancel"),
+                () => { ConfirmedRiskyMods.Add(mod.Id); onConfirm(); },
+                () => { },
+                new Color(1f, 0.4f, 0.3f)
+            );
+        };
+        timer.Start();
+    }
+
+    private static void ShowNextScanWarning(GameManager gm, List<(ModManifest mod, ScanResult scan)> queue, int idx, Action onAllDone = null)
+    {
+        if (idx >= queue.Count) { onAllDone?.Invoke(); return; }
+        var (mod, scan) = queue[idx];
+
+        int totalRisks = scan.Patterns.Count + (scan.DllFiles.Count > 0 ? 1 : 0) + (scan.ScriptFiles.Count > 0 ? 1 : 0);
+        string summary;
+        if (totalRisks >= 3) summary = Loc.Tr("mod_risk.summary_3");
+        else if (totalRisks == 2) summary = Loc.Tr("mod_risk.summary_2");
+        else if (totalRisks == 1) summary = Loc.Tr("mod_risk.summary_1");
+        else summary = "";
+
+        var parts = new List<string>();
+        if (!string.IsNullOrEmpty(summary)) parts.Add(summary);
 
         if (scan.Patterns.Count > 0)
         {
             parts.Add($"\n⚠️ {Loc.Tr("mod_risk.danger_patterns")}:");
-            foreach (var p in scan.Patterns.Take(5))
-                parts.Add($"   {mod.Folder} 第{p.Line}行: {p.Code} ← {p.Reason}");
-            if (scan.Patterns.Count > 5)
-                parts.Add($"   ...{Loc.TrF("mod_risk.more", scan.Patterns.Count - 5)}");
+            foreach (var p in scan.Patterns.Take(10))
+                parts.Add($"   {mod.Id} 第{p.Line}行: {p.Code} ← {p.Reason}");
         }
 
         if (scan.DllFiles.Count > 0)
         {
             parts.Add($"\n⚠️ {Loc.Tr("mod_risk.dll_found")}:");
-            foreach (var dll in scan.DllFiles.Take(5))
+            foreach (var dll in scan.DllFiles)
                 parts.Add($"   - {dll}");
+            parts.Add(Loc.Tr("mod_risk.dll_warn"));
         }
 
         if (scan.ScriptFiles.Count > 0)
         {
             parts.Add($"\n⚠️ {Loc.Tr("mod_risk.script_files")}:");
-            foreach (var sf in scan.ScriptFiles.Take(5))
+            foreach (var sf in scan.ScriptFiles)
                 parts.Add($"   - {sf}");
+            parts.Add(Loc.Tr("mod_risk.script_warn"));
         }
 
         parts.Add($"\n{Loc.Tr("mod_risk.disclaimer")}");
-        return string.Join("\n", parts);
+
+        string fullMsg = string.Join("\n", parts);
+
+        gm.ShowTriChoicePopup(
+            $"⚠️ {Loc.Tr("mod_risk.title")}: {mod.Name}",
+            fullMsg,
+            Loc.Tr("mod_risk.confirm_risk"),
+            Loc.Tr("mod_risk.reject"),
+            Loc.Tr("mod_risk.open_folder"),
+            () => ShowFinalConfirm(gm, mod, scan, () => ShowNextScanWarning(gm, queue, idx + 1, onAllDone)),
+            () => { EnabledMods.Remove(mod.Id); ShowNextScanWarning(gm, queue, idx + 1, onAllDone); },
+            () => OpenModFolder(mod.Folder),
+            scan.RiskLevel switch
+            {
+                ModRiskLevel.Medium => new Color(1f, 0.6f, 0.2f),
+                ModRiskLevel.High => new Color(1f, 0.4f, 0.2f),
+                ModRiskLevel.Critical => new Color(1f, 0.2f, 0.2f),
+                ModRiskLevel.Dangerous => new Color(0.8f, 0.1f, 0.1f),
+                _ => new Color(1f, 0.6f, 0.2f)
+            }
+        );
     }
 
     // ── 语言 Mod ──
