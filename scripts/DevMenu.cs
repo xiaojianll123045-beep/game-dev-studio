@@ -174,7 +174,7 @@ public class DevMenu
     { var l = new Label { Text = t, HorizontalAlignment = ha }; l.AddThemeFontSizeOverride("font_size", (int)fs); l.AddThemeColorOverride("font_color", c); return l; }
 
     private Button MkB(string t, float w, float h, float fs = 14)
-    { var b = new Button { Text = t, CustomMinimumSize = new(Sf(w), Sf(h)), Size = new(Sf(w), Sf(h)) }; b.AddThemeFontSizeOverride("font_size", (int)fs); b.AddThemeColorOverride("font_color", new Color(0.10f, 0.12f, 0.18f)); return b; }
+    { var b = new Button { Text = t, CustomMinimumSize = new(Sf(w), Sf(h)), Size = new(Sf(w), Sf(h)) }; b.AddThemeFontSizeOverride("font_size", (int)fs); return b; }
 
     private Label MkLPos(string t, float x, float y, float w, float h, float fs, Color c)
     { var l = new Label { Text = t, Position = new(x, y), Size = new(w, h) }; l.AddThemeFontSizeOverride("font_size", (int)fs); l.AddThemeColorOverride("font_color", c); return l; }
@@ -882,6 +882,7 @@ public class DevMenu
             var predRow = new HBoxContainer();
             predRow.AddChild(MkL(Loc.TrF("devmenu.pred_current", _sequelBase.Name, _sequelBase.FinalScore), 13, new Color(0.9f, 0.45f, 0.15f)));
             var clearBtn = MkB(Loc.Tr("devmenu.pred_clear"), 60, 26, 11);
+            clearBtn.AddThemeColorOverride("font_color", new Color(0.10f, 0.12f, 0.18f));
             clearBtn.Pressed += () =>
             {
                 _sequelBase = null; _isSequel = false; _canReuse = false;
@@ -914,6 +915,7 @@ public class DevMenu
                     var predRow2 = new HBoxContainer();
                     predRow2.AddChild(MkL($"  {cp.Name}  [{cp.Genre.Name()}×{cp.Theme.Name()}]  {cp.FinalScore:F0}分", 12, new Color(0.30f, 0.33f, 0.38f)));
                     var pickBtn = MkB(Loc.Tr("devmenu.pred_use"), 60, 24, 10);
+                    pickBtn.AddThemeColorOverride("font_color", new Color(0.10f, 0.12f, 0.18f));
                     var pp = cp;
                     pickBtn.Pressed += () =>
                     {
