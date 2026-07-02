@@ -919,19 +919,23 @@ public partial class MenuManager : Node
 		var acceptBtn = new Button { Text = Loc.Tr("mod_risk.confirm_risk"), Position = new(S(16), btnY), Size = new(S(200), S(34)) };
 		acceptBtn.AddThemeFontSizeOverride("font_size", 12);
 		acceptBtn.AddThemeColorOverride("font_color", new Color(0.9f, 0.2f, 0.2f));
+		acceptBtn.AddThemeStyleboxOverride("normal", MakeBtnStyle(new Color(1f, 0.95f, 0.95f), new Color(0.9f, 0.3f, 0.2f)));
+		acceptBtn.AddThemeStyleboxOverride("hover", MakeBtnStyle(new Color(1f, 0.85f, 0.85f), new Color(0.9f, 0.2f, 0.1f)));
 		acceptBtn.Pressed += () => { dp.QueueFree(); ShowModFurtherConfirm(mod, scan, totalRisks, onAccept, onDecline); };
 		dp.AddChild(acceptBtn);
 
-		var openBtn = new Button { Text = Loc.Tr("mod_risk.open_folder"), Position = new(S(224), btnY), Size = new(S(130), S(34)), Flat = true };
+		var openBtn = new Button { Text = Loc.Tr("mod_risk.open_folder"), Position = new(S(220), btnY), Size = new(S(130), S(34)), Flat = true };
 		openBtn.AddThemeFontSizeOverride("font_size", 11);
 		openBtn.AddThemeColorOverride("font_color", new Color(0.2f, 0.3f, 0.6f));
+		openBtn.AddThemeColorOverride("font_hover_color", new Color(0.4f, 0.5f, 0.8f));
 		var modFolder = mod.Folder;
 		openBtn.Pressed += () => { string abs = ProjectSettings.GlobalizePath(modFolder); OS.ShellShowInFileManager(abs); };
 		dp.AddChild(openBtn);
 
 		var declineBtn = new Button { Text = Loc.Tr("mod_risk.reject"), Position = new(pw - S(124), btnY), Size = new(S(110), S(34)), Flat = true };
 		declineBtn.AddThemeFontSizeOverride("font_size", 12);
-		declineBtn.AddThemeColorOverride("font_color", new Color(0.15f, 0.15f, 0.15f));
+		declineBtn.AddThemeColorOverride("font_color", new Color(0.4f, 0.4f, 0.4f));
+		declineBtn.AddThemeColorOverride("font_hover_color", new Color(0.8f, 0.2f, 0.2f));
 		declineBtn.Pressed += () => { dp.QueueFree(); onDecline(); };
 		dp.AddChild(declineBtn);
 	}
@@ -956,11 +960,15 @@ public partial class MenuManager : Node
 
 			var okBtn = new Button { Text = Loc.Tr("mod_risk.troll_confirm"), Position = new(16, 114), Size = new(190, 34) };
 			okBtn.AddThemeFontSizeOverride("font_size", 12); okBtn.AddThemeColorOverride("font_color", new Color(0.9f, 0.2f, 0.2f));
+			okBtn.AddThemeStyleboxOverride("normal", MakeBtnStyle(new Color(1f, 0.95f, 0.95f), new Color(0.9f, 0.3f, 0.2f)));
+			okBtn.AddThemeStyleboxOverride("hover", MakeBtnStyle(new Color(1f, 0.85f, 0.85f), new Color(0.9f, 0.2f, 0.1f)));
 			okBtn.Pressed += () => { dp.QueueFree(); ShowModTimedConfirm(mod, onAccept, onDecline); };
 			dp.AddChild(okBtn);
 
 			var cancelBtn = new Button { Text = Loc.Tr("mod_risk.cancel"), Position = new(220, 114), Size = new(130, 34), Flat = true };
-			cancelBtn.AddThemeFontSizeOverride("font_size", 12); cancelBtn.AddThemeColorOverride("font_color", new Color(0.15f, 0.15f, 0.15f));
+			cancelBtn.AddThemeFontSizeOverride("font_size", 12);
+			cancelBtn.AddThemeColorOverride("font_color", new Color(0.4f, 0.4f, 0.4f));
+			cancelBtn.AddThemeColorOverride("font_hover_color", new Color(0.8f, 0.2f, 0.2f));
 			cancelBtn.Pressed += () => { dp.QueueFree(); onDecline(); };
 			dp.AddChild(cancelBtn);
 		}
@@ -970,11 +978,16 @@ public partial class MenuManager : Node
 		}
 	}
 
+	private StyleBoxFlat MakeBtnStyle(Color bg, Color border)
+	{
+		return new StyleBoxFlat { BgColor = bg, BorderWidthLeft = 1, BorderWidthTop = 1, BorderWidthRight = 1, BorderWidthBottom = 1, BorderColor = border, CornerRadiusTopLeft = 4, CornerRadiusTopRight = 4, CornerRadiusBottomLeft = 4, CornerRadiusBottomRight = 4 };
+	}
+
 	private void ShowModTimedConfirm(ModManifest mod, Action onAccept, Action onDecline)
 	{
 		var vp = GetViewport().GetVisibleRect().Size;
 		var S = (Func<float, float>)(v => v * _uiScale);
-		float pw = S(460), ph = S(180);
+		float pw = S(500), ph = S(240);
 
 		var dp = new DragPanel { Position = new(vp.X / 2 - pw / 2, vp.Y / 2 - ph / 2), Size = new(pw, ph) };
 		dp.AddThemeStyleboxOverride("panel", new StyleBoxFlat { BgColor = new Color(1, 1, 1), CornerRadiusTopLeft = 10, CornerRadiusTopRight = 10, CornerRadiusBottomLeft = 10, CornerRadiusBottomRight = 10, BorderWidthLeft = 2, BorderWidthTop = 2, BorderWidthRight = 2, BorderWidthBottom = 2, BorderColor = new Color(0.9f, 0.3f, 0.2f) });
@@ -984,18 +997,29 @@ public partial class MenuManager : Node
 		title.AddThemeFontSizeOverride("font_size", 15); title.AddThemeColorOverride("font_color", new Color(0.8f, 0.15f, 0.15f));
 		dp.AddChild(title);
 
-		var msg = new Label { Text = Loc.Tr("mod_risk.final_msg"), Position = new(S(16), S(42)), Size = new(pw - S(32), S(80)) };
+		float msgY = S(44), msgW = pw - S(32), msgH = ph - S(96);
+		var sc = new ScrollContainer { Position = new(S(16), msgY), Size = new(msgW, msgH) };
+		sc.HorizontalScrollMode = ScrollContainer.ScrollMode.Disabled;
+		var msg = new Label { Text = Loc.Tr("mod_risk.final_msg") };
 		msg.AddThemeFontSizeOverride("font_size", 10); msg.AddThemeColorOverride("font_color", new Color(0.12f, 0.14f, 0.18f));
 		msg.AutowrapMode = TextServer.AutowrapMode.Word;
-		dp.AddChild(msg);
+		msg.SizeFlagsHorizontal = Control.SizeFlags.ExpandFill;
+		sc.AddChild(msg);
+		dp.AddChild(sc);
 
 		int remain = 5;
-		var confirmBtn = new Button { Text = Loc.TrF("mod_risk.timed_btn", remain), Position = new(S(16), ph - S(44)), Size = new(S(280), S(34)), Disabled = true };
-		confirmBtn.AddThemeFontSizeOverride("font_size", 12); confirmBtn.AddThemeColorOverride("font_color", new Color(0.4f, 0.4f, 0.4f));
+		float btnY = ph - S(40);
+		var confirmBtn = new Button { Text = Loc.TrF("mod_risk.timed_btn", remain), Position = new(S(16), btnY), Size = new(S(300), S(30)), Disabled = true };
+		confirmBtn.AddThemeFontSizeOverride("font_size", 12);
+		confirmBtn.AddThemeColorOverride("font_color", new Color(0.5f, 0.5f, 0.5f));
+		confirmBtn.AddThemeStyleboxOverride("normal", MakeBtnStyle(new Color(0.9f, 0.9f, 0.9f), new Color(0.6f, 0.6f, 0.6f)));
+		confirmBtn.AddThemeStyleboxOverride("hover", MakeBtnStyle(new Color(0.85f, 0.85f, 0.85f), new Color(0.5f, 0.5f, 0.5f)));
 		dp.AddChild(confirmBtn);
 
-		var cancelBtn = new Button { Text = Loc.Tr("mod_risk.cancel"), Position = new(pw - S(130), ph - S(44)), Size = new(S(120), S(34)), Flat = true };
-		cancelBtn.AddThemeFontSizeOverride("font_size", 12); cancelBtn.AddThemeColorOverride("font_color", new Color(0.15f, 0.15f, 0.15f));
+		var cancelBtn = new Button { Text = Loc.Tr("mod_risk.cancel"), Position = new(pw - S(110), btnY), Size = new(S(100), S(30)), Flat = true };
+		cancelBtn.AddThemeFontSizeOverride("font_size", 12);
+		cancelBtn.AddThemeColorOverride("font_color", new Color(0.4f, 0.4f, 0.4f));
+		cancelBtn.AddThemeColorOverride("font_hover_color", new Color(0.8f, 0.2f, 0.2f));
 		cancelBtn.Pressed += () => { dp.QueueFree(); onDecline(); };
 		dp.AddChild(cancelBtn);
 
@@ -1014,6 +1038,8 @@ public partial class MenuManager : Node
 				confirmBtn.Text = Loc.Tr("mod_risk.timed_ready");
 				confirmBtn.Disabled = false;
 				confirmBtn.AddThemeColorOverride("font_color", new Color(0.9f, 0.2f, 0.2f));
+				confirmBtn.AddThemeStyleboxOverride("normal", MakeBtnStyle(new Color(1f, 0.95f, 0.95f), new Color(0.9f, 0.3f, 0.2f)));
+				confirmBtn.AddThemeStyleboxOverride("hover", MakeBtnStyle(new Color(1f, 0.85f, 0.85f), new Color(0.9f, 0.2f, 0.1f)));
 				confirmBtn.Pressed += () => { dp.QueueFree(); ModManager.ConfirmedRiskyMods.Add(mod.Id); onAccept(); };
 			}
 		};
