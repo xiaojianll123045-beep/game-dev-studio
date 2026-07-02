@@ -2977,7 +2977,8 @@ public partial class GameManager : Node3D
         float btnH = S(36);
 
         float availableMsgH = vp.Y * 0.82f - titleH - gapT - gapM - btnH - pad * 2;
-        var (msgH, msgFont) = FitTextSize(message, contentW - S(12), availableMsgH, 13, 9);
+        float msgW = contentW - S(4);
+        var (msgH, msgFont) = FitTextSize(message, msgW, availableMsgH, 13, 9);
 
         float ph = pad + titleH + gapT + msgH + gapM + btnH + pad;
         ph = Mathf.Min(ph, vp.Y * 0.82f);
@@ -3000,11 +3001,10 @@ public partial class GameManager : Node3D
 
         // 消息正文
         float msgY = pad + titleH + gapT;
-        var ml = new Label { Text = message, Position = new(pad, msgY), Size = new(contentW - S(4), msgH) };
+        var ml = new Label { Text = message, Position = new(pad, msgY), Size = new(msgW, msgH) };
         ml.AddThemeFontSizeOverride("font_size", msgFont);
         ml.AddThemeColorOverride("font_color", new Color(0.10f, 0.14f, 0.22f));
         ml.AutowrapMode = TextServer.AutowrapMode.Arbitrary;
-        ml.ClipContents = true;
         _toastPanel.AddChild(ml);
 
         // 确定按钮
@@ -3053,7 +3053,8 @@ public partial class GameManager : Node3D
         float btnAreaH = verticalBtns ? btnH * 2 + btnGap : btnH;
 
         float availableMsgH = vp.Y * 0.82f - titleH - gapT - gapM - btnAreaH - pad * 2;
-        var (msgH, msgFont) = FitTextSize(message, contentW - S(12), availableMsgH, 13, 9);
+        float msgW = contentW - S(4);
+        var (msgH, msgFont) = FitTextSize(message, msgW, availableMsgH, 13, 9);
 
         float ph = pad + titleH + gapT + msgH + gapM + btnAreaH + pad;
         ph = Mathf.Min(ph, vp.Y * 0.82f);
@@ -3074,11 +3075,10 @@ public partial class GameManager : Node3D
         _toastPanel.AddChild(tl);
 
         float msgY = pad + titleH + gapT;
-        var ml = new Label { Text = message, Position = new(pad, msgY), Size = new(contentW - S(4), msgH) };
+        var ml = new Label { Text = message, Position = new(pad, msgY), Size = new(msgW, msgH) };
         ml.AddThemeFontSizeOverride("font_size", msgFont);
         ml.AddThemeColorOverride("font_color", new Color(0.10f, 0.14f, 0.22f));
         ml.AutowrapMode = TextServer.AutowrapMode.Arbitrary;
-        ml.ClipContents = true;
         _toastPanel.AddChild(ml);
 
         float btnY = msgY + msgH + gapM;
@@ -3139,7 +3139,8 @@ public partial class GameManager : Node3D
         float btnAreaH = (btnH + btnGap) * 3 - btnGap;
 
         float availableMsgH = vp.Y * 0.82f - titleH - gapT - btnAreaH - pad * 2;
-        var (msgH, msgFont) = FitTextSize(message, contentW - S(12), availableMsgH, 13, 9);
+        float msgW = contentW - S(4);
+        var (msgH, msgFont) = FitTextSize(message, msgW, availableMsgH, 13, 9);
 
         float ph = pad + titleH + gapT + msgH + btnAreaH + pad;
         ph = Mathf.Min(ph, vp.Y * 0.82f);
@@ -3160,11 +3161,10 @@ public partial class GameManager : Node3D
         _toastPanel.AddChild(tl);
 
         float msgY = pad + titleH + gapT;
-        var ml = new Label { Text = message, Position = new(pad, msgY), Size = new(contentW - S(4), msgH) };
+        var ml = new Label { Text = message, Position = new(pad, msgY), Size = new(msgW, msgH) };
         ml.AddThemeFontSizeOverride("font_size", msgFont);
         ml.AddThemeColorOverride("font_color", new Color(0.10f, 0.14f, 0.22f));
         ml.AutowrapMode = TextServer.AutowrapMode.Arbitrary;
-        ml.ClipContents = true;
         _toastPanel.AddChild(ml);
 
         float btnAreaY = msgY + msgH;
