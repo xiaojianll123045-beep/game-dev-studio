@@ -111,6 +111,47 @@ public partial class ModBridge : Node
     public void set_setting(string mod_id, string key, string value)
         => ModManager.SetModSetting(mod_id, key, value);
 
+    // ═══════════════ Mod 通信 API ═══════════════
+    /// <summary>注册通信端点 (GDScript)</summary>
+    public void register_endpoint(string mod_id, string endpoint, Callable handler)
+        => ModCommAPI.RegisterGDEndpoint(mod_id, endpoint, handler);
+
+    /// <summary>向指定 Mod 发送消息</summary>
+    public Variant send_message(string target_mod_id, string endpoint, Godot.Collections.Array args)
+    {
+        var result = ModCommAPI.SendMessage(target_mod_id, endpoint, args);
+        if (result == null) return new Variant();
+        if (result is Variant v) return v;
+        return Variant.From(result.ToString());
+    }
+
+    /// <summary>向所有 Mod 广播消息</summary>
+    public Godot.Collections.Dictionary broadcast_message(string endpoint, Godot.Collections.Array args)
+    {
+        var results = ModCommAPI.BroadcastMessage(endpoint, args);
+        var dict = new Godot.Collections.Dictionary();
+        foreach (var kv in results)
+            dict[kv.Key] = kv.Value is Variant v ? v : Variant.From(kv.Value.ToString());
+        return dict;
+    }
+
+    /// <summary>查询端点是否存在</summary>
+    public bool has_endpoint(string mod_id, string endpoint)
+        => ModCommAPI.HasEndpoint(mod_id, endpoint);
+
+    /// <summary>列出注册了端点的 Mod</summary>
+    public Godot.Collections.Array get_mods_with_endpoint(string endpoint)
+    {
+        var list = ModCommAPI.GetModsWithEndpoint(endpoint);
+        var arr = new Godot.Collections.Array();
+        foreach (var s in list) arr.Add(s);
+        return arr;
+    }
+
+    /// <summary>清除 Mod 注册</summary>
+    public void unregister_mod(string mod_id)
+        => ModCommAPI.UnregisterMod(mod_id);
+
     // ═══════════════ 日志 ═══════════════
     public void log(string msg) => GD.Print($"[Mod] {msg}");
     public void log_err(string msg) => GD.PrintErr($"[Mod] {msg}");

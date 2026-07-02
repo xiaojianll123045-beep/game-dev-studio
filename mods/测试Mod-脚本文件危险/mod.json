@@ -1,0 +1,7 @@
+{
+    "name": "测试Mod-脚本文件(危险)",
+    "version": "1.0",
+    "author": "测试",
+    "description": "包含.bat脚本文件，风险等级：危险",
+    "type": "script"
+}

@@ -1,0 +1,7 @@
+{
+    "name": "测试Mod-1个警告",
+    "version": "1.0",
+    "author": "测试",
+    "description": "包含1个高危操作：OS.execute",
+    "type": "script"
+}

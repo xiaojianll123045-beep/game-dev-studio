@@ -1,0 +1,7 @@
+{
+    "name": "测试Mod-3个警告",
+    "version": "1.0",
+    "author": "测试",
+    "description": "包含3个高危操作：OS.execute + 文件删除 + DLL加载",
+    "type": "script"
+}

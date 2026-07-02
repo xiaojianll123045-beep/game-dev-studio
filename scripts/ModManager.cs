@@ -111,6 +111,15 @@ public static class ModManager
         var valid = enabled.Where(m => !skipIds.Contains(m.Id)).ToList();
         var sorted = TopologicalSort(valid);
 
+        // 安全扫描：先扫所有高风险 Mod
+        int highRiskCount = 0;
+        foreach (var mod in sorted)
+        {
+            var scan = ModSecurityScanner.ScanMod(mod.Folder, mod.Id);
+            if (scan.RiskLevel >= ModRiskLevel.Medium)
+                highRiskCount++;
+        }
+
         foreach (var mod in sorted)
         {
             if (!string.IsNullOrEmpty(mod.MinGameVersion) && CompareVersion(mod.MinGameVersion, GameVersion) > 0)
@@ -118,6 +127,15 @@ public static class ModManager
                 DlcManager.Log("Mod", $"[{mod.Name}] SKIP — game version too low");
                 continue;
             }
+
+            var scan = ModSecurityScanner.ScanMod(mod.Folder, mod.Id);
+            if (scan.RiskLevel >= ModRiskLevel.Medium && !ConfirmedRiskyMods.Contains(mod.Id))
+            {
+                ModStatus[mod.Id] = "SKIP:未确认风险";
+                DlcManager.Log("Mod", $"[{mod.Name}] SKIP — risk not confirmed");
+                continue;
+            }
+
             ApplyMod(mod, gm);
             ModStatus[mod.Id] = "OK";
             DlcManager.Log("Mod", $"[{mod.Name}] loaded OK (type={mod.Type})");
@@ -194,6 +212,97 @@ public static class ModManager
         string asmDir = mod.Folder + "/assemblies";
         if (DirAccess.DirExistsAbsolute(asmDir))
             ModAssemblyLoader.LoadAllFrom(asmDir, gm);
+    }
+
+    /// <summary>扫描 Mod 并显示风险确认弹窗</summary>
+    public static void ScanAndConfirmMods(GameManager gm)
+    {
+        var queue = new List<(ModManifest mod, ScanResult scan)>();
+
+        foreach (var mod in LoadedMods)
+        {
+            if (!EnabledMods.Contains(mod.Id)) continue;
+            var scan = ModSecurityScanner.ScanMod(mod.Folder, mod.Id);
+            if (scan.RiskLevel >= ModRiskLevel.Medium)
+                queue.Add((mod, scan));
+        }
+
+        if (queue.Count == 0) return;
+
+        ShowNextScanWarning(gm, queue, 0);
+    }
+
+    private static void ShowNextScanWarning(GameManager gm, List<(ModManifest mod, ScanResult scan)> queue, int idx)
+    {
+        if (idx >= queue.Count) return;
+        var (mod, scan) = queue[idx];
+
+        string riskLabel = ModSecurityScanner.GetRiskLevelLabel(scan.RiskLevel);
+        string msg = BuildScanMessage(mod, scan);
+
+        Color bgColor = scan.RiskLevel switch
+        {
+            ModRiskLevel.Medium => new Color(1f, 0.95f, 0.8f),
+            ModRiskLevel.High => new Color(1f, 0.85f, 0.7f),
+            ModRiskLevel.Critical => new Color(1f, 0.75f, 0.7f),
+            ModRiskLevel.Dangerous => new Color(1f, 0.65f, 0.6f),
+            _ => Colors.White
+        };
+
+        gm.ShowChoicePopup(
+            $"⚠️ {Loc.Tr("mod_risk.title")}: {mod.Name} [{riskLabel}]",
+            msg,
+            Loc.Tr("mod_risk.confirm"),
+            Loc.Tr("mod_risk.reject"),
+            () => {
+                ConfirmedRiskyMods.Add(mod.Id);
+                ShowNextScanWarning(gm, queue, idx + 1);
+            },
+            () => {
+                EnabledMods.Remove(mod.Id);
+                ShowNextScanWarning(gm, queue, idx + 1);
+            },
+            bgColor
+        );
+    }
+
+    private static string BuildScanMessage(ModManifest mod, ScanResult scan)
+    {
+        var parts = new List<string>();
+        int totalRisks = scan.Patterns.Count + (scan.DllFiles.Count > 0 ? 1 : 0) + (scan.ScriptFiles.Count > 0 ? 1 : 0);
+
+        if (totalRisks >= 3)
+            parts.Add(Loc.Tr("mod_risk.summary_3"));
+        else if (totalRisks == 2)
+            parts.Add(Loc.Tr("mod_risk.summary_2"));
+        else if (totalRisks == 1)
+            parts.Add(Loc.Tr("mod_risk.summary_1"));
+
+        if (scan.Patterns.Count > 0)
+        {
+            parts.Add($"\n⚠️ {Loc.Tr("mod_risk.danger_patterns")}:");
+            foreach (var p in scan.Patterns.Take(5))
+                parts.Add($"   {mod.Folder} 第{p.Line}行: {p.Code} ← {p.Reason}");
+            if (scan.Patterns.Count > 5)
+                parts.Add($"   ...{Loc.TrF("mod_risk.more", scan.Patterns.Count - 5)}");
+        }
+
+        if (scan.DllFiles.Count > 0)
+        {
+            parts.Add($"\n⚠️ {Loc.Tr("mod_risk.dll_found")}:");
+            foreach (var dll in scan.DllFiles.Take(5))
+                parts.Add($"   - {dll}");
+        }
+
+        if (scan.ScriptFiles.Count > 0)
+        {
+            parts.Add($"\n⚠️ {Loc.Tr("mod_risk.script_files")}:");
+            foreach (var sf in scan.ScriptFiles.Take(5))
+                parts.Add($"   - {sf}");
+        }
+
+        parts.Add($"\n{Loc.Tr("mod_risk.disclaimer")}");
+        return string.Join("\n", parts);
     }
 
     // ── 语言 Mod ──
