@@ -7,33 +7,26 @@ Built with Godot 4.7 (Mono / C# .NET 8).
 
 ---
 
-## 开源说明 / Open Source (for Mod Developers)
+## 开源说明 / Open Source
 
-本游戏是**商业游戏**，游玩请购买正版。
-The game is **commercial software**. Please purchase the game to play.
+本游戏已开源。你可以自由地：
+This game is open source. You are free to:
 
-源码公开的目的是**方便 Mod 开发者参考和学习**，而非免费游玩。
-The source code is made available for **mod development reference and learning purposes**, not for free gameplay.
-
-作为 Mod 开发者，你可以：
-As a mod developer, you are free to:
-
-- ✅ **学习 / Learn** — 读代码、学 Godot C# 游戏开发
-- ✅ **做 Mod / Make Mods** — 制作 Mod，Mod 不需要开源
-- ✅ **参考 / Reference** — 参考源码实现来编写你的 Mod
-
-但请**不要**：
-Please **do not**:
-
-- ❌ **分发游戏本体 / Redistribute the game** — 游戏是商业产品，请购买
-- ❌ **编译并发布完整游戏 / Build & publish the full game** — 这不是免费版
+- ✅ **游玩 / Play** — 随意玩，无需付费
+- ✅ **学习 / Learn** — 读代码、学 Godot C#
+- ✅ **修改 / Modify** — Fork、改代码、做你自己的版本
+- ✅ **分发 / Distribute** — 重新发布，只要遵守 GPL v3
+- ✅ **做 Mod / Make Mods** — Mod 不需要开源（详见下方）
+- 🏴‍☠️ **玩学习版** — 如果你没钱，玩学习版就行，但有钱了请支持正版
 
 ### 许可证 / License
 
-游戏核心代码以 **GNU General Public License v3 (GPL v3)** 发布。但 Mod 不受此限制。
+游戏核心代码以 **GNU General Public License v3 (GPL v3)** 发布。
+
+**但 Mod 不受限：** 你为本游戏制作的 Mod（包括脚本、数据包、资源包、插件等）**不需要开源**，可以用任何你喜欢的许可证发布。详见 `LICENSE` 文件中的 Mod Exception 条款。
 
 The game's core source code is licensed under **GPL v3**.
-However, **Mods are exempt**: any Mod you create does **not** need to be open source. See the Mod Exception in `LICENSE`.
+However, **Mods are exempt**: any Mod you create (scripts, data packs, assets, plugins) does **not** need to be open source. See the Mod Exception in `LICENSE`.
 
 ---
 
