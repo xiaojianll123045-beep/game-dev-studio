@@ -306,7 +306,6 @@ public class GameDevPopup
         }
         platOpt.Selected = (int)_selectedPlatform;
         platOpt.ItemSelected += (long i) => _selectedPlatform = (Platform)i;
-        platOpt.AddThemeColorOverride("font_color", new Color(0.10f, 0.10f, 0.10f));
         platRow.AddChild(platOpt);
         _content.AddChild(platRow);
 
@@ -326,7 +325,6 @@ public class GameDevPopup
             mktOpt.AddItem(m.Name());
         mktOpt.Selected = (int)_selectedMkt;
         mktOpt.ItemSelected += (long i) => _selectedMkt = (MarketingStrategy)i;
-        mktOpt.AddThemeColorOverride("font_color", new Color(0.10f, 0.10f, 0.10f));
         mktRow.AddChild(mktOpt);
         _content.AddChild(mktRow);
 
@@ -372,7 +370,6 @@ public class GameDevPopup
         priceOpt.AddItem(Loc.Tr("dev.free_play"));
         priceOpt.Selected = _selectedPrice == PriceModel.BuyToPlay ? 0 : 1;
         priceOpt.ItemSelected += (long i) => { _selectedPrice = i == 0 ? PriceModel.BuyToPlay : PriceModel.Free; };
-        priceOpt.AddThemeColorOverride("font_color", new Color(0.10f, 0.10f, 0.10f));
         priceRow.AddChild(priceOpt);
         _content.AddChild(priceRow);
 
