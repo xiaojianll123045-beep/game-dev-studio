@@ -17,7 +17,6 @@ This game is open source. You are free to:
 - ✅ **修改 / Modify** — Fork、改代码、做你自己的版本
 - ✅ **分发 / Distribute** — 重新发布，只要遵守 GPL v3
 - ✅ **做 Mod / Make Mods** — Mod 不需要开源（详见下方）
-- 🏴‍☠️ **玩学习版** — 如果你没钱，玩学习版就行，但有钱了请支持正版
 
 ### 许可证 / License
 
