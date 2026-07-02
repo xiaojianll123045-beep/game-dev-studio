@@ -174,7 +174,7 @@ public class DevMenu
     { var l = new Label { Text = t, HorizontalAlignment = ha }; l.AddThemeFontSizeOverride("font_size", (int)fs); l.AddThemeColorOverride("font_color", c); return l; }
 
     private Button MkB(string t, float w, float h, float fs = 14)
-    { var b = new Button { Text = t, CustomMinimumSize = new(Sf(w), Sf(h)), Size = new(Sf(w), Sf(h)) }; b.AddThemeFontSizeOverride("font_size", (int)fs); return b; }
+    { var b = new Button { Text = t, CustomMinimumSize = new(Sf(w), Sf(h)), Size = new(Sf(w), Sf(h)) }; b.AddThemeFontSizeOverride("font_size", (int)fs); b.AddThemeColorOverride("font_color", new Color(0.10f, 0.10f, 0.10f)); return b; }
 
     private Label MkLPos(string t, float x, float y, float w, float h, float fs, Color c)
     { var l = new Label { Text = t, Position = new(x, y), Size = new(w, h) }; l.AddThemeFontSizeOverride("font_size", (int)fs); l.AddThemeColorOverride("font_color", c); return l; }
@@ -653,6 +653,7 @@ public class DevMenu
         foreach (EngineBizModel m in Enum.GetValues<EngineBizModel>())
             modelOpt.AddItem(m switch { EngineBizModel.Closed => Loc.Tr("devmenu.closed"), EngineBizModel.OpenSource => Loc.Tr("devmenu.opensource"), EngineBizModel.Buyout => Loc.Tr("devmenu.buyout"), EngineBizModel.Subscription => Loc.Tr("devmenu.sub"), EngineBizModel.Royalty => Loc.Tr("devmenu.royalty"), _ => "?" });
         modelOpt.Selected = (int)eng.BizModel;
+        modelOpt.AddThemeColorOverride("font_color", new Color(0.10f, 0.10f, 0.10f));
         modelOpt.ItemSelected += (long i) =>
         {
             eng.BizModel = (EngineBizModel)i;
@@ -900,6 +901,7 @@ public class DevMenu
             seqOpt.AddItem(Loc.Tr("devmenu.seq_spinoff"));
             seqOpt.Selected = (int)_selSequelStrat;
             seqOpt.ItemSelected += (long i) => { _selSequelStrat = (SequelStrategy)i; };
+            seqOpt.AddThemeColorOverride("font_color", new Color(0.10f, 0.10f, 0.10f));
             seqRow.AddChild(seqOpt);
             _content.AddChild(seqRow);
         }
@@ -974,6 +976,7 @@ public class DevMenu
         }
         platOpt.Selected = (int)_selPlatform;
         platOpt.ItemSelected += (long i) => _selPlatform = (Platform)i;
+        platOpt.AddThemeColorOverride("font_color", new Color(0.10f, 0.10f, 0.10f));
         platRow.AddChild(platOpt);
         _content.AddChild(platRow);
 
@@ -982,6 +985,7 @@ public class DevMenu
         var mktOpt = new OptionButton();
         foreach (MarketingStrategy m in Enum.GetValues<MarketingStrategy>()) mktOpt.AddItem(m.Name());
         mktOpt.Selected = (int)_selMkt; mktOpt.ItemSelected += (long i) => _selMkt = (MarketingStrategy)i;
+        mktOpt.AddThemeColorOverride("font_color", new Color(0.10f, 0.10f, 0.10f));
         mktRow.AddChild(mktOpt); _content.AddChild(mktRow);
 
         var budgetRow = new HBoxContainer();
@@ -1019,6 +1023,7 @@ public class DevMenu
             _selPrice = i == 0 ? PriceModel.BuyToPlay : PriceModel.Free;
             RenderPlanning();
         };
+        priceOpt.AddThemeColorOverride("font_color", new Color(0.10f, 0.10f, 0.10f));
         priceRow.AddChild(priceOpt); _content.AddChild(priceRow);
 
         // ── 广告/内购强度（仅免费游戏显示）──
