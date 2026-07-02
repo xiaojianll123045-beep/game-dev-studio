@@ -955,12 +955,18 @@ public class DevMenu
 
         if (_canReuse || _isSequel)
         {
-            _reuseCheck = new CheckBox { Text = Loc.Tr("devmenu.reuse_code") };
+            var reuseRow = new HBoxContainer();
+            _reuseCheck = new CheckBox();
             _reuseCheck.AddThemeFontSizeOverride("font_size", 12);
-            _reuseCheck.AddThemeColorOverride("font_color", new Color(0.10f, 0.12f, 0.18f));
-            _reuseCheck.AddThemeColorOverride("font_hover_color", new Color(0.30f, 0.32f, 0.38f));
             if (_isSequel) _reuseCheck.ButtonPressed = true;
-            _content.AddChild(_reuseCheck);
+            reuseRow.AddChild(_reuseCheck);
+            var reuseLabel = new Label { Text = Loc.Tr("devmenu.reuse_code") };
+            reuseLabel.AddThemeFontSizeOverride("font_size", 12);
+            reuseLabel.AddThemeColorOverride("font_color", new Color(0.10f, 0.12f, 0.18f));
+            reuseLabel.MouseFilter = Control.MouseFilterEnum.Stop;
+            reuseLabel.GuiInput += (ie) => { if (ie is InputEventMouseButton mb && mb.Pressed && mb.ButtonIndex == MouseButton.Left) _reuseCheck.ButtonPressed = !_reuseCheck.ButtonPressed; };
+            reuseRow.AddChild(reuseLabel);
+            _content.AddChild(reuseRow);
         }
 
         var platRow = new HBoxContainer();
