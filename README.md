@@ -12,7 +12,6 @@ Built with Godot 4.7 (Mono / C# .NET 8).
 本游戏已开源。你可以自由地：
 This game is open source. You are free to:
 
-- ✅ **游玩 / Play** — 随意玩，无需付费
 - ✅ **学习 / Learn** — 读代码、学 Godot C#
 - ✅ **修改 / Modify** — Fork、改代码、做你自己的版本
 - ✅ **分发 / Distribute** — 重新发布，只要遵守 GPL v3
