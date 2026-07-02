@@ -882,7 +882,6 @@ public class DevMenu
             var predRow = new HBoxContainer();
             predRow.AddChild(MkL(Loc.TrF("devmenu.pred_current", _sequelBase.Name, _sequelBase.FinalScore), 13, new Color(0.9f, 0.45f, 0.15f)));
             var clearBtn = MkB(Loc.Tr("devmenu.pred_clear"), 60, 26, 11);
-            clearBtn.AddThemeColorOverride("font_color", new Color(0.10f, 0.12f, 0.18f));
             clearBtn.Pressed += () =>
             {
                 _sequelBase = null; _isSequel = false; _canReuse = false;
@@ -915,7 +914,6 @@ public class DevMenu
                     var predRow2 = new HBoxContainer();
                     predRow2.AddChild(MkL($"  {cp.Name}  [{cp.Genre.Name()}×{cp.Theme.Name()}]  {cp.FinalScore:F0}分", 12, new Color(0.30f, 0.33f, 0.38f)));
                     var pickBtn = MkB(Loc.Tr("devmenu.pred_use"), 60, 24, 10);
-                    pickBtn.AddThemeColorOverride("font_color", new Color(0.10f, 0.12f, 0.18f));
                     var pp = cp;
                     pickBtn.Pressed += () =>
                     {
@@ -959,9 +957,8 @@ public class DevMenu
         {
             _reuseCheck = new CheckBox { Text = Loc.Tr("devmenu.reuse_code") };
             _reuseCheck.AddThemeFontSizeOverride("font_size", 12);
-            _reuseCheck.AddThemeColorOverride("font_color", new Color(1f, 0.7f, 0.3f));
-            _reuseCheck.AddThemeColorOverride("font_hover_color", new Color(0.40f, 0.40f, 0.40f));
-            _reuseCheck.AddThemeColorOverride("icon_hover_color", new Color(0.40f, 0.40f, 0.40f));
+            _reuseCheck.AddThemeColorOverride("font_color", new Color(0.10f, 0.12f, 0.18f));
+            _reuseCheck.AddThemeColorOverride("font_hover_color", new Color(0.30f, 0.32f, 0.38f));
             if (_isSequel) _reuseCheck.ButtonPressed = true;
             _content.AddChild(_reuseCheck);
         }
