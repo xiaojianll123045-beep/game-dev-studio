@@ -214,14 +214,13 @@ public static class ModManager
             ModAssemblyLoader.LoadAllFrom(asmDir, gm);
     }
 
-    /// <summary>扫描 Mod 并显示风险确认弹窗</summary>
+    /// <summary>扫描所有已加载 Mod 并显示风险确认弹窗</summary>
     public static void ScanAndConfirmMods(GameManager gm)
     {
         var queue = new List<(ModManifest mod, ScanResult scan)>();
 
         foreach (var mod in LoadedMods)
         {
-            if (!EnabledMods.Contains(mod.Id)) continue;
             var scan = ModSecurityScanner.ScanMod(mod.Folder, mod.Id);
             if (scan.RiskLevel >= ModRiskLevel.Medium)
                 queue.Add((mod, scan));
@@ -240,12 +239,12 @@ public static class ModManager
         string riskLabel = ModSecurityScanner.GetRiskLevelLabel(scan.RiskLevel);
         string msg = BuildScanMessage(mod, scan);
 
-        Color bgColor = scan.RiskLevel switch
+        Color titleColor = scan.RiskLevel switch
         {
-            ModRiskLevel.Medium => new Color(1f, 0.95f, 0.8f),
-            ModRiskLevel.High => new Color(1f, 0.85f, 0.7f),
-            ModRiskLevel.Critical => new Color(1f, 0.75f, 0.7f),
-            ModRiskLevel.Dangerous => new Color(1f, 0.65f, 0.6f),
+            ModRiskLevel.Medium => new Color(1f, 0.7f, 0.1f),
+            ModRiskLevel.High => new Color(1f, 0.5f, 0.1f),
+            ModRiskLevel.Critical => new Color(1f, 0.2f, 0.1f),
+            ModRiskLevel.Dangerous => new Color(0.8f, 0.1f, 0.1f),
             _ => Colors.White
         };
 
@@ -256,13 +255,19 @@ public static class ModManager
             Loc.Tr("mod_risk.reject"),
             () => {
                 ConfirmedRiskyMods.Add(mod.Id);
+                if (!EnabledMods.Contains(mod.Id))
+                {
+                    EnabledMods.Add(mod.Id);
+                    SaveEnabledConfig();
+                    ApplyMod(mod, gm);
+                }
                 ShowNextScanWarning(gm, queue, idx + 1);
             },
             () => {
                 EnabledMods.Remove(mod.Id);
                 ShowNextScanWarning(gm, queue, idx + 1);
             },
-            bgColor
+            titleColor
         );
     }
 
