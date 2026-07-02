@@ -253,8 +253,7 @@ public partial class GameManager : Node3D
         // UI 补丁系统
         ModUIPatch.Init(this);
 
-        // 延迟一帧执行 Mod 安全扫描弹窗（UI 就绪后）
-        Callable.From(() => ModManager.ScanAndConfirmMods(this)).CallDeferred();
+
 
         // Mod 控制台（预创建让 _Input 能接收 F12 事件）
         if (!InputMap.HasAction("toggle_console"))
