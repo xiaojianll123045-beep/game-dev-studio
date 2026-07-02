@@ -854,128 +854,118 @@ public partial class MenuManager : Node
 		var scan = ModSecurityScanner.ScanMod(mod.Folder, mod.Id);
 		int totalRisks = scan.Patterns.Count + (scan.DllFiles.Count > 0 ? 1 : 0) + (scan.ScriptFiles.Count > 0 ? 1 : 0);
 
-		if (totalRisks == 0)
-		{
-			// 无风险：直接确认加载
-			ModManager.ConfirmedRiskyMods.Add(mod.Id);
-			onAccept();
-			return;
-		}
+		if (totalRisks == 0) { ModManager.ConfirmedRiskyMods.Add(mod.Id); onAccept(); return; }
 
-		// 第一层：风险详情 + 三按钮
-		string summary;
-		if (totalRisks >= 3) summary = Loc.Tr("mod_risk.summary_3");
-		else if (totalRisks == 2) summary = Loc.Tr("mod_risk.summary_2");
-		else summary = Loc.Tr("mod_risk.summary_1");
+		var parts = new System.Collections.Generic.List<string>();
 
-		var parts = new System.Collections.Generic.List<string> { summary };
-		bool hasPatterns = scan.Patterns.Count > 0;
-		bool hasDll = scan.DllFiles.Count > 0;
-		bool hasScripts = scan.ScriptFiles.Count > 0;
+		if (totalRisks >= 3) parts.Add(Loc.Tr("mod_risk.summary_3"));
+		else if (totalRisks == 2) parts.Add(Loc.Tr("mod_risk.summary_2"));
+		else parts.Add(Loc.Tr("mod_risk.summary_1"));
 
-		if (hasPatterns)
+		if (scan.Patterns.Count > 0)
 		{
 			parts.Add($"\n⚠️ {Loc.Tr("mod_risk.danger_patterns")}:");
 			for (int pi = 0; pi < Mathf.Min(scan.Patterns.Count, 10); pi++)
 			{
 				var p = scan.Patterns[pi];
-				parts.Add($"   {mod.Id} 第{p.Line}行: {p.Code} ← {p.Reason}");
+				parts.Add($"   {p.File} 第{p.Line}行: {p.Code} ← {p.Reason}");
 			}
 		}
-		if (hasDll)
+		if (scan.DllFiles.Count > 0)
 		{
 			parts.Add($"\n⚠️ {Loc.Tr("mod_risk.dll_found")}:");
 			foreach (var dll in scan.DllFiles) parts.Add($"   - {dll}");
-			parts.Add(Loc.Tr("mod_risk.dll_warn"));
+			parts.Add($"   {Loc.Tr("mod_risk.dll_warn")}");
 		}
-		if (hasScripts)
+		if (scan.ScriptFiles.Count > 0)
 		{
 			parts.Add($"\n⚠️ {Loc.Tr("mod_risk.script_files")}:");
 			foreach (var sf in scan.ScriptFiles) parts.Add($"   - {sf}");
-			parts.Add(Loc.Tr("mod_risk.script_warn"));
+			parts.Add($"   {Loc.Tr("mod_risk.script_warn")}");
 		}
 		parts.Add($"\n{Loc.Tr("mod_risk.disclaimer")}");
 
+		ShowRiskyModDetails(mod, scan, totalRisks, string.Join("\n", parts), onAccept, onDecline);
+	}
+
+	private void ShowRiskyModDetails(ModManifest mod, ScanResult scan, int totalRisks, string msg, Action onAccept, Action onDecline)
+	{
 		var vp = GetViewport().GetVisibleRect().Size;
-		var dp = new DragPanel { Position = new(vp.X / 2 - 240, vp.Y / 2 - 180), Size = new(480, 360) };
-		Color borderColor = totalRisks >= 3 ? new Color(0.8f, 0.1f, 0.1f) : totalRisks == 2 ? new Color(1f, 0.3f, 0.1f) : new Color(1f, 0.5f, 0.1f);
-		dp.AddThemeStyleboxOverride("panel", new StyleBoxFlat { BgColor = new Color(1f, 0.95f, 0.90f), CornerRadiusTopLeft = 8, CornerRadiusTopRight = 8, CornerRadiusBottomLeft = 8, CornerRadiusBottomRight = 8, BorderWidthLeft = 2, BorderWidthTop = 2, BorderWidthRight = 2, BorderWidthBottom = 2, BorderColor = borderColor });
+		var S = (Func<float, float>)(v => v * _uiScale);
+		float pw = S(500), ph = S(420);
+		Color accent = totalRisks >= 3 ? new Color(0.9f, 0.15f, 0.15f) : totalRisks == 2 ? new Color(0.95f, 0.4f, 0.1f) : new Color(0.95f, 0.55f, 0.1f);
+
+		var dp = new DragPanel { Position = new(vp.X / 2 - pw / 2, vp.Y / 2 - ph / 2), Size = new(pw, ph) };
+		dp.AddThemeStyleboxOverride("panel", new StyleBoxFlat { BgColor = new Color(1, 1, 1), CornerRadiusTopLeft = 10, CornerRadiusTopRight = 10, CornerRadiusBottomLeft = 10, CornerRadiusBottomRight = 10, BorderWidthLeft = 2, BorderWidthTop = 2, BorderWidthRight = 2, BorderWidthBottom = 2, BorderColor = accent });
 		_ui.AddChild(dp);
 
-		float y = 10;
-		var title = LUI.Label($"⚠️ {Loc.Tr("mod_risk.title")}: {mod.Name}", 14, new Color(0.8f, 0.2f, 0.2f));
-		title.Position = new(14, y);
+		float y = S(14);
+		var title = new Label { Text = $"⚠️ {Loc.Tr("mod_risk.title")}: {mod.Name}", Position = new(S(16), y), Size = new(pw - S(32), S(28)) };
+		title.AddThemeFontSizeOverride("font_size", 15); title.AddThemeColorOverride("font_color", new Color(0.8f, 0.15f, 0.15f));
 		dp.AddChild(title);
-		y += 28;
+		y += S(32);
 
-		var msg = new Label { Text = string.Join("\n", parts), Position = new(14, y), Size = new(452, 250) };
-		msg.AddThemeFontSizeOverride("font_size", 10);
-		msg.AddThemeColorOverride("font_color", new Color(0.15f, 0.15f, 0.2f));
-		msg.AutowrapMode = TextServer.AutowrapMode.Arbitrary;
-		dp.AddChild(msg);
+		var scroll = new ScrollContainer { Position = new(S(16), y), Size = new(pw - S(32), ph - y - S(56)) };
+		scroll.HorizontalScrollMode = ScrollContainer.ScrollMode.Disabled;
+		var msgLabel = new Label { Text = msg };
+		msgLabel.AddThemeFontSizeOverride("font_size", 10);
+		msgLabel.AddThemeColorOverride("font_color", new Color(0.12f, 0.14f, 0.18f));
+		msgLabel.AutowrapMode = TextServer.AutowrapMode.Word;
+		msgLabel.SizeFlagsHorizontal = Control.SizeFlags.ExpandFill;
+		scroll.AddChild(msgLabel);
+		dp.AddChild(scroll);
 
-		float btnY = 310;
-		var acceptBtn = new Button { Text = Loc.Tr("mod_risk.confirm_risk"), Position = new(14, btnY), Size = new(200, 34) };
+		float btnY = ph - S(44);
+		var acceptBtn = new Button { Text = Loc.Tr("mod_risk.confirm_risk"), Position = new(S(16), btnY), Size = new(S(200), S(34)) };
 		acceptBtn.AddThemeFontSizeOverride("font_size", 12);
 		acceptBtn.AddThemeColorOverride("font_color", new Color(0.9f, 0.2f, 0.2f));
-		acceptBtn.Pressed += () =>
-		{
-			dp.QueueFree();
-			ShowModFinalConfirm(mod, scan, onAccept, onDecline);
-		};
+		acceptBtn.Pressed += () => { dp.QueueFree(); ShowModFurtherConfirm(mod, scan, totalRisks, onAccept, onDecline); };
 		dp.AddChild(acceptBtn);
 
-		var openBtn = new Button { Text = Loc.Tr("mod_risk.open_folder"), Position = new(220, btnY), Size = new(130, 34), Flat = true };
+		var openBtn = new Button { Text = Loc.Tr("mod_risk.open_folder"), Position = new(S(224), btnY), Size = new(S(130), S(34)), Flat = true };
 		openBtn.AddThemeFontSizeOverride("font_size", 11);
 		openBtn.AddThemeColorOverride("font_color", new Color(0.2f, 0.3f, 0.6f));
 		var modFolder = mod.Folder;
 		openBtn.Pressed += () => { string abs = ProjectSettings.GlobalizePath(modFolder); OS.ShellShowInFileManager(abs); };
 		dp.AddChild(openBtn);
 
-		var declineBtn = new Button { Text = Loc.Tr("mod_risk.reject"), Position = new(356, btnY), Size = new(110, 34), Flat = true };
+		var declineBtn = new Button { Text = Loc.Tr("mod_risk.reject"), Position = new(pw - S(124), btnY), Size = new(S(110), S(34)), Flat = true };
 		declineBtn.AddThemeFontSizeOverride("font_size", 12);
-		declineBtn.AddThemeColorOverride("font_color", Colors.Black);
+		declineBtn.AddThemeColorOverride("font_color", new Color(0.15f, 0.15f, 0.15f));
 		declineBtn.Pressed += () => { dp.QueueFree(); onDecline(); };
 		dp.AddChild(declineBtn);
 	}
 
-	private void ShowModFinalConfirm(ModManifest mod, ScanResult scan, Action onAccept, Action onDecline)
+	private void ShowModFurtherConfirm(ModManifest mod, ScanResult scan, int totalRisks, Action onAccept, Action onDecline)
 	{
-		int totalRisks = scan.Patterns.Count + (scan.DllFiles.Count > 0 ? 1 : 0) + (scan.ScriptFiles.Count > 0 ? 1 : 0);
-		var vp = GetViewport().GetVisibleRect().Size;
-
 		if (totalRisks >= 3)
 		{
-			// 3+ 风险：嘲讽弹窗
-			var trollDp = new DragPanel { Position = new(vp.X / 2 - 200, vp.Y / 2 - 80), Size = new(400, 160) };
-			trollDp.AddThemeStyleboxOverride("panel", new StyleBoxFlat { BgColor = new Color(1f, 0.9f, 0.85f), CornerRadiusTopLeft = 8, CornerRadiusTopRight = 8, CornerRadiusBottomLeft = 8, CornerRadiusBottomRight = 8, BorderWidthLeft = 2, BorderWidthTop = 2, BorderWidthRight = 2, BorderWidthBottom = 2, BorderColor = new Color(0.9f, 0.2f, 0.2f) });
-			_ui.AddChild(trollDp);
+			var vp = GetViewport().GetVisibleRect().Size;
+			var dp = new DragPanel { Position = new(vp.X / 2 - 200, vp.Y / 2 - 80), Size = new(400, 160) };
+			dp.AddThemeStyleboxOverride("panel", new StyleBoxFlat { BgColor = new Color(1, 1, 1), CornerRadiusTopLeft = 10, CornerRadiusTopRight = 10, CornerRadiusBottomLeft = 10, CornerRadiusBottomRight = 10, BorderWidthLeft = 2, BorderWidthTop = 2, BorderWidthRight = 2, BorderWidthBottom = 2, BorderColor = new Color(0.9f, 0.2f, 0.2f) });
+			_ui.AddChild(dp);
 
-			var tTitle = LUI.Label(Loc.Tr("mod_risk.troll_title"), 15, new Color(0.8f, 0.2f, 0.2f));
-			tTitle.Position = new(16, 12);
-			trollDp.AddChild(tTitle);
+			var title = new Label { Text = Loc.Tr("mod_risk.troll_title"), Position = new(16, 14), Size = new(368, 26) };
+			title.AddThemeFontSizeOverride("font_size", 15); title.AddThemeColorOverride("font_color", new Color(0.8f, 0.15f, 0.15f));
+			dp.AddChild(title);
 
-			var tMsg = LUI.Label(Loc.Tr("mod_risk.troll_msg"), 11, new Color(0.2f, 0.2f, 0.2f));
-			tMsg.Position = new(16, 40);
-			tMsg.Size = new(368, 60);
-			tMsg.AutowrapMode = TextServer.AutowrapMode.Word;
-			trollDp.AddChild(tMsg);
+			var msg = new Label { Text = Loc.Tr("mod_risk.troll_msg"), Position = new(16, 44), Size = new(368, 60) };
+			msg.AddThemeFontSizeOverride("font_size", 11); msg.AddThemeColorOverride("font_color", new Color(0.15f, 0.15f, 0.2f));
+			msg.AutowrapMode = TextServer.AutowrapMode.Word;
+			dp.AddChild(msg);
 
-			var okBtn = new Button { Text = Loc.Tr("mod_risk.troll_confirm"), Position = new(16, 110), Size = new(190, 34) };
-			okBtn.AddThemeFontSizeOverride("font_size", 12);
-			okBtn.AddThemeColorOverride("font_color", new Color(0.9f, 0.2f, 0.2f));
-			okBtn.Pressed += () => { trollDp.QueueFree(); ShowModTimedConfirm(mod, onAccept, onDecline); };
-			trollDp.AddChild(okBtn);
+			var okBtn = new Button { Text = Loc.Tr("mod_risk.troll_confirm"), Position = new(16, 114), Size = new(190, 34) };
+			okBtn.AddThemeFontSizeOverride("font_size", 12); okBtn.AddThemeColorOverride("font_color", new Color(0.9f, 0.2f, 0.2f));
+			okBtn.Pressed += () => { dp.QueueFree(); ShowModTimedConfirm(mod, onAccept, onDecline); };
+			dp.AddChild(okBtn);
 
-			var cancelBtn = new Button { Text = Loc.Tr("mod_risk.cancel"), Position = new(220, 110), Size = new(130, 34), Flat = true };
-			cancelBtn.AddThemeFontSizeOverride("font_size", 12);
-			cancelBtn.AddThemeColorOverride("font_color", Colors.Black);
-			cancelBtn.Pressed += () => { trollDp.QueueFree(); onDecline(); };
-			trollDp.AddChild(cancelBtn);
+			var cancelBtn = new Button { Text = Loc.Tr("mod_risk.cancel"), Position = new(220, 114), Size = new(130, 34), Flat = true };
+			cancelBtn.AddThemeFontSizeOverride("font_size", 12); cancelBtn.AddThemeColorOverride("font_color", new Color(0.15f, 0.15f, 0.15f));
+			cancelBtn.Pressed += () => { dp.QueueFree(); onDecline(); };
+			dp.AddChild(cancelBtn);
 		}
 		else
 		{
-			// 1-2 个风险：直接最终确认
 			ShowModTimedConfirm(mod, onAccept, onDecline);
 		}
 	}
@@ -983,55 +973,49 @@ public partial class MenuManager : Node
 	private void ShowModTimedConfirm(ModManifest mod, Action onAccept, Action onDecline)
 	{
 		var vp = GetViewport().GetVisibleRect().Size;
+		var S = (Func<float, float>)(v => v * _uiScale);
+		float pw = S(460), ph = S(180);
 
-		// 5秒等待弹窗
-		var waitDp = new DragPanel { Position = new(vp.X / 2 - 200, vp.Y / 2 - 60), Size = new(400, 120) };
-		waitDp.AddThemeStyleboxOverride("panel", new StyleBoxFlat { BgColor = Colors.White, CornerRadiusTopLeft = 8, CornerRadiusTopRight = 8, CornerRadiusBottomLeft = 8, CornerRadiusBottomRight = 8, BorderWidthLeft = 2, BorderWidthTop = 2, BorderWidthRight = 2, BorderWidthBottom = 2, BorderColor = new Color(1f, 0.3f, 0.2f) });
-		_ui.AddChild(waitDp);
+		var dp = new DragPanel { Position = new(vp.X / 2 - pw / 2, vp.Y / 2 - ph / 2), Size = new(pw, ph) };
+		dp.AddThemeStyleboxOverride("panel", new StyleBoxFlat { BgColor = new Color(1, 1, 1), CornerRadiusTopLeft = 10, CornerRadiusTopRight = 10, CornerRadiusBottomLeft = 10, CornerRadiusBottomRight = 10, BorderWidthLeft = 2, BorderWidthTop = 2, BorderWidthRight = 2, BorderWidthBottom = 2, BorderColor = new Color(0.9f, 0.3f, 0.2f) });
+		_ui.AddChild(dp);
 
-		var waitTitle = LUI.Label(Loc.Tr("mod_risk.timed_title"), 15, new Color(0.8f, 0.2f, 0.2f));
-		waitTitle.Position = new(16, 12);
-		waitDp.AddChild(waitTitle);
+		var title = new Label { Text = Loc.Tr("mod_risk.final_title"), Position = new(S(16), S(12)), Size = new(pw - S(32), S(26)) };
+		title.AddThemeFontSizeOverride("font_size", 15); title.AddThemeColorOverride("font_color", new Color(0.8f, 0.15f, 0.15f));
+		dp.AddChild(title);
 
-		var waitLabel = new Label { Text = Loc.TrF("mod_risk.timed_wait", 5), Position = new(16, 42), Size = new(368, 40) };
-		waitLabel.AddThemeFontSizeOverride("font_size", 12);
-		waitLabel.AddThemeColorOverride("font_color", new Color(0.3f, 0.3f, 0.3f));
-		waitLabel.AutowrapMode = TextServer.AutowrapMode.Word;
-		waitDp.AddChild(waitLabel);
+		var msg = new Label { Text = Loc.Tr("mod_risk.final_msg"), Position = new(S(16), S(42)), Size = new(pw - S(32), S(80)) };
+		msg.AddThemeFontSizeOverride("font_size", 10); msg.AddThemeColorOverride("font_color", new Color(0.12f, 0.14f, 0.18f));
+		msg.AutowrapMode = TextServer.AutowrapMode.Word;
+		dp.AddChild(msg);
 
-		// 5秒后显示确认按钮
-		var timer = new Timer { WaitTime = 5, OneShot = true };
-		waitDp.AddChild(timer);
+		int remain = 5;
+		var confirmBtn = new Button { Text = Loc.TrF("mod_risk.timed_btn", remain), Position = new(S(16), ph - S(44)), Size = new(S(280), S(34)), Disabled = true };
+		confirmBtn.AddThemeFontSizeOverride("font_size", 12); confirmBtn.AddThemeColorOverride("font_color", new Color(0.4f, 0.4f, 0.4f));
+		dp.AddChild(confirmBtn);
+
+		var cancelBtn = new Button { Text = Loc.Tr("mod_risk.cancel"), Position = new(pw - S(130), ph - S(44)), Size = new(S(120), S(34)), Flat = true };
+		cancelBtn.AddThemeFontSizeOverride("font_size", 12); cancelBtn.AddThemeColorOverride("font_color", new Color(0.15f, 0.15f, 0.15f));
+		cancelBtn.Pressed += () => { dp.QueueFree(); onDecline(); };
+		dp.AddChild(cancelBtn);
+
+		var timer = new Timer { WaitTime = 1, OneShot = false };
+		dp.AddChild(timer);
 		timer.Timeout += () =>
 		{
-			timer.QueueFree();
-			waitDp.QueueFree();
-
-			var confirmDp = new DragPanel { Position = new(vp.X / 2 - 220, vp.Y / 2 - 80), Size = new(440, 160) };
-			confirmDp.AddThemeStyleboxOverride("panel", new StyleBoxFlat { BgColor = Colors.White, CornerRadiusTopLeft = 8, CornerRadiusTopRight = 8, CornerRadiusBottomLeft = 8, CornerRadiusBottomRight = 8, BorderWidthLeft = 2, BorderWidthTop = 2, BorderWidthRight = 2, BorderWidthBottom = 2, BorderColor = new Color(0.9f, 0.3f, 0.2f) });
-			_ui.AddChild(confirmDp);
-
-			var cTitle = LUI.Label(Loc.Tr("mod_risk.final_title"), 15, new Color(0.8f, 0.2f, 0.2f));
-			cTitle.Position = new(16, 12);
-			confirmDp.AddChild(cTitle);
-
-			var cMsg = LUI.Label(Loc.Tr("mod_risk.final_msg"), 11, new Color(0.2f, 0.2f, 0.2f));
-			cMsg.Position = new(16, 40);
-			cMsg.Size = new(408, 60);
-			cMsg.AutowrapMode = TextServer.AutowrapMode.Word;
-			confirmDp.AddChild(cMsg);
-
-			var okBtn = new Button { Text = Loc.Tr("mod_risk.timed_ready"), Position = new(16, 110), Size = new(240, 34) };
-			okBtn.AddThemeFontSizeOverride("font_size", 12);
-			okBtn.AddThemeColorOverride("font_color", new Color(0.9f, 0.2f, 0.2f));
-			okBtn.Pressed += () => { ModManager.ConfirmedRiskyMods.Add(mod.Id); confirmDp.QueueFree(); onAccept(); };
-			confirmDp.AddChild(okBtn);
-
-			var cancelBtn = new Button { Text = Loc.Tr("mod_risk.cancel"), Position = new(270, 110), Size = new(130, 34), Flat = true };
-			cancelBtn.AddThemeFontSizeOverride("font_size", 12);
-			cancelBtn.AddThemeColorOverride("font_color", Colors.Black);
-			cancelBtn.Pressed += () => { confirmDp.QueueFree(); onDecline(); };
-			confirmDp.AddChild(cancelBtn);
+			remain--;
+			if (remain > 0)
+			{
+				confirmBtn.Text = Loc.TrF("mod_risk.timed_btn", remain);
+			}
+			else
+			{
+				timer.Stop(); timer.QueueFree();
+				confirmBtn.Text = Loc.Tr("mod_risk.timed_ready");
+				confirmBtn.Disabled = false;
+				confirmBtn.AddThemeColorOverride("font_color", new Color(0.9f, 0.2f, 0.2f));
+				confirmBtn.Pressed += () => { dp.QueueFree(); ModManager.ConfirmedRiskyMods.Add(mod.Id); onAccept(); };
+			}
 		};
 		timer.Start();
 	}

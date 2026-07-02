@@ -16,6 +16,7 @@ public enum ModRiskLevel
 
 public struct DangerPattern
 {
+    public string File;
     public int Line;
     public string Code;
     public string Reason;
@@ -138,6 +139,7 @@ public static class ModSecurityScanner
                 {
                     result.Patterns.Add(new DangerPattern
                     {
+                        File = System.IO.Path.GetFileName(filePath),
                         Line = i + 1,
                         Code = line.Truncate(80),
                         Reason = kv.Value
