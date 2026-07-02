@@ -447,7 +447,7 @@ public partial class MenuManager : Node
 
 	private void BuildAboutPanel(float cx, float cy)
 	{
-		float pw = 420, ph = 465;
+		float pw = 600, ph = 490;
 		_aboutPanel = MkPanel(cx - pw / 2, cy - ph / 2, pw, ph);
 		_aboutPanel.Visible = false;
 		_ui.AddChild(_aboutPanel);
@@ -464,7 +464,7 @@ public partial class MenuManager : Node
 			Loc.Tr("about.ai_credit"),
 		};
 		float ly = 44;
-		float editW = 300;
+		float editW = pw - 80;
 		float editX = (pw - editW) / 2;
 		foreach (var line in lines)
 		{
@@ -489,7 +489,7 @@ public partial class MenuManager : Node
 		tip.HorizontalAlignment = HorizontalAlignment.Center;
 		_aboutPanel.AddChild(tip);
 
-		var devotion = new Label { Text = Loc.Tr("about.devotion"), Position = new(20, ly + 24), Size = new(pw - 40, 90) };
+		var devotion = new Label { Text = Loc.Tr("about.devotion"), Position = new(20, ly + 24), Size = new(pw - 40, 110) };
 		devotion.AddThemeFontSizeOverride("font_size", 9);
 		devotion.AddThemeColorOverride("font_color", new Color(0.40f, 0.45f, 0.50f));
 		devotion.HorizontalAlignment = HorizontalAlignment.Center;
