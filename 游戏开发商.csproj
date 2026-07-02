@@ -1,0 +1,28 @@
+<Project Sdk="Godot.NET.Sdk/4.7.0">
+  <PropertyGroup>
+    <TargetFramework>net9.0</TargetFramework>
+    <EnableDynamicLoading>true</EnableDynamicLoading>
+    <RootNamespace>游戏开发商</RootNamespace>
+    <GenerateAssemblyInfo>false</GenerateAssemblyInfo>
+    <GenerateTargetFrameworkAttribute>false</GenerateTargetFrameworkAttribute>
+  </PropertyGroup>
+  <ItemGroup>
+    <Using Include="Godot.FileAccess" Alias="FileAccess" />
+  </ItemGroup>
+  <ItemGroup>
+    <Compile Remove="_tools\**" />
+    <Compile Remove="scripts\PatchDev\**" />
+    <Compile Remove="scripts\AddDK\**" />
+    <Compile Remove="scripts\FixLocTool\**" />
+    <Compile Remove="scripts\AddMk2\**" />
+    <Compile Remove="scripts\AddMk3\**" />
+    <Compile Remove="scripts\AddRA\**" />
+    <Compile Remove="scripts\AddAT\**" />
+    <Compile Remove="scripts\AddPred\**" />
+    <Compile Remove="scripts\CleanLK\**" />
+    <Compile Remove="scripts\AddRO\**" />
+    <Compile Remove="scripts\AddSpec\**" />
+    <Compile Remove="scripts\AddSet\**" />
+    <Compile Remove="scripts\AddSf\**" />
+  </ItemGroup>
+</Project>

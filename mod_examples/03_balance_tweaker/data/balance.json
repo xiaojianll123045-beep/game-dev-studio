@@ -1,0 +1,12 @@
+{
+  "project.init.gameplay_base": 35,
+  "project.init.graphics": 35,
+  "project.init.audio": 25,
+  "project.init.story": 25,
+  "fatigue.monthly_gain": 3,
+  "sales.multiplier.95": 2.0,
+  "sales.multiplier.90": 1.5,
+  "sales.multiplier.80": 1.2,
+  "outsource.reward.base": 15000,
+  "tech.research.cost_mult": 0.8
+}

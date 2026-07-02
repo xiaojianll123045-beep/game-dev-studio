@@ -1,0 +1,554 @@
+{
+  "genre_guide": [
+    {
+      "id": "RPG",
+      "name": "Role-Playing",
+      "description": "Players assume the roles of characters in a fictional world, advancing through combat, dialogue, and exploration. Focuses on character growth, deep storytelling, and world immersion.",
+      "compatible_themes": ["FAN", "MYT", "SCI", "HIS", "DUN", "WAR", "APO"],
+      "base_score_bonus": 0,
+      "tips": "Best compatibility with Fantasy and Myth themes. Skill Tree and Branching Narrative components work well. Research Save System first, or suffer -20 penalty."
+    },
+    {
+      "id": "ACT",
+      "name": "Action",
+      "description": "Emphasizes player reflexes, hand-eye coordination, and skill. Features real-time combat, platforming, and fast-paced interactive gameplay.",
+      "compatible_themes": ["FAN", "CYP", "APO", "MYT", "NIN", "DUN", "WAR", "WES"],
+      "base_score_bonus": 0,
+      "tips": "Physics engine is essential for Action games. Ninja and Cyberpunk themes offer unique combat styles."
+    },
+    {
+      "id": "AVG",
+      "name": "Adventure",
+      "description": "Focuses on exploration, puzzle-solving, and narrative. Players interact with characters and environments to advance the story.",
+      "compatible_themes": ["FAN", "LOV", "MYS", "SCH", "MYT", "MOD", "SCI", "VIC", "HIS", "HOR"],
+      "base_score_bonus": 5,
+      "tips": "Adventure games benefit greatly from Branching Narrative and Voice Acting components. Romance and Mystery themes work best."
+    },
+    {
+      "id": "SLG",
+      "name": "Strategy",
+      "description": "Players use tactical planning, resource management, and strategic decision-making to achieve goals. Emphasizes foresight over quick reflexes.",
+      "compatible_themes": ["WAR", "HIS", "SPA", "MOD", "FAN", "SCI", "CYP"],
+      "base_score_bonus": 0,
+      "tips": "War and Historical themes pair naturally with Strategy games. AI Behavior Tree tech significantly boosts depth."
+    },
+    {
+      "id": "FPS",
+      "name": "First-Person Shooter",
+      "description": "First-person perspective combat focused on precision aiming, quick reflexes, and tactical teamwork. Balances immersion with adrenaline.",
+      "compatible_themes": ["WAR", "MOD", "CYP", "SCI", "APO", "SPA", "HOR"],
+      "base_score_bonus": 0,
+      "tips": "War and Cyberpunk are the most popular themes. 3D Spatial Audio provides a significant immersion boost."
+    },
+    {
+      "id": "RAC",
+      "name": "Racing",
+      "description": "Players race vehicles on tracks or open roads, pursuing speed and precision. Includes customization, drifting, and boost mechanics.",
+      "compatible_themes": ["MOD", "CYP", "SCI", "APO", "SPA", "STE"],
+      "base_score_bonus": 0,
+      "tips": "Modern and Cyberpunk themes suit Racing best. Physics engine (physics_v1) is essential."
+    },
+    {
+      "id": "SIM",
+      "name": "Simulation",
+      "description": "Simulates real or fictional systems, letting players manage, build, or experience specific roles. Authenticity and detail are key.",
+      "compatible_themes": ["MOD", "HIS", "SPA", "SCI", "SCH", "CYP", "STE", "WOR"],
+      "base_score_bonus": 0,
+      "tips": "Modern theme is the safest choice. Workplace theme has a unique niche audience."
+    },
+    {
+      "id": "SPO",
+      "name": "Sports",
+      "description": "Simulates athletic competitions. Players control athletes or teams, combining mechanical skill with tactical strategy.",
+      "compatible_themes": ["MOD", "SCH", "COM", "SCI", "FAN", "CYP"],
+      "base_score_bonus": 0,
+      "tips": "Modern sports are most popular. School and Comedy themes attract specific audiences."
+    },
+    {
+      "id": "MUS",
+      "name": "Music",
+      "description": "Players perform actions in rhythm with music, emphasizing timing and musical appreciation. Includes note charts and track creation.",
+      "compatible_themes": ["COM", "MOD", "LOV", "SCH", "FAN", "CYP", "SCI"],
+      "base_score_bonus": 5,
+      "tips": "Dynamic Music tech directly benefits this type. Prioritize audio research for quality."
+    },
+    {
+      "id": "FTG",
+      "name": "Fighting",
+      "description": "Players engage in close-quarters combat using combos, blocks, and counters. Demands precision inputs and matchup knowledge.",
+      "compatible_themes": ["FAN", "MYT", "MOD", "CYP", "NIN", "HIS", "SCI", "PIR"],
+      "base_score_bonus": 0,
+      "tips": "Ninja and Fantasy themes are a natural fit. Frame Sync tech is required for fair online play."
+    },
+    {
+      "id": "MOBA",
+      "name": "MOBA",
+      "description": "Two teams compete on a symmetrical map, controlling heroes with unique abilities to destroy the enemy base through teamwork and strategy.",
+      "compatible_themes": ["FAN", "SCI", "MYT", "CYP", "SPA", "APO"],
+      "base_score_bonus": 0,
+      "tips": "MOBA requires strong network tech (net_v2) and Frame Sync. Balance is critical for success."
+    },
+    {
+      "id": "MMO",
+      "name": "MMO",
+      "description": "Thousands of players coexist in a persistent virtual world, exploring, battling, and socializing. Massive scale and persistence define this genre.",
+      "compatible_themes": ["FAN", "SCI", "SPA", "MYT", "CYP", "HIS", "STE"],
+      "base_score_bonus": 0,
+      "tips": "MMO requires net_v3 for thousands of concurrent players. Live Ops are key for retention."
+    },
+    {
+      "id": "RTS",
+      "name": "Real-Time Strategy",
+      "description": "Players gather resources, build bases, train armies, and command battles in real-time. Macro management and micro control are both essential.",
+      "compatible_themes": ["WAR", "SCI", "HIS", "MOD", "FAN", "SPA", "CYP"],
+      "base_score_bonus": 0,
+      "tips": "War and Sci-Fi are the golden combo for RTS. Pathfinding and AI tech are critical."
+    },
+    {
+      "id": "HOR",
+      "name": "Horror",
+      "description": "Creates tension, dread, and fear through psychological and visceral means. Jump scares and oppressive atmospheres are common tools.",
+      "compatible_themes": ["HOR", "MYS", "APO", "DEE", "CYP", "DUN", "VIC", "SCH", "MOD"],
+      "base_score_bonus": 10,
+      "tips": "Horror theme is a perfect match. 3D Spatial Audio and quality sound design contribute enormously to atmosphere."
+    },
+    {
+      "id": "SAN",
+      "name": "Sandbox",
+      "description": "Provides players with a highly free virtual world to explore, create, and modify. No fixed path—players define their own goals.",
+      "compatible_themes": ["MOD", "SPA", "SCI", "FAN", "APO", "CYP", "STE", "WES"],
+      "base_score_bonus": 0,
+      "tips": "Open World component is core to Sandbox. Memory Management V2 is needed for large-scale worlds."
+    },
+    {
+      "id": "ROG",
+      "name": "Roguelike",
+      "description": "Characterized by permadeath, procedural generation, and turn-based/real-time combat. Each run is unique, emphasizing replayability.",
+      "compatible_themes": ["FAN", "SCI", "HOR", "MYT", "APO", "SPA", "DUN", "CYP"],
+      "base_score_bonus": 0,
+      "tips": "Dungeon and Fantasy themes are classic Roguelike pairings. Procedural Generation component boosts replay value."
+    },
+    {
+      "id": "VNA",
+      "name": "Visual Novel",
+      "description": "Text-driven storytelling with character portraits, CG backgrounds, and music. Player choices affect story branches and endings.",
+      "compatible_themes": ["LOV", "SCH", "MYS", "MOD", "HIS", "FAN", "HOR", "COM", "VIC", "SCI"],
+      "base_score_bonus": 5,
+      "tips": "Romance and School themes are the most popular. Strong 2D rendering is needed for beautiful art."
+    },
+    {
+      "id": "PZL",
+      "name": "Puzzle",
+      "description": "Players solve challenges using logic, pattern recognition, and spatial reasoning. From simple brain teasers to complex mechanical puzzles.",
+      "compatible_themes": ["COM", "MOD", "MYS", "SCH", "FAN", "SCI", "LOV", "DUN", "MYT"],
+      "base_score_bonus": 5,
+      "tips": "Comedy and Mystery themes enhance puzzle engagement. Puzzle design is the core of quality."
+    },
+    {
+      "id": "PTY",
+      "name": "Party",
+      "description": "Multiplayer fun with a collection of mini-games, perfect for gatherings. Easy to learn, with a cheerful and social atmosphere.",
+      "compatible_themes": ["COM", "MOD", "SCH", "WOR", "FAN", "NIN", "PIR", "SPA", "LOV"],
+      "base_score_bonus": 5,
+      "tips": "Comedy and School themes pair perfectly with Party games. No complex tech needed—great for early studios."
+    },
+    {
+      "id": "TOW",
+      "name": "Tower Defense",
+      "description": "Players build defensive towers along a fixed path to stop enemies from reaching their goal. Strategic placement and upgrade choices matter.",
+      "compatible_themes": ["WAR", "FAN", "SCI", "APO", "HIS", "DUN", "CYP", "SPA", "MYT", "STE"],
+      "base_score_bonus": 0,
+      "tips": "War and Fantasy themes are most popular. Pathfinding AI tech directly benefits this type."
+    },
+    {
+      "id": "SUR",
+      "name": "Survival",
+      "description": "Players gather resources, build shelters, and fight dangers to survive in harsh environments. Resource management and crisis response are core.",
+      "compatible_themes": ["APO", "DEE", "HOR", "DUN", "SPA", "PIR", "WAR", "HIS", "MOD", "WES"],
+      "base_score_bonus": 0,
+      "tips": "Post-Apocalyptic and Deep Sea themes offer the most immersive survival experiences."
+    },
+    {
+      "id": "CIN",
+      "name": "Interactive Movie",
+      "description": "Cinematic narrative experiences where player choices shape the story. High-quality presentation, cinematography, and music are the core appeal.",
+      "compatible_themes": ["MYS", "MOD", "LOV", "HOR", "CYP", "SCI", "APO", "HIS", "WES", "DEE", "VIC"],
+      "base_score_bonus": 5,
+      "tips": "Mystery and Modern themes showcase Interactive Movies best. Strong 2D/3D rendering is needed for cinematic quality."
+    }
+  ],
+  "theme_guide": [
+    {
+      "id": "FAN",
+      "name": "Fantasy",
+      "description": "A world of magic, swords, dragons, elves, and dwarves. Unlimited imagination and the most universally appealing theme.",
+      "compatible_genres": ["RPG", "ACT", "AVG", "FTG", "MOBA", "MMO", "ROG", "TOW", "SAN", "RTS"]
+    },
+    {
+      "id": "SCI",
+      "name": "Sci-Fi",
+      "description": "Future technology, alien civilizations, AI, and space exploration. Explores technology's profound impact on society.",
+      "compatible_genres": ["RPG", "ACT", "FPS", "MOBA", "MMO", "RTS", "ROG", "TOW", "SAN", "SIM"]
+    },
+    {
+      "id": "MOD",
+      "name": "Modern",
+      "description": "Set in the contemporary real world. Highly relatable for simulation and sports games.",
+      "compatible_genres": ["FPS", "RAC", "SIM", "SPO", "MUS", "PTY", "SAN", "PZL", "SUR", "CIN", "HOR"]
+    },
+    {
+      "id": "HIS",
+      "name": "Historical",
+      "description": "Set in real historical periods, from ancient civilizations to modern wars. Historically accurate worlds offer unique educational immersion.",
+      "compatible_genres": ["RPG", "SLG", "RTS", "FTG", "SIM", "TOW", "SUR", "AVG", "VNA"]
+    },
+    {
+      "id": "APO",
+      "name": "Post-Apocalyptic",
+      "description": "A wasteland after civilization's collapse. Survivors struggle in ruins—bleak, cruel, yet hopeful.",
+      "compatible_genres": ["ACT", "FPS", "SUR", "HOR", "TOW", "ROG", "SAN", "RPG", "RAC"]
+    },
+    {
+      "id": "CYP",
+      "name": "Cyberpunk",
+      "description": "High-tech, low-life dystopian future. Neon-lit cities, cybernetic enhancements, hacker culture, and megacorporation rule.",
+      "compatible_genres": ["ACT", "FPS", "RAC", "FTG", "MOBA", "MMO", "HOR", "CIN", "SLG", "RPG", "SAN"]
+    },
+    {
+      "id": "STE",
+      "name": "Steampunk",
+      "description": "A Victorian-era world powered by steam. Gears, brass, goggles, and airships—a romantic fusion of retro and sci-fi.",
+      "compatible_genres": ["RPG", "ACT", "FPS", "SLG", "SAN", "TOW", "MMO", "SUR", "CIN", "VNA"]
+    },
+    {
+      "id": "HOR",
+      "name": "Horror",
+      "description": "Fear-driven theme featuring supernatural phenomena, monsters, and psychological terror. Seeks thrills and tension.",
+      "compatible_genres": ["HOR", "ROG", "SUR", "AVG", "CIN", "FPS", "MUS"]
+    },
+    {
+      "id": "COM",
+      "name": "Comedy",
+      "description": "Humorous and lighthearted, with funny scenarios, exaggerated characters, and absurd dialogue. A cheerful gaming experience.",
+      "compatible_genres": ["PTY", "MUS", "PZL", "SPO", "AVG", "VNA", "SIM", "RAC"]
+    },
+    {
+      "id": "LOV",
+      "name": "Romance",
+      "description": "Centered on romantic relationships. Players bond with characters through interaction. Sweet and heartwarming emotional experiences.",
+      "compatible_genres": ["VNA", "AVG", "MUS", "CIN", "SIM", "PZL", "RPG"]
+    },
+    {
+      "id": "WAR",
+      "name": "War",
+      "description": "Military conflict from ancient battles to modern warfare. Tactics, strategy, and patriotism intertwine.",
+      "compatible_genres": ["SLG", "RTS", "FPS", "TOW", "SUR", "ACT", "RPG", "HIS"]
+    },
+    {
+      "id": "MYS",
+      "name": "Mystery",
+      "description": "Centered on puzzles, detective investigations, and psychological games. Players gather clues and deduce the truth.",
+      "compatible_genres": ["CIN", "HOR", "AVG", "VNA", "PZL", "RPG", "MUS", "ACT", "TOW"]
+    },
+    {
+      "id": "SCH",
+      "name": "School",
+      "description": "Set in school life—youth, friendship, club activities, and academic challenges. A warm and relaxing daily atmosphere.",
+      "compatible_genres": ["VNA", "AVG", "SPO", "PTY", "MUS", "PZL", "SIM", "SUR", "ACT"]
+    },
+    {
+      "id": "MYT",
+      "name": "Mythology",
+      "description": "Based on global myths and legends—gods, heroes, monsters, and epic tales. Deep cultural heritage meets grand fantasy worlds.",
+      "compatible_genres": ["RPG", "ACT", "FTG", "MOBA", "MMO", "ROG", "TOW", "AVG", "SLG", "PZL"]
+    },
+    {
+      "id": "WES",
+      "name": "Western",
+      "description": "Set in the American Wild West—cowboys, revolvers, bounty hunters, and desert towns. Rugged frontier romanticism.",
+      "compatible_genres": ["ACT", "FPS", "SUR", "AVG", "CIN", "RPG", "PTY", "SLG", "TOW"]
+    },
+    {
+      "id": "SPA",
+      "name": "Space",
+      "description": "Set in outer space—space travel, alien civilizations, space stations, and galactic warfare. The romance of exploring the infinite unknown.",
+      "compatible_genres": ["SCI", "SAN", "MMO", "SLG", "SUR", "FPS", "RAC", "TOW", "ROG", "ACT"]
+    },
+    {
+      "id": "NIN",
+      "name": "Ninja",
+      "description": "Centered on Japanese ninja culture—stealth, assassination, shuriken, and katanas. Mysterious and elegant Eastern martial arts.",
+      "compatible_genres": ["ACT", "FTG", "PTY", "SLG", "TOW", "RPG", "FPS"]
+    },
+    {
+      "id": "PIR",
+      "name": "Pirate",
+      "description": "Set in the Golden Age of Piracy—sailing, plundering, treasure, and rum. Uninhibited high-seas adventure.",
+      "compatible_genres": ["ACT", "SUR", "TOW", "PTY", "AVG", "RPG", "FTG", "SAN"]
+    },
+    {
+      "id": "VIC",
+      "name": "Victorian",
+      "description": "Set in 19th century Victorian era—Industrial Revolution, strict social etiquette, and Gothic aesthetics. Elegance meets darkness.",
+      "compatible_genres": ["AVG", "VNA", "CIN", "HOR", "SIM", "SLG", "RPG", "ACT"]
+    },
+    {
+      "id": "DEE",
+      "name": "Deep Sea",
+      "description": "Set in the deep ocean—mysterious sea creatures, shipwrecks, and pressure hazards. Claustrophobic abyss exploration.",
+      "compatible_genres": ["SUR", "HOR", "CIN", "AVG", "RPG", "SAN", "TOW", "FTG"]
+    },
+    {
+      "id": "DUN",
+      "name": "Dungeon",
+      "description": "Labyrinthine underground complexes filled with monsters, traps, treasure, and unknown dangers. Classic subterranean adventure.",
+      "compatible_genres": ["ROG", "RPG", "ACT", "TOW", "SUR", "HOR", "PZL", "AVG", "FTG"]
+    },
+    {
+      "id": "WOR",
+      "name": "Workplace",
+      "description": "Set in modern office life—office politics, project management, and career development. Realistic workplace ecosystem simulation.",
+      "compatible_genres": ["SIM", "PTY", "AVG", "VNA", "PZL", "SAN", "CIN"]
+    }
+  ],
+  "tech_tree": [
+    {"id":"save_system","name":"Save System","branch":"ProgramBase","level":0,"required_months":5,"prerequisites":"","primary_skill":"Program","primary_skill_level":1,"description":"Basic save/load","effect":"Required for RPG/AVG, -20 score penalty if missing"},
+    {"id":"memory_v1","name":"Memory Mgmt V1","branch":"ProgramBase","level":1,"required_months":8,"prerequisites":"","primary_skill":"Program","primary_skill_level":1,"description":"Basic memory management","effect":"Stability +10%, Bug rate -5%"},
+    {"id":"memory_v2","name":"Memory Mgmt V2","branch":"ProgramBase","level":2,"required_months":20,"prerequisites":"memory_v1","primary_skill":"Program","primary_skill_level":2,"description":"Advanced memory scheduling","effect":"Stability +15%, enables open world"},
+    {"id":"physics_v1","name":"Physics Engine V1","branch":"ProgramBase","level":1,"required_months":15,"prerequisites":"","primary_skill":"Program","primary_skill_level":2,"description":"Rigid body collision","effect":"Required for ACT/Racing"},
+    {"id":"physics_v2","name":"Physics Engine V2","branch":"ProgramBase","level":2,"required_months":40,"prerequisites":"physics_v1","primary_skill":"Program","primary_skill_level":3,"description":"Cloth/fluid simulation","effect":"Graphics realism +10"},
+    {"id":"multithread","name":"Multithreading","branch":"ProgramBase","level":1,"required_months":25,"prerequisites":"memory_v2","primary_skill":"Program","primary_skill_level":3,"description":"Multi-core CPU utilization","effect":"Development speed +20%"},
+    {"id":"2d_v1","name":"2D Rendering V1","branch":"Render2D","level":1,"required_months":0,"prerequisites":"","primary_skill":"Art","primary_skill_level":1,"description":"Pixel art (start with)","effect":"Enables pixel art"},
+    {"id":"2d_v2","name":"2D Rendering V2","branch":"Render2D","level":2,"required_months":8,"prerequisites":"2d_v1","primary_skill":"Art","primary_skill_level":2,"secondary_skill":"Program","secondary_skill_level":1,"description":"HD character rendering","effect":"2D graphics cap +15"},
+    {"id":"2d_v3","name":"2D Rendering V3","branch":"Render2D","level":3,"required_months":20,"prerequisites":"2d_v2","primary_skill":"Art","primary_skill_level":3,"secondary_skill":"Program","secondary_skill_level":2,"description":"Skeletal animation","effect":"2D dev speed +25%, dynamic characters"},
+    {"id":"2d_v4","name":"2D Rendering V4","branch":"Render2D","level":4,"required_months":45,"prerequisites":"2d_v3","primary_skill":"Art","primary_skill_level":4,"secondary_skill":"Program","secondary_skill_level":3,"description":"4K/particle effects","effect":"Graphics cap +15, speed +30%"},
+    {"id":"2d_v5","name":"2D Rendering V5","branch":"Render2D","level":5,"required_months":100,"prerequisites":"2d_v4","primary_skill":"Art","primary_skill_level":5,"secondary_skill":"Program","secondary_skill_level":3,"description":"Ultimate hand-painted","effect":"2D mastery, speed +100%, max graphics possible"},
+    {"id":"3d_v1","name":"3D Rendering V1","branch":"Render3D","level":1,"required_months":20,"prerequisites":"2d_v2","primary_skill":"Program","primary_skill_level":2,"secondary_skill":"Art","secondary_skill_level":2,"description":"Low-poly/unlit 3D","effect":"Enables low-poly 3D"},
+    {"id":"3d_v2","name":"3D Rendering V2","branch":"Render3D","level":2,"required_months":50,"prerequisites":"3d_v1","primary_skill":"Program","primary_skill_level":3,"secondary_skill":"Art","secondary_skill_level":3,"description":"Standard/rasterized","effect":"PS2~PS3 level 3D"},
+    {"id":"3d_v3","name":"3D Rendering V3","branch":"Render3D","level":3,"required_months":120,"prerequisites":"3d_v2","primary_skill":"Program","primary_skill_level":4,"secondary_skill":"Art","secondary_skill_level":4,"description":"PBR/global illumination","effect":"Ray tracing, next-gen graphics"},
+    {"id":"3d_v4","name":"3D Rendering V4","branch":"Render3D","level":4,"required_months":240,"prerequisites":"3d_v3","primary_skill":"Program","primary_skill_level":5,"secondary_skill":"Art","secondary_skill_level":5,"description":"Real-time path tracing","effect":"Cinematic rendering, score can reach 100"},
+    {"id":"daynight","name":"Day/Night Cycle","branch":"Render3D","level":1,"required_months":15,"prerequisites":"3d_v1","primary_skill":"Program","primary_skill_level":2,"secondary_skill":"Art","secondary_skill_level":1,"description":"Day/night cycle","effect":"Open world immersion +15"},
+    {"id":"volumetric","name":"Volumetric Clouds","branch":"Render3D","level":1,"required_months":25,"prerequisites":"3d_v2","primary_skill":"Art","primary_skill_level":3,"description":"Volumetric fog","effect":"Scene atmosphere +10"},
+    {"id":"audio_v1","name":"Sound Library V1","branch":"Audio","level":1,"required_months":4,"prerequisites":"","primary_skill":"Audio","primary_skill_level":1,"description":"Basic sound effects","effect":"Has audio, not immersion-breaking"},
+    {"id":"audio_v2","name":"Sound Library V2","branch":"Audio","level":2,"required_months":12,"prerequisites":"audio_v1","primary_skill":"Audio","primary_skill_level":2,"description":"Realistic sound effects","effect":"Audio quality +20"},
+    {"id":"dynamic_music","name":"Dynamic Music","branch":"Audio","level":1,"required_months":18,"prerequisites":"audio_v2","primary_skill":"Audio","primary_skill_level":3,"secondary_skill":"Program","secondary_skill_level":1,"description":"Seamless combat/exploration music","effect":"Music score +15"},
+    {"id":"spatial_audio","name":"3D Spatial Audio","branch":"Audio","level":1,"required_months":22,"prerequisites":"3d_v1","primary_skill":"Audio","primary_skill_level":3,"secondary_skill":"Program","secondary_skill_level":2,"description":"3D positional audio","effect":"FPS/Horror immersion +20"},
+    {"id":"net_v1","name":"Networking V1","branch":"Network","level":1,"required_months":25,"prerequisites":"save_system","primary_skill":"Network","primary_skill_level":2,"secondary_skill":"Program","secondary_skill_level":1,"description":"P2P two-player","effect":"Enables 2-player online"},
+    {"id":"net_v2","name":"Networking V2","branch":"Network","level":2,"required_months":60,"prerequisites":"net_v1","primary_skill":"Network","primary_skill_level":3,"secondary_skill":"Program","secondary_skill_level":2,"description":"C/S 32-player","effect":"Small server multiplayer"},
+    {"id":"net_v3","name":"Networking V3","branch":"Network","level":3,"required_months":150,"prerequisites":"net_v2","primary_skill":"Network","primary_skill_level":4,"secondary_skill":"Program","secondary_skill_level":4,"description":"MMO 1000-player","effect":"Massive multiplayer, operation required"},
+    {"id":"frame_sync","name":"Frame Sync","branch":"Network","level":1,"required_months":30,"prerequisites":"net_v2","primary_skill":"Network","primary_skill_level":3,"description":"Frame synchronization","effect":"Required for Fighting/MOBA, or negative reviews"},
+    {"id":"cloud_save","name":"Cloud Save","branch":"Network","level":1,"required_months":15,"prerequisites":"net_v1","primary_skill":"Network","primary_skill_level":2,"secondary_skill":"Program","secondary_skill_level":1,"description":"Cloud save/load","effect":"Cross-platform save, retention +10%"},
+    {"id":"ai_v1","name":"AI Behavior Tree V1","branch":"AI","level":1,"required_months":30,"prerequisites":"","primary_skill":"AI","primary_skill_level":2,"secondary_skill":"Program","secondary_skill_level":2,"description":"Basic patrol/attack","effect":"NPCs have simple logic"},
+    {"id":"ai_v2","name":"AI Behavior Tree V2","branch":"AI","level":2,"required_months":70,"prerequisites":"ai_v1","primary_skill":"AI","primary_skill_level":3,"secondary_skill":"Program","secondary_skill_level":3,"description":"Complex decision AI","effect":"NPC tactical cooperation, SLG/RPG +20"},
+    {"id":"pathfinding","name":"Pathfinding","branch":"AI","level":1,"required_months":15,"prerequisites":"","primary_skill":"AI","primary_skill_level":1,"secondary_skill":"Program","secondary_skill_level":1,"description":"Auto pathfinding","effect":"Required for RTS/open world"},
+    {"id":"ml_ai","name":"Machine Learning AI","branch":"AI","level":1,"required_months":200,"prerequisites":"ai_v2|multithread","primary_skill":"AI","primary_skill_level":5,"secondary_skill":"Network","secondary_skill_level":3,"description":"NPC learns player habits","effect":"Dynamic difficulty, legendary experience"},
+    {"id":"gen_story","name":"Procedural Story","branch":"AI","level":1,"required_months":120,"prerequisites":"save_system","primary_skill":"AI","primary_skill_level":4,"secondary_skill":"Program","secondary_skill_level":3,"description":"Auto-generates side quests","effect":"Open world originality +25"},
+    {"id":"cross_v1","name":"Cross-Platform V1","branch":"Platform","level":1,"required_months":30,"prerequisites":"","primary_skill":"Program","primary_skill_level":3,"description":"PC to console port","effect":"Multi-platform release, sales ×1.2"},
+    {"id":"cross_v2","name":"Cross-Platform V2","branch":"Platform","level":2,"required_months":80,"prerequisites":"cross_v1","primary_skill":"Program","primary_skill_level":4,"secondary_skill":"Network","secondary_skill_level":2,"description":"Full platform sync","effect":"PC/console/mobile sync, sales ×1.5"},
+    {"id":"hardware_design","name":"Console Hardware Design","branch":"Platform","level":1,"required_months":200,"prerequisites":"","primary_skill":"Program","primary_skill_level":5,"secondary_skill":"Art","secondary_skill_level":3,"description":"Hardware design","effect":"Unlocks ultimate project (needs hardware engineer)"},
+    {"id":"console_os","name":"Console OS","branch":"Platform","level":1,"required_months":100,"prerequisites":"hardware_design","primary_skill":"Program","primary_skill_level":4,"secondary_skill":"Network","secondary_skill_level":3,"description":"Console operating system","effect":"Store/friend system"},
+    {"id":"sdk","name":"SDK","branch":"Platform","level":1,"required_months":80,"prerequisites":"console_os","primary_skill":"Program","primary_skill_level":4,"description":"Third-party SDK","effect":"Sell dev kits to third parties"},
+    {"id":"genre_rac","name":"Racing Genre","branch":"GenreUnlock","level":1,"required_months":8,"prerequisites":"","primary_skill":"Program","primary_skill_level":1,"secondary_skill":"Art","secondary_skill_level":1,"description":"Unlock racing games","effect":"Unlocks Racing type"},
+    {"id":"genre_sim","name":"Simulation Genre","branch":"GenreUnlock","level":1,"required_months":12,"prerequisites":"","primary_skill":"Program","primary_skill_level":2,"secondary_skill":"AI","secondary_skill_level":1,"description":"Unlock simulation games","effect":"Unlocks Simulation type"},
+    {"id":"genre_spo","name":"Sports Genre","branch":"GenreUnlock","level":1,"required_months":10,"prerequisites":"","primary_skill":"Program","primary_skill_level":2,"secondary_skill":"Art","secondary_skill_level":1,"description":"Unlock sports games","effect":"Unlocks Sports type"},
+    {"id":"genre_mus","name":"Music Genre","branch":"GenreUnlock","level":1,"required_months":8,"prerequisites":"","primary_skill":"Audio","primary_skill_level":2,"secondary_skill":"Program","secondary_skill_level":1,"description":"Unlock music games","effect":"Unlocks Music type"},
+    {"id":"genre_ftg","name":"Fighting Genre","branch":"GenreUnlock","level":1,"required_months":12,"prerequisites":"","primary_skill":"Program","primary_skill_level":2,"description":"Unlock fighting games","effect":"Unlocks Fighting type"},
+    {"id":"genre_moba","name":"MOBA Genre","branch":"GenreUnlock","level":1,"required_months":25,"prerequisites":"net_v1","primary_skill":"Network","primary_skill_level":2,"secondary_skill":"Program","secondary_skill_level":2,"description":"Unlock MOBA","effect":"Unlocks MOBA type"},
+    {"id":"genre_mmo","name":"MMO Genre","branch":"GenreUnlock","level":1,"required_months":30,"prerequisites":"net_v2","primary_skill":"Network","primary_skill_level":2,"secondary_skill":"Program","secondary_skill_level":2,"description":"Unlock MMO","effect":"Unlocks MMO type"},
+    {"id":"genre_rts","name":"RTS Genre","branch":"GenreUnlock","level":1,"required_months":15,"prerequisites":"ai_v1","primary_skill":"AI","primary_skill_level":2,"secondary_skill":"Program","secondary_skill_level":1,"description":"Unlock RTS","effect":"Unlocks RTS type"},
+    {"id":"genre_hor","name":"Horror Genre","branch":"GenreUnlock","level":1,"required_months":10,"prerequisites":"","primary_skill":"Audio","primary_skill_level":2,"secondary_skill":"Art","secondary_skill_level":1,"description":"Unlock horror games","effect":"Unlocks Horror type"},
+    {"id":"genre_san","name":"Sandbox Genre","branch":"GenreUnlock","level":1,"required_months":20,"prerequisites":"memory_v2","primary_skill":"Program","primary_skill_level":3,"secondary_skill":"AI","secondary_skill_level":2,"description":"Unlock sandbox games","effect":"Unlocks Sandbox type"},
+    {"id":"genre_rog","name":"Roguelike Genre","branch":"GenreUnlock","level":1,"required_months":15,"prerequisites":"pathfinding","primary_skill":"Program","primary_skill_level":2,"secondary_skill":"AI","secondary_skill_level":1,"description":"Unlock Roguelike","effect":"Unlocks Roguelike type"},
+    {"id":"genre_vis","name":"Visual Novel Genre","branch":"GenreUnlock","level":1,"required_months":5,"prerequisites":"","primary_skill":"Art","primary_skill_level":1,"description":"Unlock visual novels","effect":"Unlocks Visual Novel type"},
+    {"id":"genre_pzl","name":"Puzzle Genre","branch":"GenreUnlock","level":1,"required_months":8,"prerequisites":"","primary_skill":"Program","primary_skill_level":1,"secondary_skill":"Art","secondary_skill_level":1,"description":"Unlock puzzle games","effect":"Unlocks Puzzle type"},
+    {"id":"theme_cyber","name":"Cyberpunk Theme","branch":"ThemeUnlock","level":1,"required_months":10,"prerequisites":"","primary_skill":"Art","primary_skill_level":2,"secondary_skill":"Program","secondary_skill_level":1,"description":"Unlock cyberpunk","effect":"Unlocks Cyberpunk theme"},
+    {"id":"theme_steam","name":"Steampunk Theme","branch":"ThemeUnlock","level":1,"required_months":10,"prerequisites":"","primary_skill":"Art","primary_skill_level":2,"secondary_skill":"Program","secondary_skill_level":1,"description":"Unlock steampunk","effect":"Unlocks Steampunk theme"},
+    {"id":"theme_horror","name":"Horror Theme","branch":"ThemeUnlock","level":1,"required_months":12,"prerequisites":"","primary_skill":"Audio","primary_skill_level":2,"secondary_skill":"Art","secondary_skill_level":1,"description":"Unlock horror","effect":"Unlocks Horror theme"},
+    {"id":"theme_comedy","name":"Comedy Theme","branch":"ThemeUnlock","level":1,"required_months":8,"prerequisites":"","primary_skill":"Art","primary_skill_level":1,"description":"Unlock comedy","effect":"Unlocks Comedy theme"},
+    {"id":"theme_romance","name":"Romance Theme","branch":"ThemeUnlock","level":1,"required_months":8,"prerequisites":"","primary_skill":"Art","primary_skill_level":1,"description":"Unlock romance","effect":"Unlocks Romance theme"},
+    {"id":"theme_war","name":"War Theme","branch":"ThemeUnlock","level":1,"required_months":15,"prerequisites":"","primary_skill":"Program","primary_skill_level":2,"secondary_skill":"AI","secondary_skill_level":2,"description":"Unlock war","effect":"Unlocks War theme"},
+    {"id":"theme_mystery","name":"Mystery Theme","branch":"ThemeUnlock","level":1,"required_months":12,"prerequisites":"","primary_skill":"Art","primary_skill_level":2,"secondary_skill":"Audio","secondary_skill_level":1,"description":"Unlock mystery","effect":"Unlocks Mystery theme"},
+    {"id":"theme_school","name":"School Theme","branch":"ThemeUnlock","level":1,"required_months":8,"prerequisites":"","primary_skill":"Art","primary_skill_level":1,"description":"Unlock school","effect":"Unlocks School theme"},
+    {"id":"theme_myth","name":"Mythology Theme","branch":"ThemeUnlock","level":1,"required_months":12,"prerequisites":"","primary_skill":"Art","primary_skill_level":2,"description":"Unlock mythology","effect":"Unlocks Mythology theme"},
+    {"id":"theme_western","name":"Western Theme","branch":"ThemeUnlock","level":1,"required_months":10,"prerequisites":"","primary_skill":"Art","primary_skill_level":2,"secondary_skill":"Audio","secondary_skill_level":1,"description":"Unlock western","effect":"Unlocks Western theme"},
+    {"id":"theme_space","name":"Space Theme","branch":"ThemeUnlock","level":1,"required_months":15,"prerequisites":"3d_v1","primary_skill":"Art","primary_skill_level":2,"secondary_skill":"Program","secondary_skill_level":2,"description":"Unlock space","effect":"Unlocks Space theme"}
+  ],
+  "mechanics": {
+    "development_flow": {
+      "title": "Development Flow",
+      "sections": [
+        {"heading": "Project Initiation", "content": "Choose game name, genre, theme, and target platform. The system calculates genre-theme compatibility (0~1), with ≥0.8 being excellent and <0.4 causing +60% development time."},
+        {"heading": "Planning Phase", "content": "Assign teams to the project, choose marketing strategy and pricing. Equip game components to enhance specific attributes, but each component adds complexity."},
+        {"heading": "Development Phase", "content": "Teams work on 6 modules (Core Gameplay, Visuals, Audio, Story, Stability, Online). Progress is made monthly based on team skills. Resource allocation can be adjusted."},
+        {"heading": "Polish Phase", "content": "Choose a polish strategy (Standard/Deep/Extreme) to improve quality at the cost of extra time. Fix bugs and optimize performance."},
+        {"heading": "Testing Phase", "content": "QA testing finds and fixes bugs. The test report evaluates game stability. High bug counts negatively impact final score and sales."},
+        {"heading": "Marketing Sprint", "content": "3~5 months of pre-release marketing. Invest budget to boost hype. A large gap between hype and actual score reduces player trust and sales."},
+        {"heading": "Release & Operations", "content": "The game enters long-tail sales after launch. Post-release content (patches, DLC, expansions, sequels) can extend the product lifecycle."}
+      ]
+    },
+    "employee_system": {
+      "title": "Employee System",
+      "sections": [
+        {"heading": "Skill System", "content": "Employees have 5 skills: Program, Art, Audio, Network, AI. Each skill ranges from 0~5; higher levels mean greater efficiency. An employee's overall capability is a weighted combination of their skills. High-level employees significantly reduce project timelines."},
+        {"heading": "Employee Traits", "content": "Each employee has one of 12 unique traits: Workaholic (fatigue halved), Genius (+1 all skills), Perfectionist (quality bonus but slower speed), Social (team chemistry doubled), TechClean (auto-reduces tech debt), Sensitive (efficiency plummets under pressure), Mentor (accelerates junior growth), Nostalgic (satisfaction scales with tenure), and more. Traits have a significant impact on development."},
+        {"heading": "Satisfaction & Fatigue", "content": "Employees accumulate fatigue each month; overtime accelerates fatigue buildup. High fatigue reduces efficiency and satisfaction. Low satisfaction makes employees vulnerable to poaching by competitors. You can boost satisfaction through paid leave, salary increases, and better office conditions."},
+        {"heading": "Mental Health & Burnout", "content": "Chronic high-pressure work leads to Burnout in 4 stages: Mild (-10% efficiency), Moderate (-25% efficiency), Severe (may skip work), Crisis (may quit voluntarily). Burnout triggers crisis events requiring player intervention. Proper rest scheduling is essential to prevent burnout."},
+        {"heading": "Friendship & Rivalry", "content": "Employees naturally form friendships or rivalries over time. Friendship boosts Team Chemistry for better collaboration. Rivalry lowers chemistry but can drive each other to grow faster. Long-term co-location in the same team deepens these relationships."},
+        {"heading": "Recruitment & Talent Market", "content": "New employees can be hired from the talent market each month. Candidates have randomized skill levels and trait combinations. Higher company reputation and better salary offers attract higher-tier talent. Always check a candidate's traits and salary expectations before hiring."},
+        {"heading": "Training & Growth", "content": "Employees gain experience through project participation and auto-level up when experience is sufficient. Employees with the Mentor trait accelerate the growth of lower-level teammates. External training courses (costing funds) can target specific skill improvements."},
+        {"heading": "Team Building & Chemistry", "content": "Assigning employees to project groups forms a team. Each team needs a captain. Total team skill determines development efficiency, but Chemistry is equally important—high chemistry gives bonus efficiency, low chemistry causes penalties. Long-term co-location gradually improves chemistry."},
+        {"heading": "Employee Dreams & Loyalty", "content": "Each employee has a personal dream, such as creating a 90+ score masterpiece, becoming a team lead, or starting their own studio. Fulfilling these dreams greatly boosts satisfaction and loyalty. Loyal employees are harder to poach and will actively reject competitor offers."},
+        {"heading": "Poaching & Attrition", "content": "Employees may receive poaching offers from competitors. High satisfaction/loyalty employees auto-reject offers. You can choose to counter with a raise or let them go. Poached employees may end up at competitor studios, working against you."}
+      ]
+    },
+    "economy_system": {
+      "title": "Economy System",
+      "sections": [
+        {"heading": "Revenue Sources", "content": "Main sources: game sales, publishing royalties, engine licensing/subscriptions, DLC/expansion revenue, merchandise/IP licensing. Revenue is affected by score, platform, and marketing."},
+        {"heading": "Expenses", "content": "Main costs: employee salaries (largest monthly cost), office rent, marketing, tech research, outsourcing, platform licensing fees, loan interest."},
+        {"heading": "Cash Flow Management", "content": "Monitor monthly cash flow (Green/Yellow/Orange/Red/Black alert). Cash flow crisis triggers emergency events. Aim for 3-6 months of operating reserves."},
+        {"heading": "Financing", "content": "Options: bank loans (requires credit rating), investors/VC, crowdfunding, IPO. Different methods affect control and dividend policies."},
+        {"heading": "Economic Cycles", "content": "The macroeconomy cycles through Boom, Recession, Depression, and Recovery phases, affecting game sales and market conditions."}
+      ]
+    },
+    "market_system": {
+      "title": "Market System",
+      "sections": [
+        {"heading": "Game Scoring", "content": "Final score is a weighted calculation of 6 quality attributes, influenced by genre-theme compatibility, tech bonuses, components, and polish. Tiers: D<10, C<20, B<35, A<55, S<80, SS≥80."},
+        {"heading": "Sales Calculation", "content": "Sales are affected by score, platform base, marketing hype, brand power, price, and market competition. High-scoring games get word-of-mouth bonuses."},
+        {"heading": "Market Competition", "content": "AI competitors develop similar genre/theme games simultaneously. Competition affects sales. Monitor competitor activity to adjust strategy."},
+        {"heading": "Market Trends", "content": "Player preferences change over time. Certain genres/themes enter trending periods with sales bonuses. Watch market reports for trends."},
+        {"heading": "Fans & Brand", "content": "Each successful release builds a fan base. Fan count affects day-one sales of subsequent games. Brand Power is based on cumulative average scores."}
+      ]
+    },
+    "tech_system": {
+      "title": "Tech System",
+      "sections": [
+        {"heading": "Tech Branches", "content": "The tech tree has 6 main branches: ProgramBase, Render2D, Render3D, Audio, Network, AI. Plus 3 special branches: Platform, GenreUnlock, ThemeUnlock."},
+        {"heading": "Research Mechanic", "content": "Assign teams to research techs, consuming man-months to make progress. Prerequisite techs must be completed first. Multiple prerequisites are supported (separated by |)."},
+        {"heading": "Effects & Bonuses", "content": "Researched techs automatically apply to new projects: boost quality attributes, unlock new genres/themes, improve dev efficiency, and unlock game components."},
+        {"heading": "Tech Levels", "content": "Each tech has a Level. High-level techs require higher employee skill levels for research. Genre and Theme unlock techs are mostly Level 1 and research quickly."},
+        {"heading": "Research Strategy", "content": "Early priority: Save System, 2D Rendering V2, and basic Audio. Mid-game: choose 3D/Network/AI branches based on direction. Late-game: pursue top techs like Real-time Path Tracing and ML AI."}
+      ]
+    },
+    "founder_system": {
+      "title": "Founder System",
+      "sections": [
+        {"heading": "Creating a Founder", "content": "At game start, you create your Founder by allocating points across 6 skills (Program, Art, Audio, Network, AI, Business), each ranging 1~10 with 8 points to distribute beyond bases. Skill allocation determines your initial development capabilities and research direction."},
+        {"heading": "Founder Traits", "content": "Choose from 6 Founder traits: Visionary (quality cap +5), Technical (research speed +15%), Business (revenue +10%), Indie (small team efficiency +20%), RiskTaker (better high-risk decision outcomes), Balanced (+1 all skills). The trait is permanent and shapes your entire playthrough."},
+        {"heading": "Founder Growth", "content": "Founders improve skills through project participation but cannot be trained through conventional means. Founders provide stable baseline output on projects and never cause chemistry conflicts. Founders are immune to poaching mechanics."},
+        {"heading": "Founder Legacy", "content": "When a Founder retires or meets certain conditions, the Legacy system triggers. You must choose a successor from existing employees. The successor inherits some Founder attributes and Studio DNA bonuses. Legacy succession is key to maintaining competitiveness in the late game."}
+      ]
+    },
+    "design_canvas": {
+      "title": "Design Canvas",
+      "sections": [
+        {"heading": "Design Decision Tree", "content": "During project planning, you can enter the Design Canvas to make design decisions: Core Loop (action/turn-based/real-time), Combat System (visible/random/none), Perspective (2D/3D/first-person), Art Style (realistic/cartoon/pixel). Each choice influences quality attribute weighting."},
+        {"heading": "Innovation & Appeal", "content": "Design decisions generate Innovation and Appeal scores. High-Innovation games attract media attention and have higher score potential but risk being too niche. High-Appeal games cater to mainstream tastes with more stable sales. Balancing both is the key to great design."},
+        {"heading": "Design Combinations", "content": "Different decision combinations affect the final game's attribute weights. For example, Action Core + First-Person + Realistic Art boosts Graphics and Gameplay caps significantly, but may sacrifice Story and Audio potential. Certain combos unlock hidden quality bonuses."},
+        {"heading": "Design Unlocks", "content": "Some design options require specific tech research or prior project experience to unlock. For example, 3D Rendering V1 is needed to choose a 3D perspective. Unlocked options persist across future projects, building your studio's design repertoire."}
+      ]
+    },
+    "components_system": {
+      "title": "Game Components System",
+      "sections": [
+        {"heading": "Component Assembly", "content": "During project planning, you can equip game Components. There are 30+ components across 3 categories: Gameplay (Open World, Skill Tree, Branching Narrative), Tech (Ray Tracing, Dynamic Physics), and Content (Extensive Text, Voice Acting). Each component adds development complexity."},
+        {"heading": "Attribute Effects", "content": "Each component boosts specific quality attributes. For example, Open World greatly improves Gameplay and Graphics scores but adds program complexity; Voice Acting boosts Audio and Story scores but requires Audio skill support. Choosing the right components is key to making high-quality games."},
+        {"heading": "Synergy Effects", "content": "When equipped components share the same Tag, a Synergy bonus triggers. For example, equipping both Dynamic Lighting and Ray Tracing triggers the lighting tag synergy, providing extra graphics score bonuses. Mastering synergies separates expert players from novices."},
+        {"heading": "Complexity Management", "content": "Each component adds to project complexity—higher complexity means longer development and more bugs. You must balance component quantity against project scope. High tech debt amplifies the negative effects of added components."}
+      ]
+    },
+    "tech_debt_system": {
+      "title": "Tech Debt System",
+      "sections": [
+        {"heading": "What is Tech Debt", "content": "Technical Debt represents hidden quality issues accumulated in a project. Rushing deadlines, adding components, and skipping tech tree prerequisites all increase debt. 4 tiers: Healthy (<25), Warning (25~50), Dangerous (50~75), Critical (>75). Higher debt means more bugs and slower development."},
+        {"heading": "996 Crunch Mode", "content": "You can enable 996 crunch mode to accelerate development, at the cost of accelerated tech debt buildup, doubled employee fatigue, and decreased satisfaction. 996 is a double-edged sword—good for short sprints but prolonged use causes burnout and mass resignations."},
+        {"heading": "Refactoring & Fixes", "content": "You can perform a Big Refactor to significantly reduce tech debt, but development pauses during refactoring. Refactoring efficiency depends on employees with the TechClean trait. Small refactors can be done anytime, reducing debt without pausing development."},
+        {"heading": "Debt Crisis", "content": "When tech debt reaches 90+, a debt crisis event may trigger—severe architectural issues causing progress rollback and attribute penalties. At debt 100, the project crashes and loses substantial progress. Maintaining healthy debt levels is essential for project success."},
+        {"heading": "Sequel Debt Inheritance", "content": "Sequels inherit a portion of the predecessor's tech debt. The inheritance ratio depends on code reuse rate—higher reuse means faster development but more inherited debt. Legacy code may also generate new debt over time."}
+      ]
+    },
+    "post_release_system": {
+      "title": "Post-Release Operations",
+      "sections": [
+        {"heading": "Post-Release Content Types", "content": "After release, you can create various post-launch content: Bug Fix Patches (quick reputation recovery), Content Updates (new features/levels), Skin DLCs (low-cost revenue), Expansions (medium content packs), Remasters (graphics upgrade + re-release), Ports (new platforms), Sequels (new project with brand bonus), and Mod Kits (activate community creativity)."},
+        {"heading": "Content Planning Strategy", "content": "Different content types offer different ROI. Bug fix patches are low-cost but significantly improve口碑. Expansions drive a sales resurgence but take time to develop. Mod kits don't generate direct revenue but extend game longevity. Recommended: release 1~2 patches first, then decide based on sales performance."},
+        {"heading": "Sequel Mechanics", "content": "Sequels inherit some fans, brand power, and player expectations from the predecessor. You can choose the code reuse ratio—higher reuse speeds development but inherits more tech debt. Final score requirements are higher for sequels of well-regarded predecessors, as player expectations rise."},
+        {"heading": "Long-Tail Sales", "content": "Games don't disappear after launch—they enter a long-tail sales period with diminishing monthly sales. Content updates, discount promotions, and streamer coverage can create sales resurgences. High-quality games can generate revenue for years."}
+      ]
+    },
+    "engine_business_system": {
+      "title": "Engine Business System",
+      "sections": [
+        {"heading": "Engine Development", "content": "Your studio has a self-developed engine. Its level and built-in perks are determined by researched techs. The engine can be upgraded through team R&D investment. Engine level affects game quality caps and development efficiency."},
+        {"heading": "Business Model Selection", "content": "5 business models: Closed (in-house only, no external revenue), Open Source (free public access, community contributions boost engine level), Buyout (one-time license fee for large cash influx), Subscription (monthly licensing fees for stable cash flow), Royalty (free to use but takes a cut of game sales)."},
+        {"heading": "Market Share", "content": "Engine market share affects third-party developer preferences and your brand appeal. High market share attracts more external developers, generating sustained licensing revenue. Market share is influenced by both engine quality and business model choice."},
+        {"heading": "Engine Perk System", "content": "Researched techs are automatically converted into Engine Perks (multithreaded rendering, physics engine, network middleware, etc.). These perks directly benefit games developed on your engine. The quality and quantity of perks are the core competitive advantage for attracting third-party developers."}
+      ]
+    },
+    "competitor_system": {
+      "title": "Competitor System",
+      "sections": [
+        {"heading": "AI Studios", "content": "The market contains multiple AI-controlled competitor studios, each with their own funds, reputation, tech level, employees, and fan base. Competitors independently initiate projects, develop, and release games, competing with you for market share. Competitor count and strength grow over time."},
+        {"heading": "Competitor Strategies", "content": "AI competitors use 4 behavioral strategies: Balanced (all-around stable development), Aggressive (launches competing games near your release dates), Copycat (clones your high-scoring genre/theme combos), NicheHunter (targets underserved combos to avoid direct competition). You can observe competitor tendencies through market reports."},
+        {"heading": "Employee Poaching", "content": "Competitors may poach your employees. Acceptance depends on employee satisfaction, loyalty, and the competitor's offer. You can also proactively poach competitor employees for a cost, with success rate affected by target satisfaction and your reputation. Poaching damages studio relations."},
+        {"heading": "Market Competition Effects", "content": "When multiple games of the same genre/theme release simultaneously, the market becomes diluted, reducing sales for each title. Competitor high-score games also raise player quality expectations. Avoid direct competition by staggering release dates or choosing differentiated genres."},
+        {"heading": "Market News Feed", "content": "Monthly news reports cover studio activities—new project announcements, game releases, employee changes, financial events. Following the news helps you understand market shifts and predict competitor moves. News tone is affected by market sentiment—optimistic in bull markets, negative in bears."}
+      ]
+    },
+    "fan_community_system": {
+      "title": "Fan & Community System",
+      "sections": [
+        {"heading": "Two-Tier Fan System", "content": "Fans are split into two tiers: Casual and Diehard. Casual fans can be attracted through marketing but churn easily. Diehard fans require high-quality games and long-term brand building to cultivate, but are extremely loyal. Diehard fans automatically purchase new releases (baseline sales) and actively defend your reputation even when scores dip."},
+        {"heading": "Fan Growth & Attrition", "content": "Each game release attracts new fans, proportional to score and sales. A natural attrition rate applies monthly. Total fan count affects initial awareness and first-week sales of new games. Hosting Fan Festival events can provide a short-term fan boost."},
+        {"heading": "Brand Power & Faith Bonus", "content": "Brand Power is based on the average score of all your released games. Higher Brand Power increases diehard conversion rate. When diehard ratio exceeds a threshold, the Faith Bonus activates—even if a new game scores poorly, diehard fans generate positive reviews to offset criticism."},
+        {"heading": "Community Interaction", "content": "The player community vocalizes through social media: cheers for high scores, protests for low scores, complaints about delays and excessive DLC. Community sentiment affects neutral player conversion rates (casual-to-diehard and diehard-to-lost). Take community feedback seriously, but don't let it dictate your every move."},
+        {"heading": "Fan Petitions", "content": "The fan community occasionally launches petitions—demanding classic remakes, specific genre sequels, multiplayer modes, etc. Responding to petitions greatly boosts fan satisfaction but may disrupt your development plans. Declining petitions reduces satisfaction but preserves development autonomy."}
+      ]
+    },
+    "office_room_system": {
+      "title": "Office & Room System",
+      "sections": [
+        {"heading": "Office Tiers", "content": "5 office tiers: Garage (starting, has a bed for overtime without satisfaction penalty), Small Office (rent 5k/month), Medium Office (rent 15k/month), Large Office (rent 50k/month), High-Rise (rent 150k/month). Higher-tier offices accommodate more employees and provide global efficiency bonuses."},
+        {"heading": "Bonus Rooms", "content": "5 types of bonus rooms can be built: Meeting Room (team chemistry generation +), Server Room (network research speed +15%), Art Studio (art research speed +15%), Audio Lab (audio research speed +15%), Lounge (fatigue recovery +20%). Each room provides different strategic advantages."},
+        {"heading": "3D Office Environment", "content": "The office is rendered in 3D with desks, computers, monitors, chairs, bookshelves, plants, and tea sets. Employees appear at their workstations. Different office tiers have different layouts—the garage is a personal workshop style, while the high-rise features an open-plan layout. Room upgrades are visually reflected in the 3D scene."},
+        {"heading": "Rent & Upgrade Strategy", "content": "Rent is paid monthly and is a significant fixed cost. Upgrading requires a one-time investment and construction time. Recommended: upgrade when employee count is about to exceed the current cap, or upgrade early when funds allow to gain efficiency bonuses. The garage phase is the toughest but also the most entrepreneurial."},
+        {"heading": "Quick Access Tip", "content": "Click the 'Office' button (🏠 icon) on the bottom navigation bar to open the room panel. There you can view current office info, upgrade to a larger office, and purchase bonus rooms. When employee count approaches the workstation limit, visit the room panel to upgrade and expand capacity—otherwise you won't be able to hire new staff."}
+      ]
+    },
+    "sprint_system": {
+      "title": "Sprint Development System",
+      "sections": [
+        {"heading": "Sprint Cycles", "content": "Development follows a Scrum-style Sprint cycle. Each sprint lasts approximately 3 months. At the start of each sprint, you plan which development modules to prioritize and how to allocate resources."},
+        {"heading": "Sprint Planning", "content": "At the start of each sprint, you adjust resource allocation across 6 development modules (Core Gameplay, Visuals, Audio, Story, Stability, Online Services). Concentrating resources on priority modules accelerates their progress at the expense of others."},
+        {"heading": "Sprint Review", "content": "Each sprint ends with a review, summarizing development output, bug generation, and team efficiency. Good sprint reviews boost team morale; poor sprint performance may trigger negative events."},
+        {"heading": "Mid-Sprint Adjustments", "content": "If progress falls behind schedule, you can make mid-sprint adjustments—overtime, resource reallocation, or feature scope cuts. Scope cuts help catch up quickly but reduce the final game score."}
+      ]
+    },
+    "card_system": {
+      "title": "Card System",
+      "sections": [
+        {"heading": "What Are Cards", "content": "Cards are consumable one-time boost items, divided into free cards and shop-purchased cards. Cards can apply various effects to in-development projects or active research—boosting attributes, advancing progress, reducing tech debt, restoring team fatigue, and more. Cards are strategic resources that can turn the tide at critical moments."},
+        {"heading": "Card Rarity", "content": "Cards come in 4 rarities: Common (grey border), Rare (blue border), Epic (purple border), and Legendary (gold border). Higher rarity cards have stronger effects but are harder to obtain. Legendary cards are limited to 1 purchase per quarter."},
+        {"heading": "Card Effect Types", "content": "15 effect types: ProjectProgress (advance development %), Fun/Graphics/Audio/Story/Stability/Network (boost individual attributes), AllAttributes (boost all stats), TechDebt (reduce debt), Memory (reduce memory usage), Sales (multiply monthly sales), Research (accelerate tech research), Score (add to final score), Fatigue (restore team energy). Legendary cards provide all-attributes boost + 30% progress simultaneously."},
+        {"heading": "Getting Free Cards", "content": "3 free cards are granted at game start. Free card slots refresh at the beginning of each year—old cards are cleared and 3 new ones are drawn. Free cards have basic effects but cost nothing, making them ideal for early projects. Free slot capacity is 3 cards."},
+        {"heading": "Buying Cards", "content": "The Card Shop lets you spend money or inspiration to purchase cards. Inventory refreshes every 3 months, randomly generating Common (4~6), Rare (2~4), Epic (1~2), and Legendary (30% chance for 1) cards. Purchased cards go into paid slots (max 5). Legendary card purchases are limited to 1 per quarter."},
+        {"heading": "Using Cards", "content": "Click a card in the drawer to open the target selection panel. Select an in-development project to apply the effect—quality effects directly add to attribute scores, progress effects advance development by a percentage. Some cards can target active research to accelerate it. The card is consumed and removed from the slot after use."},
+        {"heading": "Card Strategy", "content": "Common cards are good for early-stage project acceleration. Rare cards offer the best value-for-money for mid-game sprints. Epic cards pack a punch for high-score project pushes. Legendary cards are extremely rare and expensive but can turn the tide at critical moments. Note: 'Market Monopoly' is a double-edged sword—all attributes -20 but market domination. Manage your card slots wisely; use cards before free slots refresh to avoid waste."}
+      ]
+    },
+    "stock_system": {
+      "title": "Stock Market & IPO System",
+      "sections": [
+        {"heading": "Going Public (IPO)", "content": "When your studio has been operating for 5+ years, has 30+ employees, and annual profit exceeds ¥500,000, you can launch an IPO. The IPO raises ¥3~6 million in one-time funding. The issue price is determined by a PE (Price-to-Earnings) model based on profitability, publisher reputation, and market conditions."},
+        {"heading": "Stock Pricing Model", "content": "Stock prices follow a PE-based model: Price = EPS × Industry PE × Growth Premium × Sentiment Premium. Industry PE ranges from 5~40x based on reputation and market cap. Market sentiment follows bull/bear cycles. Prices converge toward fair value at 30% per quarter, preventing instant spikes or crashes."},
+        {"heading": "Market Sentiment & Cycles", "content": "Market sentiment affects all listed companies systematically. The sentiment value fluctuates between 0.75~1.30, driven by a random walk with sine wave cycles, naturally forming five phases: Bull (>1.20), Rising (>1.05), Stable (>0.95), Falling (>0.80), Bear (≤0.80). All valuations are premium in bull markets and discounted in bears."},
+        {"heading": "Stock Trading", "content": "In the company details panel, you can view stock prices, market caps, and shareholder distributions for all listed companies. You can buy and sell AI competitor stocks—buying costs funds, selling returns cash. Large sell orders create volume impact that depresses prices. You cannot trade your own company's stock (insider trading restrictions)."},
+        {"heading": "Dividend System", "content": "Listed companies can distribute a portion of profits as dividends to shareholders. The DividendRate determines what fraction of profit is paid out. Dividends provide a small boost to the stock price after payment. A reasonable dividend policy attracts more investors and can improve market valuation."},
+        {"heading": "Market Index", "content": "The market index is the normalized total market cap of all listed companies divided by company count (baseline 1000). An index above 1000 indicates a rising market; below 900 signals a downturn. The index reflects overall economic conditions and aggregate corporate earnings."},
+        {"heading": "Stock Price Factors", "content": "Key factors affecting stock prices: quarterly profit (strongest driver, profit growth directly boosts EPS), profit acceleration (triggers 1.2x growth premium), market sentiment (bull/bear environment), trading volume (large orders create price impact), dividends (post-dividend price boost), company reputation (higher reputation raises PE multiples). Sustained losses cause severe price declines and potential delisting."},
+        {"heading": "Bankruptcy & Delisting", "content": "When a company's funds remain negative, it suffers sustained losses, or debts exceed assets, it may trigger bankruptcy and delisting. Delisted stock becomes worthless, and the company loses access to public market financing. AI competitors can also go bankrupt, be acquired, or be liquidated due to poor management."}
+      ]
+    }
+  }
+}

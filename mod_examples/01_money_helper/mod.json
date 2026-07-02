@@ -1,0 +1,8 @@
+{
+  "name": "💰 Monthly Money Helper",
+  "version": "1.0",
+  "author": "Mod Example",
+  "description": "Gives you ¥50,000 every month. A simple working example of a GDScript mod.",
+  "type": "script",
+  "min_game_version": "0.1"
+}

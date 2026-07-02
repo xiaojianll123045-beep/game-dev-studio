@@ -1,0 +1,147 @@
+[
+  {
+    "id": "open_world",
+    "name": "开放世界",
+    "category": "Gameplay",
+    "required_tech": "open_world",
+    "synergy_tags": ["rpg", "big", "exploration"],
+    "description": "无缝大地图，自由探索",
+    "effects": [
+      { "attr": "gameplay", "bonus": 12 },
+      { "attr": "stability", "bonus": -5 }
+    ]
+  },
+  {
+    "id": "open_world_online",
+    "name": "开放世界在线服",
+    "category": "Online",
+    "required_tech": "network_v2",
+    "synergy_tags": ["open_world", "social", "big"],
+    "description": "在线服务器支持开放世界实时同步",
+    "effects": [
+      { "attr": "network", "bonus": 15 },
+      { "attr": "stability", "bonus": -8 },
+      { "attr": "gameplay", "bonus": 5 }
+    ],
+    "synergy_tags": ["open_world", "social", "big"]
+  },
+  {
+    "id": "voxel_engine",
+    "name": "体素引擎",
+    "category": "Visual",
+    "required_tech": "3d_v2",
+    "synergy_tags": ["open_world", "procedural", "creative"],
+    "description": "全可破坏地形，体素风格渲染",
+    "effects": [
+      { "attr": "graphics", "bonus": 8 },
+      { "attr": "gameplay", "bonus": 10 },
+      { "attr": "stability", "bonus": -6 }
+    ],
+    "synergy_tags": ["open_world", "procedural", "creative"]
+  },
+  {
+    "id": "dynamic_weather",
+    "name": "动态天气系统",
+    "category": "Visual",
+    "required_tech": "shader_v1",
+    "synergy_tags": ["open_world", "exploration", "atmosphere"],
+    "description": "实时天气切换，影响玩法",
+    "effects": [
+      { "attr": "graphics", "bonus": 10 },
+      { "attr": "gameplay", "bonus": 5 },
+      { "attr": "stability", "bonus": -3 }
+    ]
+  },
+  {
+    "id": "day_night_cycle",
+    "name": "昼夜循环",
+    "category": "Gameplay",
+    "required_tech": "shader_v1",
+    "synergy_tags": ["open_world", "exploration", "atmosphere", "stealth"],
+    "description": "真实昼夜交替，NPC作息变化",
+    "effects": [
+      { "attr": "gameplay", "bonus": 8 },
+      { "attr": "story", "bonus": 5 },
+      { "attr": "stability", "bonus": -2 }
+    ]
+  },
+  {
+    "id": "procedural_dungeon",
+    "name": "程序化地牢",
+    "category": "Gameplay",
+    "required_tech": "procedural",
+    "synergy_tags": ["rpg", "exploration", "replay", "procedural"],
+    "description": "每次进入生成不同地图",
+    "effects": [
+      { "attr": "gameplay", "bonus": 10 },
+      { "attr": "story", "bonus": -3 }
+    ]
+  },
+  {
+    "id": "branching_dialog",
+    "name": "分支对话系统",
+    "category": "Story",
+    "required_tech": "ai_v1",
+    "synergy_tags": ["rpg", "narrative", "stealth"],
+    "description": "多分支对话，选择影响剧情走向",
+    "effects": [
+      { "attr": "story", "bonus": 15 },
+      { "attr": "gameplay", "bonus": 3 },
+      { "attr": "stability", "bonus": -4 }
+    ]
+  },
+  {
+    "id": "base_building",
+    "name": "基地建设",
+    "category": "Gameplay",
+    "required_tech": "physics_v2",
+    "synergy_tags": ["open_world", "creative", "survival", "big"],
+    "description": "自由建造和升级基地",
+    "effects": [
+      { "attr": "gameplay", "bonus": 12 },
+      { "attr": "graphics", "bonus": 5 },
+      { "attr": "stability", "bonus": -5 }
+    ]
+  },
+  {
+    "id": "survival_mechanics",
+    "name": "生存机制",
+    "category": "Gameplay",
+    "required_tech": "ai_v2",
+    "synergy_tags": ["open_world", "survival", "exploration"],
+    "description": "饥饿/口渴/体温管理",
+    "effects": [
+      { "attr": "gameplay", "bonus": 10 },
+      { "attr": "story", "bonus": -3 },
+      { "attr": "stability", "bonus": -3 }
+    ]
+  },
+  {
+    "id": "coop_multiplayer",
+    "name": "联机合作",
+    "category": "Online",
+    "required_tech": "network_v2",
+    "synergy_tags": ["social", "open_world", "survival", "big"],
+    "description": "多人联机合作通关",
+    "effects": [
+      { "attr": "network", "bonus": 18 },
+      { "attr": "gameplay", "bonus": 5 },
+      { "attr": "stability", "bonus": -10 },
+      { "attr": "story", "bonus": -5 }
+    ]
+  },
+  {
+    "id": "live_service",
+    "name": "持续运营服务",
+    "category": "Online",
+    "required_tech": "network_v3",
+    "synergy_tags": ["social", "big", "replay"],
+    "description": "赛季通行证、每日任务、活动运营",
+    "effects": [
+      { "attr": "network", "bonus": 12 },
+      { "attr": "gameplay", "bonus": 3 },
+      { "attr": "stability", "bonus": -12 },
+      { "attr": "story", "bonus": -5 }
+    ]
+  }
+]

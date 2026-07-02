@@ -1,0 +1,8 @@
+{
+  "name": "平衡调整器",
+  "version": "1.0",
+  "author": "Mod示例",
+  "description": "调整游戏平衡性参数，让开发更轻松。演示 data/balance.json 的使用。",
+  "type": "data",
+  "min_game_version": "0.1"
+}

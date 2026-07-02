@@ -1,0 +1,1 @@
+Remove-Item -Recurse -Force "E:\编程\Ai\游戏开发商\.godot\mono\temp" -ErrorAction SilentlyContinue; dotnet build "E:\编程\Ai\游戏开发商\游戏开发商.csproj" 2>&1; if ($LASTEXITCODE -eq 0) { Start-Process -FilePath "E:\编程\Ai\打飞机\浮岛求生\godot_mono\Godot_v4.7-stable_mono_win64\Godot_v4.7-stable_mono_win64.exe" -ArgumentList "--path `"E:\编程\Ai\游戏开发商`" --rendering-driver d3d12" }

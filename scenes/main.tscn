@@ -1,0 +1,73 @@
+[gd_scene load_steps=13 format=3 uid="uid://game_dev_main3d"]
+
+[ext_resource type="Script" path="res://scripts/GameManager.cs" id="1_gm"]
+[ext_resource type="Script" path="res://scripts/ResourceManager.cs" id="2_res"]
+[ext_resource type="Script" path="res://scripts/EmployeeManager.cs" id="3_emp"]
+[ext_resource type="Script" path="res://scripts/TeamManager.cs" id="4_team"]
+[ext_resource type="Script" path="res://scripts/TechManager.cs" id="5_tech"]
+[ext_resource type="Script" path="res://scripts/GameDevManager.cs" id="6_dev"]
+[ext_resource type="Script" path="res://scripts/CompetitorAI.cs" id="7_comp"]
+[ext_resource type="Script" path="res://scripts/FanManager.cs" id="8_fan"]
+[ext_resource type="Script" path="res://scripts/RoomManager.cs" id="9_room"]
+
+[sub_resource type="Environment" id="env"]
+background_mode = 0
+background_color = Color(0.85, 0.88, 0.92, 1)
+ambient_light_source = 1
+ambient_light_color = Color(0.55, 0.57, 0.62, 1)
+ambient_light_energy = 1.0
+
+[node name="Main" type="Node3D"]
+script = ExtResource("1_gm")
+
+[node name="WorldEnvironment" type="WorldEnvironment" parent="."]
+environment = SubResource("env")
+
+[node name="SunLight" type="DirectionalLight3D" parent="."]
+transform = Transform3D(0.65, -0.4, 0.35, 0.3, 0.85, 0.4, -0.72, -0.35, 0.6, 4, 12, 6)
+shadow_enabled = false
+light_energy = 1.2
+light_color = Color(0.95, 0.92, 0.86, 1)
+
+[node name="FillLight" type="DirectionalLight3D" parent="."]
+transform = Transform3D(-0.5, 0.1, 0.85, 0, 1, 0, -0.85, 0.1, -0.5, -6, 4, -8)
+shadow_enabled = false
+light_energy = 0.4
+light_color = Color(0.5, 0.55, 0.7, 1)
+
+[node name="RoomAmbient" type="OmniLight3D" parent="."]
+position = Vector3(0, 2, 0)
+light_energy = 0.5
+light_color = Color(0.85, 0.84, 0.78, 1)
+omni_range = 15
+omni_attenuation = 1.5
+
+[node name="Building" type="Node3D" parent="."]
+transform = Transform3D(1, 0, 0, 0, 1, 0, 0, 0, 1, 0, 0, 0)
+
+[node name="Camera3D" type="Camera3D" parent="."]
+position = Vector3(7, 10, 10)
+
+[node name="ResourceManager" type="Node" parent="."]
+script = ExtResource("2_res")
+
+[node name="EmployeeManager" type="Node" parent="."]
+script = ExtResource("3_emp")
+
+[node name="TeamManager" type="Node" parent="."]
+script = ExtResource("4_team")
+
+[node name="TechManager" type="Node" parent="."]
+script = ExtResource("5_tech")
+
+[node name="GameDevManager" type="Node" parent="."]
+script = ExtResource("6_dev")
+
+[node name="CompetitorAI" type="Node" parent="."]
+script = ExtResource("7_comp")
+
+[node name="FanManager" type="Node" parent="."]
+script = ExtResource("8_fan")
+
+[node name="RoomManager" type="Node" parent="."]
+script = ExtResource("9_room")

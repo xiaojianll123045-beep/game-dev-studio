@@ -1,0 +1,8 @@
+{
+  "name": "📦 内容扩展包 Content Expansion",
+  "version": "1.0",
+  "author": "System",
+  "description": "新增 10+ 组件（含交互关系）、8 个跨系统危机事件、数值平衡调整",
+  "type": "data",
+  "min_game_version": "0.1"
+}

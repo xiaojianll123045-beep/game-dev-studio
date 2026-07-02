@@ -1,0 +1,106 @@
+[
+  {
+    "id": "server_meltdown",
+    "title": "crisis.server_meltdown_title",
+    "description": "crisis.server_meltdown_desc",
+    "trigger_condition": "bug > 30",
+    "trigger_probability": 0.25,
+    "delay_months": 0,
+    "options": [
+      { "label": "crisis.server_meltdown_opt_a", "result_desc": "crisis.server_meltdown_opt_a_result", "effects": { "money": -80000, "bug": -20, "trust": 5 } },
+      { "label": "crisis.server_meltdown_opt_b", "result_desc": "crisis.server_meltdown_opt_b_result", "effects": { "bug": -5, "stability": 5, "progress": -5 } },
+      { "label": "crisis.server_meltdown_opt_c", "result_desc": "crisis.server_meltdown_opt_c_result", "effects": { "money": -20000, "bug": 10, "trust": -5 } }
+    ]
+  },
+  {
+    "id": "talent_war",
+    "title": "crisis.talent_war_title",
+    "description": "crisis.talent_war_desc",
+    "trigger_condition": "months > 12",
+    "trigger_probability": 0.2,
+    "delay_months": 0,
+    "options": [
+      { "label": "crisis.talent_war_opt_a", "result_desc": "crisis.talent_war_opt_a_result", "effects": { "money": -100000, "trust": 10 } },
+      { "label": "crisis.talent_war_opt_b", "result_desc": "crisis.talent_war_opt_b_result", "effects": { "progress": -8, "stability": 5 } },
+      { "label": "crisis.talent_war_opt_c", "result_desc": "crisis.talent_war_opt_c_result", "effects": { "money": -30000, "trust": -8, "bug": 5 } }
+    ]
+  },
+  {
+    "id": "feature_scope_creep",
+    "title": "crisis.scope_creep_title",
+    "description": "crisis.scope_creep_desc",
+    "trigger_condition": "progress > 30",
+    "trigger_probability": 0.3,
+    "delay_months": 0,
+    "options": [
+      { "label": "crisis.scope_creep_opt_a", "result_desc": "crisis.scope_creep_opt_a_result", "effects": { "gameplay": 10, "progress": -10, "bug": 5 } },
+      { "label": "crisis.scope_creep_opt_b", "result_desc": "crisis.scope_creep_opt_b_result", "effects": { "progress": 5, "gameplay": -5, "story": -5 } },
+      { "label": "crisis.scope_creep_opt_c", "result_desc": "crisis.scope_creep_opt_c_result", "effects": { "bug": 15, "debt": 10, "progress": 8 } }
+    ]
+  },
+  {
+    "id": "publisher_crunch",
+    "title": "crisis.publisher_crunch_title",
+    "description": "crisis.publisher_crunch_desc",
+    "trigger_condition": "debt > 20",
+    "trigger_probability": 0.25,
+    "delay_months": 0,
+    "options": [
+      { "label": "crisis.publisher_crunch_opt_a", "result_desc": "crisis.publisher_crunch_opt_a_result", "effects": { "progress": 15, "bug": 10, "trust": -5 } },
+      { "label": "crisis.publisher_crunch_opt_b", "result_desc": "crisis.publisher_crunch_opt_b_result", "effects": { "money": -120000, "debt": -10, "trust": 5 } },
+      { "label": "crisis.publisher_crunch_opt_c", "result_desc": "crisis.publisher_crunch_opt_c_result", "effects": { "progress": -5, "debt": 5, "story": -8 } }
+    ]
+  },
+  {
+    "id": "lead_departure",
+    "title": "crisis.lead_departure_title",
+    "description": "crisis.lead_departure_desc",
+    "trigger_condition": "months > 24",
+    "trigger_probability": 0.15,
+    "delay_months": 0,
+    "options": [
+      { "label": "crisis.lead_departure_opt_a", "result_desc": "crisis.lead_departure_opt_a_result", "effects": { "money": -150000, "trust": 5 } },
+      { "label": "crisis.lead_departure_opt_b", "result_desc": "crisis.lead_departure_opt_b_result", "effects": { "progress": -15, "gameplay": -8, "graphics": -5 } },
+      { "label": "crisis.lead_departure_opt_c", "result_desc": "crisis.lead_departure_opt_c_result", "effects": { "bug": 10, "stability": -5, "debt": 5 } }
+    ]
+  },
+  {
+    "id": "review_bomb",
+    "title": "crisis.review_bomb_title",
+    "description": "crisis.review_bomb_desc",
+    "trigger_condition": "bug > 40",
+    "trigger_probability": 0.2,
+    "delay_months": 0,
+    "options": [
+      { "label": "crisis.review_bomb_opt_a", "result_desc": "crisis.review_bomb_opt_a_result", "effects": { "money": -60000, "bug": -25, "trust": 5 } },
+      { "label": "crisis.review_bomb_opt_b", "result_desc": "crisis.review_bomb_opt_b_result", "effects": { "stability": 8, "sales": -25, "trust": -5 } },
+      { "label": "crisis.review_bomb_opt_c", "result_desc": "crisis.review_bomb_opt_c_result", "effects": { "progress": -10, "bug": -10, "sales": -15 } }
+    ]
+  },
+  {
+    "id": "engine_legacy_debt",
+    "title": "crisis.engine_debt_title",
+    "description": "crisis.engine_debt_desc",
+    "trigger_condition": "debt > 30",
+    "trigger_probability": 0.3,
+    "delay_months": 0,
+    "options": [
+      { "label": "crisis.engine_debt_opt_a", "result_desc": "crisis.engine_debt_opt_a_result", "effects": { "money": -100000, "debt": -20, "stability": 5 } },
+      { "label": "crisis.engine_debt_opt_b", "result_desc": "crisis.engine_debt_opt_b_result", "effects": { "progress": -12, "debt": -5, "bug": 5 } },
+      { "label": "crisis.engine_debt_opt_c", "result_desc": "crisis.engine_debt_opt_c_result", "effects": { "bug": 15, "stability": -5, "progress": 3 } }
+    ]
+  },
+  {
+    "id": "community_backlash",
+    "title": "crisis.community_title",
+    "description": "crisis.community_desc",
+    "trigger_condition": "months > 18",
+    "trigger_probability": 0.2,
+    "delay_months": 0,
+    "options": [
+      { "label": "crisis.community_opt_a", "result_desc": "crisis.community_opt_a_result", "effects": { "money": -50000, "bug": -15, "trust": 3 } },
+      { "label": "crisis.community_opt_b", "result_desc": "crisis.community_opt_b_result", "effects": { "sales": -25, "trust": -5 } },
+      { "label": "crisis.community_opt_c", "result_desc": "crisis.community_opt_c_result", "effects": { "progress": -5, "bug": -8, "debt": 3 } }
+    ]
+  }
+]

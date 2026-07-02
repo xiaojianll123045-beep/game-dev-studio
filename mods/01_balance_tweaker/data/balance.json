@@ -1,0 +1,22 @@
+{
+  "score.weight.graphics": 0.15,
+  "score.weight.gameplay": 0.35,
+  "score.weight.audio": 0.05,
+  "score.weight.story": 0.25,
+  "score.weight.network": 0.05,
+  "score.weight.stability": 0.15,
+  "sales.multiplier.95": 2.0,
+  "sales.multiplier.90": 1.5,
+  "sales.base_constant": 5000,
+  "sales.base_per_score": 400,
+  "fatigue.monthly_gain": 2,
+  "hire.cost.level0": 3000,
+  "hire.cost.level1": 15000,
+  "hire.cost.level2": 60000,
+  "project.init.graphics": 35,
+  "project.init.gameplay_base": 30,
+  "project.init.gameplay_compat": 20,
+  "trait.workaholic.efficiency": 1.2,
+  "trait.lonewolf.efficiency": 1.3,
+  "trait.workaholic.fatigue": 0.4
+}

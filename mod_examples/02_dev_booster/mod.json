@@ -1,0 +1,8 @@
+{
+  "name": "🚀 Dev Booster",
+  "version": "1.0",
+  "author": "Mod Example",
+  "description": "Max out your active project's scores and clear bugs instantly with F6. Shows how to access projects, employees, and tech.",
+  "type": "script",
+  "min_game_version": "0.1"
+}

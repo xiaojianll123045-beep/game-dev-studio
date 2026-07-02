@@ -1,0 +1,8 @@
+{
+  "name": "自定义语言包",
+  "version": "1.0",
+  "author": "Mod示例",
+  "description": "添加 Mod 专用翻译文本，演示语言 Mod 的使用。",
+  "type": "language",
+  "min_game_version": "0.1"
+}

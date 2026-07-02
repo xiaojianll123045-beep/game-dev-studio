@@ -1,0 +1,8 @@
+{
+  "name": "开发助手",
+  "version": "1.0",
+  "author": "Mod示例",
+  "description": "演示脚本 Mod 能力：每月自动加钱、注册钩子、修改项目属性。",
+  "type": "script",
+  "min_game_version": "0.1"
+}

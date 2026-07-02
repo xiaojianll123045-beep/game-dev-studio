@@ -1,0 +1,554 @@
+{
+  "genre_guide": [
+    {
+      "id": "RPG",
+      "name": "角色扮演",
+      "description": "玩家扮演一个或多个角色，在虚构世界中通过战斗、对话和探索推进剧情。注重角色成长、故事深度和世界观沉浸感。",
+      "compatible_themes": ["FAN", "MYT", "SCI", "HIS", "DUN", "WAR", "APO"],
+      "base_score_bonus": 0,
+      "tips": "与奇幻或神话主题契合度最高，适合搭配技能树、分支剧情等组件。务必先研发存档机制，否则评分-20。"
+    },
+    {
+      "id": "ACT",
+      "name": "动作",
+      "description": "强调玩家操作技巧、反应速度和手眼协调。包含战斗、跳跃、躲避等实时交互，节奏快、爽感强。",
+      "compatible_themes": ["FAN", "CYP", "APO", "MYT", "NIN", "DUN", "WAR", "WES"],
+      "base_score_bonus": 0,
+      "tips": "动作游戏需要扎实的物理引擎支持。忍者或赛博朋克主题能带来独特的战斗风格体验。"
+    },
+    {
+      "id": "AVG",
+      "name": "冒险",
+      "description": "侧重探索、解谜和叙事，玩家在丰富的场景中与角色互动、收集物品、解决谜题来推进故事。",
+      "compatible_themes": ["FAN", "LOV", "MYS", "SCH", "MYT", "MOD", "SCI", "VIC", "HIS", "HOR"],
+      "base_score_bonus": 5,
+      "tips": "冒险游戏叙事权重高，搭配分支剧情和配音叙事组件效果极佳。恋爱和悬疑主题尤为出彩。"
+    },
+    {
+      "id": "SLG",
+      "name": "策略",
+      "description": "玩家通过运筹帷幄、资源管理和战术决策来达成目标。思考重于操作，强调大局观和长远规划。",
+      "compatible_themes": ["WAR", "HIS", "SPA", "MOD", "FAN", "SCI", "CYP"],
+      "base_score_bonus": 0,
+      "tips": "战争和历史主题与策略游戏天然契合。AI行为树科技可以大幅提升策略深度评分。"
+    },
+    {
+      "id": "FPS",
+      "name": "第一人称射击",
+      "description": "以第一人称视角进行射击战斗，强调精准瞄准、快速反应和战术配合。沉浸感和爽快感并重。",
+      "compatible_themes": ["WAR", "MOD", "CYP", "SCI", "APO", "SPA", "HOR"],
+      "base_score_bonus": 0,
+      "tips": "战争和赛博朋克是最受欢迎的主题。3D空间音效对FPS沉浸感有显著加成。需要扎实的3D渲染技术支持。"
+    },
+    {
+      "id": "RAC",
+      "name": "竞速",
+      "description": "玩家驾驶车辆在赛道或开放式道路中竞速，追求速度和操作极限。包含改装、漂移、氮气加速等机制。",
+      "compatible_themes": ["MOD", "CYP", "SCI", "APO", "SPA", "STE"],
+      "base_score_bonus": 0,
+      "tips": "现代和赛博朋克主题最适合竞速。物理引擎（physics_v1）是竞速游戏的基础保障。"
+    },
+    {
+      "id": "SIM",
+      "name": "模拟",
+      "description": "模拟现实或虚构系统的运行，让玩家管理、建造或体验特定角色/场景。真实性和细节是关键。",
+      "compatible_themes": ["MOD", "HIS", "SPA", "SCI", "SCH", "CYP", "STE", "WOR"],
+      "base_score_bonus": 0,
+      "tips": "现代主题最安全，职场主题也有独特受众。模拟游戏的AI和数据分析能力往往能带来加分。"
+    },
+    {
+      "id": "SPO",
+      "name": "体育",
+      "description": "模拟各类体育竞技项目，玩家控制运动员或球队进行比赛。强调操作技巧和战术策略的结合。",
+      "compatible_themes": ["MOD", "SCH", "COM", "SCI", "FAN", "CYP"],
+      "base_score_bonus": 0,
+      "tips": "现代体育最受欢迎，校园和喜剧主题也能吸引特定受众。需要物理引擎支持真实运动模拟。"
+    },
+    {
+      "id": "MUS",
+      "name": "音乐",
+      "description": "玩家跟随音乐节奏进行操作，强调节奏感和音乐欣赏。包含谱面演奏、音轨创作等玩法。",
+      "compatible_themes": ["COM", "MOD", "LOV", "SCH", "FAN", "CYP", "SCI"],
+      "base_score_bonus": 5,
+      "tips": "动态配乐科技对本类型有直接帮助。音乐游戏对音频品质要求极高，优先升级音频科技。"
+    },
+    {
+      "id": "FTG",
+      "name": "格斗",
+      "description": "玩家控制角色进行一对一或多对多的近距离战斗，通过连招、格挡和反击击败对手。操作精度要求极高。",
+      "compatible_themes": ["FAN", "MYT", "MOD", "CYP", "NIN", "HIS", "SCI", "PIR"],
+      "base_score_bonus": 0,
+      "tips": "忍者和奇幻主题与格斗游戏高度契合。需要帧同步科技（frame_sync）来保证联机对战公平。"
+    },
+    {
+      "id": "MOBA",
+      "name": "多人在线竞技",
+      "description": "两队玩家在对称地图上实时对战，通过控制英雄角色、团队配合和策略运营摧毁对方基地。",
+      "compatible_themes": ["FAN", "SCI", "MYT", "CYP", "SPA", "APO"],
+      "base_score_bonus": 0,
+      "tips": "MOBA需要强大的网络技术支持，net_v2和帧同步是必备科技。平衡性设计是成功关键。"
+    },
+    {
+      "id": "MMO",
+      "name": "大型多人在线",
+      "description": "成千上万玩家同时在同一个虚拟世界中互动、探索、战斗和社交。巨大的世界规模和持久性是其核心。",
+      "compatible_themes": ["FAN", "SCI", "SPA", "MYT", "CYP", "HIS", "STE"],
+      "base_score_bonus": 0,
+      "tips": "MMO需要net_v3才能支持千人同服。运营系统（live_ops）是维持长期活跃度的关键。"
+    },
+    {
+      "id": "RTS",
+      "name": "即时战略",
+      "description": "玩家在实时战场上采集资源、建造基地、训练军队并指挥作战。宏观运营与微观操作缺一不可。",
+      "compatible_themes": ["WAR", "SCI", "HIS", "MOD", "FAN", "SPA", "CYP"],
+      "base_score_bonus": 0,
+      "tips": "战争和科幻是RTS的黄金组合。AI行为树和寻路算法对RTS至关重要。"
+    },
+    {
+      "id": "HOR",
+      "name": "恐怖",
+      "description": "营造紧张、不安和恐惧的氛围，让玩家在心理或生理上感受恐怖体验。跳跃惊吓和心理压迫是常用手法。",
+      "compatible_themes": ["HOR", "MYS", "APO", "DEE", "CYP", "DUN", "VIC", "SCH", "MOD"],
+      "base_score_bonus": 10,
+      "tips": "恐怖主题与本类型是天生一对。3D空间音效和出色的音频设计对恐怖氛围贡献巨大。"
+    },
+    {
+      "id": "SAN",
+      "name": "沙盒",
+      "description": "提供给玩家高度自由的虚拟世界，允许自由探索、创造和改变环境。没有固定路径，玩家自定义目标。",
+      "compatible_themes": ["MOD", "SPA", "SCI", "FAN", "APO", "CYP", "STE", "WES"],
+      "base_score_bonus": 0,
+      "tips": "开放世界组件是沙盒游戏的核心。需要强大的内存管理（memory_v2）支撑大规模场景。"
+    },
+    {
+      "id": "ROG",
+      "name": "Roguelike",
+      "description": "以永久死亡、程序生成关卡和回合制/实时战斗为特征。每次游戏的体验都不同，强调重复可玩性。",
+      "compatible_themes": ["FAN", "SCI", "HOR", "MYT", "APO", "SPA", "DUN", "CYP"],
+      "base_score_bonus": 0,
+      "tips": "地牢和奇幻主题是Roguelike的经典搭配。程序生成组件（roguelike_gen）可以大幅提升重玩价值。"
+    },
+    {
+      "id": "VNA",
+      "name": "视觉小说",
+      "description": "以文字叙事为主，配合角色立绘、背景CG和音乐来讲述故事。玩家的选择会影响剧情走向和结局。",
+      "compatible_themes": ["LOV", "SCH", "MYS", "MOD", "HIS", "FAN", "HOR", "COM", "VIC", "SCI"],
+      "base_score_bonus": 5,
+      "tips": "恋爱和校园主题最受欢迎。需要扎实的2D渲染能力来呈现精美立绘。分支剧情组件能极大提升内容深度。"
+    },
+    {
+      "id": "PZL",
+      "name": "解谜",
+      "description": "玩家通过逻辑推理、模式识别和空间思维解决各类谜题。从小型脑力挑战到大型机关解密。",
+      "compatible_themes": ["COM", "MOD", "MYS", "SCH", "FAN", "SCI", "LOV", "DUN", "MYT"],
+      "base_score_bonus": 5,
+      "tips": "喜剧和悬疑主题能增强解谜的趣味性。谜题设计是游戏品质的核心。"
+    },
+    {
+      "id": "PTY",
+      "name": "派对",
+      "description": "多人同乐的游戏类型，包含丰富的小游戏合集，适合朋友或家人聚会时共同游玩。上手简单、氛围欢乐。",
+      "compatible_themes": ["COM", "MOD", "SCH", "WOR", "FAN", "NIN", "PIR", "SPA", "LOV"],
+      "base_score_bonus": 5,
+      "tips": "喜剧和校园主题与派对游戏天生一对。无需复杂科技支撑，适合早期工作室试水。"
+    },
+    {
+      "id": "TOW",
+      "name": "塔防",
+      "description": "玩家在固定路线上建造防御塔来阻止敌人到达终点。需要策略性地选择塔的类型和位置来应对不同敌人。",
+      "compatible_themes": ["WAR", "FAN", "SCI", "APO", "HIS", "DUN", "CYP", "SPA", "MYT", "STE"],
+      "base_score_bonus": 0,
+      "tips": "战争和奇幻主题的塔防最受欢迎。AI寻路算法对本类型有直接帮助。"
+    },
+    {
+      "id": "SUR",
+      "name": "生存",
+      "description": "玩家在恶劣环境中收集资源、建造庇护所、对抗危险来维持生存。资源管理和危机应对是核心。",
+      "compatible_themes": ["APO", "DEE", "HOR", "DUN", "SPA", "PIR", "WAR", "HIS", "MOD", "WES"],
+      "base_score_bonus": 0,
+      "tips": "末日和深海主题的生存体验最为沉浸。需要强大的AI和物理系统来模拟野生动物和自然环境。"
+    },
+    {
+      "id": "CIN",
+      "name": "互动电影",
+      "description": "电影化的叙事体验，玩家通过关键选择影响故事走向。高品质的演出、镜头语言和音乐是核心卖点。",
+      "compatible_themes": ["MYS", "MOD", "LOV", "HOR", "CYP", "SCI", "APO", "HIS", "WES", "DEE", "VIC"],
+      "base_score_bonus": 5,
+      "tips": "悬疑和现代主题最能发挥互动电影的优势。需要强大的2D/3D渲染能力来呈现电影级画面。"
+    }
+  ],
+  "theme_guide": [
+    {
+      "id": "FAN",
+      "name": "奇幻",
+      "description": "以魔法、剑与魔法、龙、精灵、矮人等经典奇幻元素为背景的世界。无限想象力，受众最广的主题之一。",
+      "compatible_genres": ["RPG", "ACT", "AVG", "FTG", "MOBA", "MMO", "ROG", "TOW", "SAN", "RTS"]
+    },
+    {
+      "id": "SCI",
+      "name": "科幻",
+      "description": "以未来科技、外星文明、人工智能、太空探索等为核心。探索科技发展对人类社会的深远影响。",
+      "compatible_genres": ["RPG", "ACT", "FPS", "MOBA", "MMO", "RTS", "ROG", "TOW", "SAN", "SIM"]
+    },
+    {
+      "id": "MOD",
+      "name": "现代",
+      "description": "以当代现实世界为背景，贴近日常生活。适用于各类模拟和体育游戏，代入感强。",
+      "compatible_genres": ["FPS", "RAC", "SIM", "SPO", "MUS", "PTY", "SAN", "PZL", "SUR", "CIN", "HOR"]
+    },
+    {
+      "id": "HIS",
+      "name": "历史",
+      "description": "以真实历史时期为背景，从古代文明到近代战争。考据严谨的历史还原能带给玩家独特的教育和沉浸体验。",
+      "compatible_genres": ["RPG", "SLG", "RTS", "FTG", "SIM", "TOW", "SUR", "AVG", "VNA"]
+    },
+    {
+      "id": "APO",
+      "name": "末日",
+      "description": "文明毁灭后的废土世界，幸存者在废墟中挣扎求生。荒凉、残酷但也充满希望。",
+      "compatible_genres": ["ACT", "FPS", "SUR", "HOR", "TOW", "ROG", "SAN", "RPG", "RAC"]
+    },
+    {
+      "id": "CYP",
+      "name": "赛博朋克",
+      "description": "高科技低生活的反乌托邦未来。霓虹灯下的黑暗都市、义体改造、黑客文化与巨型企业的统治。",
+      "compatible_genres": ["ACT", "FPS", "RAC", "FTG", "MOBA", "MMO", "HOR", "CIN", "SLG", "RPG", "SAN"]
+    },
+    {
+      "id": "STE",
+      "name": "蒸汽朋克",
+      "description": "以蒸汽动力为核心的架空维多利亚时代。齿轮、铜管、护目镜和飞艇，复古与科幻的浪漫结合。",
+      "compatible_genres": ["RPG", "ACT", "FPS", "SLG", "SAN", "TOW", "MMO", "SUR", "CIN", "VNA"]
+    },
+    {
+      "id": "HOR",
+      "name": "恐怖",
+      "description": "以恐惧为核心体验的主题，包含超自然现象、怪物、心理恐怖等元素。追求刺激和紧张感。",
+      "compatible_genres": ["HOR", "ROG", "SUR", "AVG", "CIN", "FPS", "MUS"]
+    },
+    {
+      "id": "COM",
+      "name": "喜剧",
+      "description": "以幽默诙谐为核心，包含搞笑情节、夸张角色和无厘头对白。轻松愉快的游戏体验。",
+      "compatible_genres": ["PTY", "MUS", "PZL", "SPO", "AVG", "VNA", "SIM", "RAC"]
+    },
+    {
+      "id": "LOV",
+      "name": "恋爱",
+      "description": "以浪漫关系为核心，玩家通过互动培养与角色的感情。甜蜜、温馨的情感体验。",
+      "compatible_genres": ["VNA", "AVG", "MUS", "CIN", "SIM", "PZL", "RPG"]
+    },
+    {
+      "id": "WAR",
+      "name": "战争",
+      "description": "以军事冲突为核心，涵盖古代战争到现代战役。战术、策略和爱国主义情怀交织。",
+      "compatible_genres": ["SLG", "RTS", "FPS", "TOW", "SUR", "ACT", "RPG", "HIS"]
+    },
+    {
+      "id": "MYS",
+      "name": "悬疑",
+      "description": "以谜团、侦探调查和心理博弈为核心。玩家通过收集线索、推理分析揭开真相。",
+      "compatible_genres": ["CIN", "HOR", "AVG", "VNA", "PZL", "RPG", "MUS", "ACT", "TOW"]
+    },
+    {
+      "id": "SCH",
+      "name": "校园",
+      "description": "以学校生活为背景，包含青春、友情、社团活动和学业挑战。轻松温馨的日常氛围。",
+      "compatible_genres": ["VNA", "AVG", "SPO", "PTY", "MUS", "PZL", "SIM", "SUR", "ACT"]
+    },
+    {
+      "id": "MYT",
+      "name": "神话",
+      "description": "以世界各地神话传说为基础，神祇、英雄、怪物和史诗故事。深厚的文化底蕴和壮丽的幻想世界。",
+      "compatible_genres": ["RPG", "ACT", "FTG", "MOBA", "MMO", "ROG", "TOW", "AVG", "SLG", "PZL"]
+    },
+    {
+      "id": "WES",
+      "name": "西部",
+      "description": "以美国西部拓荒时代为背景，牛仔、左轮手枪、赏金猎人和荒漠小镇。粗犷自由的浪漫主义。",
+      "compatible_genres": ["ACT", "FPS", "SUR", "AVG", "CIN", "RPG", "PTY", "SLG", "TOW"]
+    },
+    {
+      "id": "SPA",
+      "name": "太空",
+      "description": "以宇宙空间为舞台，星际旅行、外星文明、太空站和星系战争。无垠的浩瀚和探索未知的浪漫。",
+      "compatible_genres": ["SCI", "SAN", "MMO", "SLG", "SUR", "FPS", "RAC", "TOW", "ROG", "ACT"]
+    },
+    {
+      "id": "NIN",
+      "name": "忍者",
+      "description": "以日本忍者文化为核心，潜行、暗杀、手里剑和武士刀。神秘而优雅的东方武艺。",
+      "compatible_genres": ["ACT", "FTG", "PTY", "SLG", "TOW", "RPG", "FPS"]
+    },
+    {
+      "id": "PIR",
+      "name": "海盗",
+      "description": "以加勒比海盗黄金时代为背景，航海、劫掠、宝藏和朗姆酒。自由不羁的海上冒险。",
+      "compatible_genres": ["ACT", "SUR", "TOW", "PTY", "AVG", "RPG", "FTG", "SAN"]
+    },
+    {
+      "id": "VIC",
+      "name": "维多利亚",
+      "description": "以19世纪维多利亚时代为背景，工业革命、严谨社会礼仪和哥特式美学。优雅与阴暗并存。",
+      "compatible_genres": ["AVG", "VNA", "CIN", "HOR", "SIM", "SLG", "RPG", "ACT"]
+    },
+    {
+      "id": "DEE",
+      "name": "深海",
+      "description": "以深海世界为舞台，神秘的海底生物、沉船遗迹和水压危机。未知而压抑的深渊探险。",
+      "compatible_genres": ["SUR", "HOR", "CIN", "AVG", "RPG", "SAN", "TOW", "FTG"]
+    },
+    {
+      "id": "DUN",
+      "name": "地牢",
+      "description": "以迷宫般的地下城为核心，怪物、陷阱、宝藏和未知的危险。经典的地下探险体验。",
+      "compatible_genres": ["ROG", "RPG", "ACT", "TOW", "SUR", "HOR", "PZL", "AVG", "FTG"]
+    },
+    {
+      "id": "WOR",
+      "name": "职场",
+      "description": "以现代职场生活为背景，办公室政治、项目管理和职业发展。真实的职场生态模拟。",
+      "compatible_genres": ["SIM", "PTY", "AVG", "VNA", "PZL", "SAN", "CIN"]
+    }
+  ],
+  "tech_tree": [
+    {"id":"save_system","name":"存档机制","branch":"ProgramBase","level":0,"required_months":5,"prerequisites":"","primary_skill":"Program","primary_skill_level":1,"description":"基础存档/读档","effect":"RPG/AVG必备，无则评分-20"},
+    {"id":"memory_v1","name":"内存管理 V1","branch":"ProgramBase","level":1,"required_months":8,"prerequisites":"","primary_skill":"Program","primary_skill_level":1,"description":"基础内存管理","effect":"稳定性+10%，BUG率-5%"},
+    {"id":"memory_v2","name":"内存管理 V2","branch":"ProgramBase","level":2,"required_months":20,"prerequisites":"memory_v1","primary_skill":"Program","primary_skill_level":2,"description":"高级内存调度","effect":"稳定性+15%，支持开放世界"},
+    {"id":"physics_v1","name":"物理引擎 V1","branch":"ProgramBase","level":1,"required_months":15,"prerequisites":"","primary_skill":"Program","primary_skill_level":2,"description":"刚体碰撞检测","effect":"ACT/赛车基础"},
+    {"id":"physics_v2","name":"物理引擎 V2","branch":"ProgramBase","level":2,"required_months":40,"prerequisites":"physics_v1","primary_skill":"Program","primary_skill_level":3,"description":"布料/流体模拟","effect":"画面真实感+10"},
+    {"id":"multithread","name":"多线程优化","branch":"ProgramBase","level":1,"required_months":25,"prerequisites":"memory_v2","primary_skill":"Program","primary_skill_level":3,"description":"多核CPU利用","effect":"开发速度+20%"},
+    {"id":"2d_v1","name":"2D渲染 V1","branch":"Render2D","level":1,"required_months":0,"prerequisites":"","primary_skill":"Art","primary_skill_level":1,"description":"像素风格（开局自带）","effect":"支持像素风"},
+    {"id":"2d_v2","name":"2D渲染 V2","branch":"Render2D","level":2,"required_months":8,"prerequisites":"2d_v1","primary_skill":"Art","primary_skill_level":2,"secondary_skill":"Program","secondary_skill_level":1,"description":"高清立绘渲染","effect":"2D画面属性上限+15"},
+    {"id":"2d_v3","name":"2D渲染 V3","branch":"Render2D","level":3,"required_months":20,"prerequisites":"2d_v2","primary_skill":"Art","primary_skill_level":3,"secondary_skill":"Program","secondary_skill_level":2,"description":"骨骼动画系统","effect":"2D开发速度+25%，动态角色"},
+    {"id":"2d_v4","name":"2D渲染 V4","branch":"Render2D","level":4,"required_months":45,"prerequisites":"2d_v3","primary_skill":"Art","primary_skill_level":4,"secondary_skill":"Program","secondary_skill_level":3,"description":"4K/粒子特效","effect":"画面上限+15，速度+30%"},
+    {"id":"2d_v5","name":"2D渲染 V5","branch":"Render2D","level":5,"required_months":100,"prerequisites":"2d_v4","primary_skill":"Art","primary_skill_level":5,"secondary_skill":"Program","secondary_skill_level":3,"description":"极致手绘模拟","effect":"2D封神，速度+100%，画面可满分"},
+    {"id":"3d_v1","name":"3D渲染 V1","branch":"Render3D","level":1,"required_months":20,"prerequisites":"2d_v2","primary_skill":"Program","primary_skill_level":2,"secondary_skill":"Art","secondary_skill_level":2,"description":"低模/无光照3D","effect":"支持低多边形3D"},
+    {"id":"3d_v2","name":"3D渲染 V2","branch":"Render3D","level":2,"required_months":50,"prerequisites":"3d_v1","primary_skill":"Program","primary_skill_level":3,"secondary_skill":"Art","secondary_skill_level":3,"description":"标准/光栅化","effect":"PS2~PS3级别3D"},
+    {"id":"3d_v3","name":"3D渲染 V3","branch":"Render3D","level":3,"required_months":120,"prerequisites":"3d_v2","primary_skill":"Program","primary_skill_level":4,"secondary_skill":"Art","secondary_skill_level":4,"description":"PBR/全局光照","effect":"光追，次世代画面"},
+    {"id":"3d_v4","name":"3D渲染 V4","branch":"Render3D","level":4,"required_months":240,"prerequisites":"3d_v3","primary_skill":"Program","primary_skill_level":5,"secondary_skill":"Art","secondary_skill_level":5,"description":"实时路径追踪","effect":"电影级渲染，画面可冲100分"},
+    {"id":"daynight","name":"昼夜更替","branch":"Render3D","level":1,"required_months":15,"prerequisites":"3d_v1","primary_skill":"Program","primary_skill_level":2,"secondary_skill":"Art","secondary_skill_level":1,"description":"昼夜循环系统","effect":"开放世界沉浸感+15"},
+    {"id":"volumetric","name":"体积云/雾","branch":"Render3D","level":1,"required_months":25,"prerequisites":"3d_v2","primary_skill":"Art","primary_skill_level":3,"description":"体积雾渲染","effect":"场景氛围+10"},
+    {"id":"audio_v1","name":"音效库 V1","branch":"Audio","level":1,"required_months":4,"prerequisites":"","primary_skill":"Audio","primary_skill_level":1,"description":"基础音效","effect":"有声音，不出戏"},
+    {"id":"audio_v2","name":"音效库 V2","branch":"Audio","level":2,"required_months":12,"prerequisites":"audio_v1","primary_skill":"Audio","primary_skill_level":2,"description":"拟真音效","effect":"音效品质+20"},
+    {"id":"dynamic_music","name":"动态配乐","branch":"Audio","level":1,"required_months":18,"prerequisites":"audio_v2","primary_skill":"Audio","primary_skill_level":3,"secondary_skill":"Program","secondary_skill_level":1,"description":"战斗/探索无缝配乐","effect":"音乐评分+15"},
+    {"id":"spatial_audio","name":"3D空间音效","branch":"Audio","level":1,"required_months":22,"prerequisites":"3d_v1","primary_skill":"Audio","primary_skill_level":3,"secondary_skill":"Program","secondary_skill_level":2,"description":"3D定位音效","effect":"FPS/恐怖沉浸感+20"},
+    {"id":"net_v1","name":"网络联机 V1","branch":"Network","level":1,"required_months":25,"prerequisites":"save_system","primary_skill":"Network","primary_skill_level":2,"secondary_skill":"Program","secondary_skill_level":1,"description":"P2P双人联机","effect":"支持双人联机"},
+    {"id":"net_v2","name":"网络联机 V2","branch":"Network","level":2,"required_months":60,"prerequisites":"net_v1","primary_skill":"Network","primary_skill_level":3,"secondary_skill":"Program","secondary_skill_level":2,"description":"C/S 32人对战","effect":"小型服务器对战"},
+    {"id":"net_v3","name":"网络联机 V3","branch":"Network","level":3,"required_months":150,"prerequisites":"net_v2","primary_skill":"Network","primary_skill_level":4,"secondary_skill":"Program","secondary_skill_level":4,"description":"MMO千人同服","effect":"大型多人在线，运营前提"},
+    {"id":"frame_sync","name":"断线重连/帧同步","branch":"Network","level":1,"required_months":30,"prerequisites":"net_v2","primary_skill":"Network","primary_skill_level":3,"description":"帧同步系统","effect":"格斗/MOBA必备，否则差评"},
+    {"id":"cloud_save","name":"云存档","branch":"Network","level":1,"required_months":15,"prerequisites":"net_v1","primary_skill":"Network","primary_skill_level":2,"secondary_skill":"Program","secondary_skill_level":1,"description":"云端存档","effect":"跨平台存档，粘性+10%"},
+    {"id":"ai_v1","name":"AI行为树 V1","branch":"AI","level":1,"required_months":30,"prerequisites":"","primary_skill":"AI","primary_skill_level":2,"secondary_skill":"Program","secondary_skill_level":2,"description":"基础巡逻/攻击","effect":"NPC有简单逻辑"},
+    {"id":"ai_v2","name":"AI行为树 V2","branch":"AI","level":2,"required_months":70,"prerequisites":"ai_v1","primary_skill":"AI","primary_skill_level":3,"secondary_skill":"Program","secondary_skill_level":3,"description":"复杂决策AI","effect":"NPC战术配合，SLG/RPG+20"},
+    {"id":"pathfinding","name":"寻路算法","branch":"AI","level":1,"required_months":15,"prerequisites":"","primary_skill":"AI","primary_skill_level":1,"secondary_skill":"Program","secondary_skill_level":1,"description":"自动寻路","effect":"RTS/开放世界必备"},
+    {"id":"ml_ai","name":"机器学习AI","branch":"AI","level":1,"required_months":200,"prerequisites":"ai_v2|multithread","primary_skill":"AI","primary_skill_level":5,"secondary_skill":"Network","secondary_skill_level":3,"description":"NPC学习玩家习惯","effect":"动态难度，封神级体验"},
+    {"id":"gen_story","name":"生成式剧情","branch":"AI","level":1,"required_months":120,"prerequisites":"save_system","primary_skill":"AI","primary_skill_level":4,"secondary_skill":"Program","secondary_skill_level":3,"description":"自动生成支线","effect":"开放世界独创性+25"},
+    {"id":"cross_v1","name":"跨平台移植 V1","branch":"Platform","level":1,"required_months":30,"prerequisites":"","primary_skill":"Program","primary_skill_level":3,"description":"PC→主机移植","effect":"可多平台发售，销量×1.2"},
+    {"id":"cross_v2","name":"跨平台移植 V2","branch":"Platform","level":2,"required_months":80,"prerequisites":"cross_v1","primary_skill":"Program","primary_skill_level":4,"secondary_skill":"Network","secondary_skill_level":2,"description":"全平台同步","effect":"PC/主机/手机同步，销量×1.5"},
+    {"id":"hardware_design","name":"自有主机硬件设计","branch":"Platform","level":1,"required_months":200,"prerequisites":"","primary_skill":"Program","primary_skill_level":5,"secondary_skill":"Art","secondary_skill_level":3,"description":"主机硬件设计","effect":"解锁终极项目（需硬件工程师员工）"},
+    {"id":"console_os","name":"主机操作系统","branch":"Platform","level":1,"required_months":100,"prerequisites":"hardware_design","primary_skill":"Program","primary_skill_level":4,"secondary_skill":"Network","secondary_skill_level":3,"description":"主机系统","effect":"商城/好友系统"},
+    {"id":"sdk","name":"开发套件SDK","branch":"Platform","level":1,"required_months":80,"prerequisites":"console_os","primary_skill":"Program","primary_skill_level":4,"description":"第三方SDK","effect":"可向第三方售卖开发机"},
+    {"id":"genre_rac","name":"赛车游戏类型","branch":"GenreUnlock","level":1,"required_months":8,"prerequisites":"","primary_skill":"Program","primary_skill_level":1,"secondary_skill":"Art","secondary_skill_level":1,"description":"解锁赛车游戏","effect":"解锁赛车类型"},
+    {"id":"genre_sim","name":"模拟游戏类型","branch":"GenreUnlock","level":1,"required_months":12,"prerequisites":"","primary_skill":"Program","primary_skill_level":2,"secondary_skill":"AI","secondary_skill_level":1,"description":"解锁模拟游戏","effect":"解锁模拟类型"},
+    {"id":"genre_spo","name":"体育游戏类型","branch":"GenreUnlock","level":1,"required_months":10,"prerequisites":"","primary_skill":"Program","primary_skill_level":2,"secondary_skill":"Art","secondary_skill_level":1,"description":"解锁体育游戏","effect":"解锁体育类型"},
+    {"id":"genre_mus","name":"音乐游戏类型","branch":"GenreUnlock","level":1,"required_months":8,"prerequisites":"","primary_skill":"Audio","primary_skill_level":2,"secondary_skill":"Program","secondary_skill_level":1,"description":"解锁音乐游戏","effect":"解锁音乐类型"},
+    {"id":"genre_ftg","name":"格斗游戏类型","branch":"GenreUnlock","level":1,"required_months":12,"prerequisites":"","primary_skill":"Program","primary_skill_level":2,"description":"解锁格斗游戏","effect":"解锁格斗类型"},
+    {"id":"genre_moba","name":"MOBA游戏类型","branch":"GenreUnlock","level":1,"required_months":25,"prerequisites":"net_v1","primary_skill":"Network","primary_skill_level":2,"secondary_skill":"Program","secondary_skill_level":2,"description":"解锁MOBA","effect":"解锁多人在线类型"},
+    {"id":"genre_mmo","name":"MMO游戏类型","branch":"GenreUnlock","level":1,"required_months":30,"prerequisites":"net_v2","primary_skill":"Network","primary_skill_level":2,"secondary_skill":"Program","secondary_skill_level":2,"description":"解锁MMO","effect":"解锁大型MMO类型"},
+    {"id":"genre_rts","name":"RTS游戏类型","branch":"GenreUnlock","level":1,"required_months":15,"prerequisites":"ai_v1","primary_skill":"AI","primary_skill_level":2,"secondary_skill":"Program","secondary_skill_level":1,"description":"解锁即时战略","effect":"解锁即时战略类型"},
+    {"id":"genre_hor","name":"恐怖游戏类型","branch":"GenreUnlock","level":1,"required_months":10,"prerequisites":"","primary_skill":"Audio","primary_skill_level":2,"secondary_skill":"Art","secondary_skill_level":1,"description":"解锁恐怖游戏","effect":"解锁恐怖类型"},
+    {"id":"genre_san","name":"沙盒游戏类型","branch":"GenreUnlock","level":1,"required_months":20,"prerequisites":"memory_v2","primary_skill":"Program","primary_skill_level":3,"secondary_skill":"AI","secondary_skill_level":2,"description":"解锁沙盒游戏","effect":"解锁沙盒类型"},
+    {"id":"genre_rog","name":"Roguelike类型","branch":"GenreUnlock","level":1,"required_months":15,"prerequisites":"pathfinding","primary_skill":"Program","primary_skill_level":2,"secondary_skill":"AI","secondary_skill_level":1,"description":"解锁Roguelike","effect":"解锁Roguelike类型"},
+    {"id":"genre_vis","name":"视觉小说类型","branch":"GenreUnlock","level":1,"required_months":5,"prerequisites":"","primary_skill":"Art","primary_skill_level":1,"description":"解锁视觉小说","effect":"解锁视觉小说类型"},
+    {"id":"genre_pzl","name":"解谜游戏类型","branch":"GenreUnlock","level":1,"required_months":8,"prerequisites":"","primary_skill":"Program","primary_skill_level":1,"secondary_skill":"Art","secondary_skill_level":1,"description":"解锁解谜游戏","effect":"解锁解谜类型"},
+    {"id":"theme_cyber","name":"赛博朋克主题","branch":"ThemeUnlock","level":1,"required_months":10,"prerequisites":"","primary_skill":"Art","primary_skill_level":2,"secondary_skill":"Program","secondary_skill_level":1,"description":"解锁赛博朋克","effect":"解锁赛博朋克主题"},
+    {"id":"theme_steam","name":"蒸汽朋克主题","branch":"ThemeUnlock","level":1,"required_months":10,"prerequisites":"","primary_skill":"Art","primary_skill_level":2,"secondary_skill":"Program","secondary_skill_level":1,"description":"解锁蒸汽朋克","effect":"解锁蒸汽朋克主题"},
+    {"id":"theme_horror","name":"恐怖主题","branch":"ThemeUnlock","level":1,"required_months":12,"prerequisites":"","primary_skill":"Audio","primary_skill_level":2,"secondary_skill":"Art","secondary_skill_level":1,"description":"解锁恐怖主题","effect":"解锁恐怖主题"},
+    {"id":"theme_comedy","name":"喜剧主题","branch":"ThemeUnlock","level":1,"required_months":8,"prerequisites":"","primary_skill":"Art","primary_skill_level":1,"description":"解锁喜剧主题","effect":"解锁喜剧主题"},
+    {"id":"theme_romance","name":"恋爱主题","branch":"ThemeUnlock","level":1,"required_months":8,"prerequisites":"","primary_skill":"Art","primary_skill_level":1,"description":"解锁恋爱主题","effect":"解锁恋爱主题"},
+    {"id":"theme_war","name":"战争主题","branch":"ThemeUnlock","level":1,"required_months":15,"prerequisites":"","primary_skill":"Program","primary_skill_level":2,"secondary_skill":"AI","secondary_skill_level":2,"description":"解锁战争主题","effect":"解锁战争主题"},
+    {"id":"theme_mystery","name":"悬疑主题","branch":"ThemeUnlock","level":1,"required_months":12,"prerequisites":"","primary_skill":"Art","primary_skill_level":2,"secondary_skill":"Audio","secondary_skill_level":1,"description":"解锁悬疑主题","effect":"解锁悬疑主题"},
+    {"id":"theme_school","name":"校园主题","branch":"ThemeUnlock","level":1,"required_months":8,"prerequisites":"","primary_skill":"Art","primary_skill_level":1,"description":"解锁校园主题","effect":"解锁校园主题"},
+    {"id":"theme_myth","name":"神话主题","branch":"ThemeUnlock","level":1,"required_months":12,"prerequisites":"","primary_skill":"Art","primary_skill_level":2,"description":"解锁神话主题","effect":"解锁神话主题"},
+    {"id":"theme_western","name":"西部主题","branch":"ThemeUnlock","level":1,"required_months":10,"prerequisites":"","primary_skill":"Art","primary_skill_level":2,"secondary_skill":"Audio","secondary_skill_level":1,"description":"解锁西部主题","effect":"解锁西部主题"},
+    {"id":"theme_space","name":"太空主题","branch":"ThemeUnlock","level":1,"required_months":15,"prerequisites":"3d_v1","primary_skill":"Art","primary_skill_level":2,"secondary_skill":"Program","secondary_skill_level":2,"description":"解锁太空主题","effect":"解锁太空主题"}
+  ],
+  "mechanics": {
+    "development_flow": {
+      "title": "开发流程",
+      "sections": [
+        {"heading": "项目立项", "content": "选择游戏名称、类型、主题和目标平台。系统会根据类型×主题组合计算契合度（0~1），契合度≥0.8为优秀，<0.4将导致开发时间+60%。"},
+        {"heading": "规划阶段", "content": "分配团队到项目，选择宣发策略和售价。可装配游戏组件来增强特定属性，但每个额外组件会增加开发复杂度。"},
+        {"heading": "开发阶段", "content": "团队按六大模块（核心玩法、视觉表现、听觉设计、剧情文案、程序稳定性、线上服务）推进开发。每月根据团队技能和属性分配获得进度。可调整资源分配比例（画面/音效/玩法）。"},
+        {"heading": "打磨阶段", "content": "选择打磨策略（标准/深度/极致），消耗额外时间提升品质。修复BUG，优化性能。技术债务会在本阶段产生利息。"},
+        {"heading": "测试阶段", "content": "QA测试发现BUG并修复。测试报告将评估游戏稳定性。高BUG数量会影响最终评分和销量。"},
+        {"heading": "宣发冲刺", "content": "发售前3~5个月的宣发期，投入市场预算提升期待值。期待值与实际评分的差距过大会导致玩家信任度下降和销量惩罚。"},
+        {"heading": "发售与运营", "content": "游戏正式上市后进入长尾销售期。可发布后续内容（补丁、DLC、资料片、续作）延长产品生命周期。"}
+      ]
+    },
+    "employee_system": {
+      "title": "员工系统",
+      "sections": [
+        {"heading": "技能体系", "content": "员工拥有五大技能：程序(Program)、美术(Art)、音频(Audio)、网络(Network)、AI。每项技能0~5级，等级越高开发效率越高。员工的综合能力由五项技能加权计算，高等级员工能显著缩短项目周期。"},
+        {"heading": "员工特质", "content": "每位员工拥有一个独特特质，共12种：工作狂(疲劳积累减半)、天才(全技能+1)、完美主义(品质加成但速度降低)、社交达人(团队化学加成翻倍)、技术洁癖(自动减少技术债务)、玻璃心(高压下效率骤降)、导师(加速新人成长)、恋旧(满意度和工作室年限挂钩)等。特质对开发的影响不可忽视。"},
+        {"heading": "满意度与疲劳", "content": "员工每月产生疲劳，加班会加速疲劳积累。疲劳过高会降低效率和满意度。满意度影响员工去留——满意度低的员工容易被竞争对手挖走。可通过放假、调薪、改善办公环境来提升满意度。"},
+        {"heading": "心理健康与倦怠", "content": "长期高压工作会导致职业倦怠(Burnout)，分为四个阶段：轻度(效率-10%)、中度(效率-25%)、重度(可能旷工)、危机(可能主动离职)。倦怠严重时触发危机事件，玩家需选择处理方案。合理安排休息是避免倦怠的关键。"},
+        {"heading": "友谊与竞争", "content": "员工之间会自然形成友谊或竞争关系。友谊提升团队化学值(Team Chemistry)，提升协作效率。竞争关系虽然降低化学值，但能激发彼此成长加速。同项目组员工的长期共事会加深关系。"},
+        {"heading": "招聘与人才市场", "content": "每月可从人才市场招聘新员工。人才市场的候选人是随机刷新的，其技能等级和特质组合各不相同。公司声誉越高、开出薪资越优厚，越容易吸引高等级人才。招聘时注意查看候选人的特质和期望薪资。"},
+        {"heading": "培训与成长", "content": "员工通过参与项目实践积累经验，经验满后自动升级。拥有导师(Mentor)特质的员工能加速同组低等级员工的成长速度。也可以安排员工参加外部培训课程(消耗资金)来针对性提升技能。"},
+        {"heading": "团队组建与化学值", "content": "将员工分配到项目组形成团队，团队需指定一名队长。团队总技能决定开发效率，但化学值(Chemistry)同样重要——化学值高则产出额外效率加成，化学值低则产生效率惩罚。团队成员长期共事会提升化学值。"},
+        {"heading": "员工梦想与忠诚度", "content": "每位员工怀有个人梦想，如参与制作一款评分90+的杰作、成为团队负责人、开创自己的工作室等。实现员工梦想会大幅提升满意度和忠诚度，忠诚度高的员工更难被竞争对手挖走，且会主动拒绝挖角offer。"},
+        {"heading": "被挖角与流失", "content": "员工可能收到竞争对手的挖角offer。高满意度/高忠诚度的员工会自动拒绝。玩家也可以选择主动加薪留人，或放行让员工离开。被挖走的员工可能成为对手公司的一员，在战场上与你为敌。"}
+      ]
+    },
+    "economy_system": {
+      "title": "经济系统",
+      "sections": [
+        {"heading": "收入来源", "content": "主要收入包括：游戏销售收入、发行分成收入、引擎授权/订阅收入、DLC/资料片收入、衍生品/IP授权收入。游戏收入受评分、平台、宣发力度综合影响。"},
+        {"heading": "成本支出", "content": "主要支出包括：员工工资（月度最大开销）、办公室租金、宣发费用、科技研发费用、外包费用、平台授权费、贷款利息。"},
+        {"heading": "现金流管理", "content": "关注月度现金流（绿色/黄色/橙色/红色/黑色预警）。现金流断裂将触发危机事件。保持3~6个月的运营资金储备是稳健策略。"},
+        {"heading": "融资渠道", "content": "可从银行贷款（需信用评级）、寻求投资者/风投、众筹、IPO上市。不同融资方式对控制权和分红政策有不同影响。"},
+        {"heading": "经济周期", "content": "宏观经济会经历繁荣(Boom)、衰退(Recession)、萧条(Depression)、复苏(Recovery)四个阶段，影响游戏销量和市场环境。"}
+      ]
+    },
+    "market_system": {
+      "title": "市场系统",
+      "sections": [
+        {"heading": "游戏评分", "content": "最终评分由六大品质属性加权计算，受类型-主题契合度、科技加成、组件加成、打磨质量等多因素影响。评分等级：D<10, C<20, B<35, A<55, S<80, SS≥80。"},
+        {"heading": "销量计算", "content": "销量受评分、平台基数、宣发期待值、品牌力、价格、市场竞争等多因素综合影响。高评分游戏可获口碑加成。"},
+        {"heading": "市场竞争", "content": "AI竞争对手会同期开发类似类型/主题的游戏。竞争程度影响销量。可监测竞争对手动态调整策略。"},
+        {"heading": "市场趋势", "content": "游戏市场和玩家偏好会随时间变化。某些类型/主题会进入流行期获得销量加成。可通过市场报告观察趋势。"},
+        {"heading": "粉丝与品牌", "content": "每次成功发售会积累粉丝。粉丝数量影响后续游戏的首周销量。品牌力(BrandPower)基于累计评分的平均值。"}
+      ]
+    },
+    "tech_system": {
+      "title": "科技系统",
+      "sections": [
+        {"heading": "科技分支", "content": "科技树分为六大分支：程序基础(ProgramBase)、2D渲染(Render2D)、3D渲染(Render3D)、音频(Audio)、网络(Network)、AI。另有平台(Platform)、类型解锁(GenreUnlock)、主题解锁(ThemeUnlock)三个特殊分支。"},
+        {"heading": "研发机制", "content": "指派团队进行科技研发，消耗人月（Man-Months）推进。前置科技未完成时无法研发后续科技。支持多前置条件（用|分隔）。"},
+        {"heading": "效果加成", "content": "已研发科技会自动应用于新项目：提升品质属性（画面、玩法、音频等）、解锁新类型/主题、提升开发效率、解锁游戏组件。"},
+        {"heading": "科技等级", "content": "每个科技有等级（Level），高等级科技需要更高技能等级的员工参与研发。类型解锁和主题解锁科技多为1级，研发速度快。"},
+        {"heading": "研发策略", "content": "早期优先研发存档机制(save_system)、2D渲染V2(2d_v2)和基础音频。中期根据游戏方向选择3D/网络/AI分支。后期冲击顶级科技如实时路径追踪(3d_v4)和机器学习AI(ml_ai)。"}
+      ]
+    },
+    "founder_system": {
+      "title": "创始人系统",
+      "sections": [
+        {"heading": "创建创始人", "content": "游戏开始时，你需要创建你的创始人(Founder)。在6项技能(程序、美术、音频、网络、AI、运营)上分配初始点数，每项1~10，总点数为8+各项基础值。技能分配决定了你的初始开发能力和研发方向。"},
+        {"heading": "创始人特质", "content": "从6种创始人特质中选择一项：远见者(Visionary，品质上限+5)、技术专家(Technical，研发速度+15%)、商业精英(Business，收入+10%)、独立精神(Indie，小团队效率+20%)、冒险家(RiskTaker，高风险抉择收益提升)、均衡发展(Balanced，所有技能+1)。特质不可更改，将影响整局游戏。"},
+        {"heading": "创始人成长", "content": "创始人会随项目经验逐步提升技能等级，但不能通过常规培训提升。创始人参与项目时提供稳定的基础产出，且在团队中不会产生化学冲突。创始人不受被挖角机制影响。"},
+        {"heading": "创始人传承", "content": "当创始人退休或达到特定条件时，可以触发传承系统。你需要从现有员工中选拔继任者，继任者会继承部分创始人属性和工作室DNA加成。传承是游戏后期保持竞争力的关键机制。"}
+      ]
+    },
+    "design_canvas": {
+      "title": "设计画布系统",
+      "sections": [
+        {"heading": "设计决策树", "content": "在项目规划阶段，你可以进入设计画布(Design Canvas)进行一系列设计决策。包括：核心玩法设计(动作/回合/实时等)、战斗系统(明雷/暗雷/无战斗等)、视角选择(2D/3D/第一人称等)、美术风格(写实/卡通/像素等)。每项选择会影响游戏品质属性偏向。"},
+        {"heading": "创新值与受众", "content": "设计决策会产生创新(Innovation)分数和受众(Appeal)分数。创新值高的游戏更容易获得媒体关注和高分潜力，但也可能曲高和寡；受众值高的游戏更符合大众口味，销量更稳健。平衡两者是设计的关键。"},
+        {"heading": "决策组合", "content": "不同的决策组合会影响最终游戏的属性权重。例如选择动作核心+第一人称+写实风格会大幅提升画面和玩法评分上限，但可能牺牲剧情和音频空间。某些决策组合还会解锁隐藏的品质加成。"},
+        {"heading": "设计解锁", "content": "部分设计选项需要特定的科技研发或之前项目的经验积累才能解锁。例如需要3D渲染V1才能选择3D视角。已解锁的选项会在后续项目中持续可用，形成工作室的设计储备库。"}
+      ]
+    },
+    "components_system": {
+      "title": "游戏组件系统",
+      "sections": [
+        {"heading": "组件装配", "content": "在项目规划时，你可以为游戏装配组件(Component)。共有30+种组件，涵盖玩法(开放世界、技能树、分支剧情等)、技术(光线追踪、动态物理等)、内容(海量文本、配音叙事等)三大类。每个组件消耗一定的开发复杂度。"},
+        {"heading": "属性影响", "content": "每个组件会提升特定的品质属性。例如开放世界组件大幅提升玩法和画面得分，但增加程序复杂度；配音叙事组件提升音频和剧情得分，但需要音频技能的支撑。合理搭配组件是做出高品质游戏的关键。"},
+        {"heading": "协同效应", "content": "当装配的组件拥有相同标签(Tag)时，会触发协同效应(Synergy)。例如同时装配动态光照和光线追踪组件，触发灯光标签协同，额外提升画面得分。协同效应是高手玩家和普通玩家的分水岭。"},
+        {"heading": "复杂度管理", "content": "每个组件增加项目复杂度，复杂度越高，开发周期越长，BUG率越高。需要在组件数量和项目规模之间找到平衡。技术债务高时，增加组件会放大债务负面影响。"}
+      ]
+    },
+    "tech_debt_system": {
+      "title": "技术债务系统",
+      "sections": [
+        {"heading": "什么是技术债务", "content": "技术债务(Technical Debt)是项目中积累的隐含质量问题。赶进度、加组件、不使用科技树前置都会增加技术债务。债务分为4个等级：健康(<25)、警告(25~50)、危险(50~75)、危急(>75)。债务越高，BUG率越高、开发速度越慢。"},
+        {"heading": "996加班模式", "content": "你可以开启996加班模式来加快开发进度，但代价是每月的技术债务加速积累、员工疲劳倍增、满意度下降。996是把双刃剑——短期冲刺可以赶工期，但长期开启会导致员工倦怠甚至大规模离职。"},
+        {"heading": "重构与修复", "content": "你可以选择进行全量重构(Big Refactor)来大幅降低技术债务，但重构期间项目开发进度暂停。重构的效率和效果取决于团队中拥有技术洁癖(TechClean)特质的员工数量。小规模重构可以随时进行，减少债务但不暂停开发。"},
+        {"heading": "债务危机", "content": "当技术债务累积到90+时，可能触发债务危机事件——项目出现严重架构问题，导致部分进度回退、品质属性下降。债务达到100时，项目将直接崩溃，损失大量进度。保持健康的债务水平是项目成功的基石。"},
+        {"heading": "续作负债继承", "content": "开发续作时会继承前作的部分技术债务。但继承比例受代码复用率影响——使用代码复用机制可以降低继债务继承比例，节省开发时间，但也可能因为遗留代码产生新的债务。"}
+      ]
+    },
+    "post_release_system": {
+      "title": "发售后运营系统",
+      "sections": [
+        {"heading": "发售后内容类型", "content": "游戏发售后可以制作多种后续内容：BUG修复补丁(快速恢复口碑)、内容更新(增加新功能/关卡)、皮肤DLC(低成本创收)、资料片/扩展包(中型内容扩充)、重制版(画面升级+重新发售)、移植(拓展新平台)、续作(全新项目但有前作品牌加成)、Mod工具包(激活玩家社区创造力)。"},
+        {"heading": "内容规划策略", "content": "不同类型的内容有不同的性价比。BUG修复补丁投入小但能显著提升口碑；资料片能带动一波销量回升但开发周期长；Mod工具包本身不直接创收但能延长游戏生命周期。建议发售后先出1~2个补丁稳定口碑，再根据销售情况决定后续投入。"},
+        {"heading": "续作机制", "content": "续作可以继承前作的部分粉丝、品牌力和玩家期待值。开发续作时可以选择代码复用比例——复用越高开发越快但技术债务继承越多。续作的最终评分受前作品质影响：前作评分越高，玩家对续作的期待越苛刻，续作需要更高的品质才能获得好评。"},
+        {"heading": "长尾销售", "content": "游戏发售后不会一次性下架，而是进入长尾销售期。每月销量递减，但通过后续内容更新、打折促销、直播效应等可以制造销量反弹。高品质游戏的销售生命周期可达数年。"}
+      ]
+    },
+    "engine_business_system": {
+      "title": "引擎商业化系统",
+      "sections": [
+        {"heading": "引擎研发", "content": "你的工作室拥有一款自研引擎，引擎等级和内置Perk由已研发的科技决定。引擎可以升级，升级需要团队投入研发时间。引擎等级影响游戏品质上限和开发效率。"},
+        {"heading": "商业模式选择", "content": "5种商业模式可选：闭源独占(Closed，仅供自用，无外部收入)、开源(OpenSource，免费公开，社区贡献提升引擎等级)、买断(Buyout，一次性出售引擎使用权获取大笔收入)、订阅(Subscription，按月收取授权费，稳定现金流)、分成(Royalty，免费使用但在游戏销售中抽成)。"},
+        {"heading": "市场占有率", "content": "引擎的市场占有率会影响第三方开发者的选择偏好，也会影响你的品牌号召力。高市占率的引擎可以吸引更多外部开发者使用，进而通过授权费获得持续收入。市占率受引擎品质和商业模式共同影响。"},
+        {"heading": "引擎Perk系统", "content": "已研发的科技会自动转化为引擎Perk（如多线程渲染、物理引擎、网络中间件等）。这些Perk会直接加成到使用该引擎开发的游戏中。引擎Perk的质量和数量是吸引第三方开发者的核心竞争力。"}
+      ]
+    },
+    "competitor_system": {
+      "title": "竞争对手系统",
+      "sections": [
+        {"heading": "AI工作室", "content": "市场中存在多家AI控制的竞争对手工作室，它们有自己的资金、声誉、科技等级、员工团队和粉丝基础。对手公司会独立立项、研发、发布游戏，与你争夺市场份额。随着年份推移，对手的数量和实力会逐步增长。"},
+        {"heading": "对手策略", "content": "AI对手有4种行为策略：均衡型(Balanced，全面稳健发展)、激进型(Aggressive，会在你发布同期狙击同类型游戏)、模仿型(Copycat，模仿你高分游戏的类型/主题组合)、利基型(NicheHunter，专攻冷门类型主题组合，避免直接竞争)。你可以通过市场报告观察对手的策略倾向。"},
+        {"heading": "员工挖角", "content": "对手公司可能会向你公司的员工发出挖角offer。员工是否接受取决于满意度、忠诚度和对手出价。你也可以主动挖角对手公司的员工，但挖角需要消耗资金，且成功率受对方员工满意度和你的公司声誉影响。挖角会降低与对手公司的关系。"},
+        {"heading": "市场竞争影响", "content": "当多款同类型/同主题游戏在同一时期发售时，市场会被稀释，每款游戏的销量都会受到影响。对手的高分游戏还会抬高玩家对同类游戏的品质预期。你可以通过错开发售档期、选择差异化类型来规避激烈的正面竞争。"},
+        {"heading": "市场新闻动态", "content": "每月会生成市场新闻动态，报道各工作室的动态（新项目立项、游戏发售、员工变动、财务危机等）。关注新闻可以让你了解市场变化、预判对手动向。新闻内容受市场情绪影响——牛市时乐观新闻多，熊市时负面新闻频发。"}
+      ]
+    },
+    "fan_community_system": {
+      "title": "粉丝与社区系统",
+      "sections": [
+        {"heading": "双轨粉丝体系", "content": "粉丝分为两类：路人粉(Casual)和铁粉(Diehard)。路人粉可以被营销活动吸引，但容易流失；铁粉需要通过高品质游戏和长期品牌积累来培养，但忠诚度极高。铁粉会自动购买你的新游戏（称为保底销量），且在新游戏评分不高时会主动维护口碑。"},
+        {"heading": "粉丝积累与流失", "content": "每次游戏发售会吸引新粉丝，增加的粉丝数量与游戏评分和销量正相关。每月有一定比例的自然流失率。粉丝总量影响新游戏的初始关注度和首周销量。举办粉丝嘉年华活动可以短期内大幅增加粉丝。"},
+        {"heading": "品牌力与忠实信徒", "content": "品牌力(BrandPower)基于你所有已发售游戏的平均评分。品牌力越高，铁粉转化率越高。当铁粉占比超过总粉丝的一定比例时，触发忠实信徒(FaithBonus)机制——即使新游戏评分不佳，铁粉也会用好评对冲部分差评影响。"},
+        {"heading": "社区互动", "content": "玩家社区会通过社交媒体发声。发售高评分游戏时社区欢呼、发售低评分游戏时社区抗议、跳票时社区不满、过多DLC时社区抱怨。社区情绪会影响中间玩家(路转粉/粉转黑)的转化率。认真对待社区反馈，但也不必被社区意见完全左右。"},
+        {"heading": "粉丝请愿", "content": "粉丝社区偶尔会发起请愿活动，如要求重制经典游戏、制作特定类型的续作、加入多人模式等。回应请愿可以大幅提升粉丝满意度，但也可能打乱你的开发计划。拒绝请愿会降低满意度但为你保留了开发自主权。"}
+      ]
+    },
+    "office_room_system": {
+      "title": "办公室与房间系统",
+      "sections": [
+        {"heading": "办公室等级", "content": "5个办公室等级：车库(Garage，初始，有床可加班不扣满意度)、小办公室(SmallOffice，月租5k)、中型办公室(MediumOffice，月租15k)、大型办公室(LargeOffice，月租50k)、高层写字楼(HighRise，月租150k)。高级办公室可容纳更多员工并提供全局效率加成。"},
+        {"heading": "功能房间", "content": "在办公室中可建造5种功能房间：会议室(MeetingRoom，团队化学值生成加速)、服务器房(ServerRoom，网络研发速度+15%)、美术工作室(ArtStudio，美术研发速度+15%)、音频室(AudioLab，音频研发速度+15%)、休息室(Lounge，疲劳恢复速度+20%)。每种房间提供不同的战略加成。"},
+        {"heading": "3D办公环境", "content": "办公室以3D场景呈现，包含办公桌、电脑、显示器、椅子、书架、盆栽、茶具等物品。员工会出现在工位上。不同等级的办公室有不同布局——车库是个人工作室风格，高层写字楼是开放式办公区布局。房间升级会直观反映在3D场景的变化上。"},
+        {"heading": "租金与升级策略", "content": "租金按月支付，是固定成本的重要组成部分。升级办公室需要一次性投入资金和一定工期。建议在员工数量即将超出当前上限时升级，或者在资金充裕时提前升级以获取效率加成。车库阶段是工作室最艰难的时期，资源有限但也是最有创业氛围的阶段。"},
+        {"heading": "快捷操作提示", "content": "点击底部导航栏的「房间管理」按钮（🏠图标）即可进入房间面板，查看当前办公室信息、升级办公室、购买功能房间。当员工数量接近工位上限时，请及时前往房间面板升级办公室以扩大容量，否则将无法招聘新员工。"}
+      ]
+    },
+    "sprint_system": {
+      "title": "Sprint敏捷开发系统",
+      "sections": [
+        {"heading": "Sprint周期", "content": "游戏开发采用Scrum风格的Sprint冲刺模式。每个Sprint代表一个开发冲刺周期，一般为3个月。每个Sprint开始时需要进行规划——确定本期重点开发模块和资源分配比例。"},
+        {"heading": "Sprint规划", "content": "在每个Sprint开始时，你可以调整六大开发模块(核心玩法、视觉表现、听觉设计、剧情文案、程序稳定性、线上服务)的资源分配比例。集中资源在重点模块可以加速其开发进度，但会牺牲其他模块的速度。"},
+        {"heading": "Sprint回顾", "content": "每个Sprint结束时进行回顾，根据本周期内的开发成果、BUG产生数、团队效率等指标总结。良好的Sprint回顾可以提升团队士气，效率低下的Sprint则可能触发负面事件。"},
+        {"heading": "中期调整", "content": "如果项目开发进度落后于预期，可以在Sprint中途进行调整——加班加点、调整资源分配、甚至削减功能范围(Scope Cut)。削减功能可以快速追赶进度，但会影响游戏最终评分。"}
+      ]
+    },
+    "card_system": {
+      "title": "卡牌系统",
+      "sections": [
+        {"heading": "什么是卡牌", "content": "卡牌(Card)是一种可消耗的一次性增益道具，分为免费卡和商店购买卡两种。卡牌可以对正在开发的项目或研发中的科技施加各种效果——提升属性、推进进度、减少技术债务、恢复团队疲劳等。卡牌是战略资源，在关键时刻使用能扭转局面。"},
+        {"heading": "卡牌稀有度", "content": "卡牌分为4种稀有度：普通(Common，灰色边框)、稀有(Rare，蓝色边框)、史诗(Epic，紫色边框)、传说(Legendary，金色边框)。稀有度越高的卡牌效果越强，但获取难度也越大。传说卡牌每季度限购1张。"},
+        {"heading": "卡牌效果类型", "content": "卡牌效果涵盖15种类型：推进开发进度(ProjectProgress)、提升六大品质属性(Fun/Graphics/Audio/Story/Stability/Network)、全属性提升(AllAttributes)、减少技术债务(TechDebt)、降低内存占用(Memory)、提升销量倍率(Sales)、加速科技研究(Research)、增加最终评分(Score)、恢复团队疲劳(Fatigue)。传说级卡牌同时提供全属性提升+30%进度。"},
+        {"heading": "获取免费卡牌", "content": "游戏开始时自动获得3张免费卡牌。每年年初免费卡牌槽会刷新，清空旧卡并补充3张新卡。免费卡牌效果基础但无需成本，适合早期项目使用。免费卡槽上限为3张。"},
+        {"heading": "购买卡牌", "content": "在卡牌商店(Card Shop)可以花费资金或灵感购买卡牌。商店每3个月刷新一次库存，随机生成普通(4~6张)、稀有(2~4张)、史诗(1~2张)和传说(30%概率出现1张)卡牌。已购买的卡牌存入付费卡槽，上限为5张。购买传说卡牌每季度限1张。"},
+        {"heading": "使用卡牌", "content": "在卡牌抽屉中点击一张卡牌，弹出目标选择面板。选择正在开发中的项目即可释放效果——品质类效果直接增加对应属性分，进度类效果按百分比推进开发。部分卡牌可以作用于正在研发的科技，加速研发进度。使用后卡牌消耗并移出卡槽。"},
+        {"heading": "卡牌策略", "content": "普通卡牌适合早期快速推进项目进度；稀有卡牌性价比最高，适合中期冲刺；史诗卡牌效果强劲，适合冲击高分项目时使用；传说卡牌极其稀有且价格昂贵，但能在关键时刻一举扭转颓势。注意「市场垄断」传说卡是双刃剑——全属性-20但市场统治力大增。合理管理卡槽空间，及时使用避免免费卡刷新时浪费。"}
+      ]
+    },
+    "stock_system": {
+      "title": "股票与IPO系统",
+      "sections": [
+        {"heading": "公司上市(IPO)", "content": "当公司运营满5年、员工达到30人以上、且年利润超过50万元时，可以进行IPO上市。IPO为公司带来一笔300~600万元的一次性融资。发行价由市盈率(PE)定价模型决定：基于公司盈利能力、发行商声誉和市场环境综合计算。"},
+        {"heading": "股价定价模型", "content": "股价采用市盈率(PE)定价模型：股价 = 每股收益(EPS) × 行业市盈率(PE) × 增长溢价 × 市场情绪溢价。行业市盈率受公司声誉和市值影响（5~40倍），市场情绪由整体市场环境决定（牛熊市周期）。股价每季度以30%的速度向目标价回归，不会瞬间暴涨暴跌。"},
+        {"heading": "市场情绪与周期", "content": "市场情绪是影响所有上市公司股价的系统性因素。情绪值在0.75~1.30之间波动，由带正弦波循环的随机游走模型驱动，自然形成牛市(>1.20)、上涨(>1.05)、稳定(>0.95)、下跌(>0.80)、熊市(≤0.80)五个阶段。牛市时所有公司估值溢价，熊市时估值折价。"},
+        {"heading": "股票交易", "content": "在公司详情面板中，你可以查看所有上市公司的股价、市值和股东分布。你可以买入和卖出AI竞争对手的股票——买入需消耗资金，卖出时将资金收回。大额卖出会产生交易量冲击，压低股价。但你不能买卖自己公司的股票（内部交易限制）。"},
+        {"heading": "分红机制", "content": "上市公司可以选择将部分利润以分红形式返还给股东。分红比例(DividendRate)决定利润中用于分红的比例。分红后股价会获得小幅提振。合理的分红政策可以吸引更多投资者，提高市场对公司的估值。"},
+        {"heading": "大盘指数", "content": "市场大盘指数是所有上市公司总市值之和除以公司数量的归一化值（基准1000）。指数高于1000表示市场整体上涨，低于900表示市场低迷。大盘指数受整体经济环境和各公司财报的综合影响。"},
+        {"heading": "股价影响因素", "content": "影响股价的核心因素包括：季度利润（最强驱动因素，利润增长直接提升EPS）、利润增速（加速增长触发增长溢价1.2×）、市场情绪（牛市/熊市环境）、交易量（大额买卖产生价格冲击）、分红（分红后股价提升）、公司声誉（高声誉提升PE倍数）。连续亏损会导致股价大幅下跌甚至退市。"},
+        {"heading": "退出与退市", "content": "当公司资金持续为负、连续亏损或资不抵债时，可能触发破产退市。退市后股票价值归零，公司将无法再通过公开市场融资。AI对手也可能因经营不善而退市，被其他公司收购或直接破产清算。"}
+      ]
+    }
+  }
+}
