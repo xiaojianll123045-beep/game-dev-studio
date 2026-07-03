@@ -858,9 +858,9 @@ public partial class MenuManager : Node
 
 		var parts = new System.Collections.Generic.List<string>();
 
-		int displayCount = Mathf.Min(scan.Patterns.Count + scan.DllFiles.Count + scan.ScriptFiles.Count, 3);
-		if (displayCount >= 3) parts.Add(Loc.Tr("mod_risk.summary_3"));
-		else if (displayCount == 2) parts.Add(Loc.Tr("mod_risk.summary_2"));
+		int riskTypes = (scan.Patterns.Count > 0 ? 1 : 0) + (scan.DllFiles.Count > 0 ? 1 : 0) + (scan.ScriptFiles.Count > 0 ? 1 : 0);
+		if (riskTypes >= 3) parts.Add(Loc.Tr("mod_risk.summary_3"));
+		else if (riskTypes == 2) parts.Add(Loc.Tr("mod_risk.summary_2"));
 		else parts.Add(Loc.Tr("mod_risk.summary_1"));
 
 		if (scan.Patterns.Count > 0)
@@ -886,11 +886,10 @@ public partial class MenuManager : Node
 		}
 		parts.Add($"\n{Loc.Tr("mod_risk.disclaimer")}");
 
-		int riskTypes = (scan.Patterns.Count > 0 ? 1 : 0) + (scan.DllFiles.Count > 0 ? 1 : 0) + (scan.ScriptFiles.Count > 0 ? 1 : 0);
-		ShowRiskyModDetails(mod, scan, displayCount, riskTypes, string.Join("\n", parts), onAccept, onDecline);
+		ShowRiskyModDetails(mod, scan, riskTypes, string.Join("\n", parts), onAccept, onDecline);
 	}
 
-	private void ShowRiskyModDetails(ModManifest mod, ScanResult scan, int warningCount, int riskTypes, string msg, Action onAccept, Action onDecline)
+	private void ShowRiskyModDetails(ModManifest mod, ScanResult scan, int riskTypes, string msg, Action onAccept, Action onDecline)
 	{
 		var vp = GetViewport().GetVisibleRect().Size;
 		var S = (Func<float, float>)(v => v * _uiScale);
@@ -924,7 +923,7 @@ public partial class MenuManager : Node
 		acceptBtn.AddThemeColorOverride("font_hover_color", new Color(0.6f, 0.05f, 0.05f));
 		acceptBtn.AddThemeStyleboxOverride("normal", MakeBtnStyle(new Color(1f, 0.95f, 0.95f), new Color(0.9f, 0.3f, 0.2f)));
 		acceptBtn.AddThemeStyleboxOverride("hover", MakeBtnStyle(new Color(1f, 0.85f, 0.85f), new Color(0.9f, 0.2f, 0.1f)));
-		acceptBtn.Pressed += () => { dp.QueueFree(); ShowModFurtherConfirm(mod, scan, warningCount, riskTypes, onAccept, onDecline); };
+		acceptBtn.Pressed += () => { dp.QueueFree(); ShowModFurtherConfirm(mod, scan, riskTypes, onAccept, onDecline); };
 		dp.AddChild(acceptBtn);
 
 		var openBtn = new Button { Text = Loc.Tr("mod_risk.open_folder"), Position = new(S(220), btnY), Size = new(S(130), S(34)), Flat = true };
@@ -943,7 +942,7 @@ public partial class MenuManager : Node
 		dp.AddChild(declineBtn);
 	}
 
-	private void ShowModFurtherConfirm(ModManifest mod, ScanResult scan, int warningCount, int riskTypes, Action onAccept, Action onDecline)
+	private void ShowModFurtherConfirm(ModManifest mod, ScanResult scan, int riskTypes, Action onAccept, Action onDecline)
 	{
 		if (riskTypes >= 3)
 		{
@@ -966,7 +965,7 @@ public partial class MenuManager : Node
 			okBtn.AddThemeColorOverride("font_hover_color", new Color(0.6f, 0.05f, 0.05f));
 			okBtn.AddThemeStyleboxOverride("normal", MakeBtnStyle(new Color(1f, 0.95f, 0.95f), new Color(0.9f, 0.3f, 0.2f)));
 			okBtn.AddThemeStyleboxOverride("hover", MakeBtnStyle(new Color(1f, 0.85f, 0.85f), new Color(0.9f, 0.2f, 0.1f)));
-			okBtn.Pressed += () => { dp.QueueFree(); ShowModTimedConfirm(mod, warningCount, onAccept, onDecline); };
+			okBtn.Pressed += () => { dp.QueueFree(); ShowModTimedConfirm(mod, riskTypes, onAccept, onDecline); };
 			dp.AddChild(okBtn);
 
 			var cancelBtn = new Button { Text = Loc.Tr("mod_risk.cancel"), Position = new(220, 114), Size = new(130, 34), Flat = true };
@@ -978,7 +977,7 @@ public partial class MenuManager : Node
 		}
 		else
 		{
-			ShowModTimedConfirm(mod, warningCount, onAccept, onDecline);
+			ShowModTimedConfirm(mod, riskTypes, onAccept, onDecline);
 		}
 	}
 
@@ -987,7 +986,7 @@ public partial class MenuManager : Node
 		return new StyleBoxFlat { BgColor = bg, BorderWidthLeft = 1, BorderWidthTop = 1, BorderWidthRight = 1, BorderWidthBottom = 1, BorderColor = border, CornerRadiusTopLeft = 4, CornerRadiusTopRight = 4, CornerRadiusBottomLeft = 4, CornerRadiusBottomRight = 4 };
 	}
 
-	private void ShowModTimedConfirm(ModManifest mod, int warningCount, Action onAccept, Action onDecline)
+	private void ShowModTimedConfirm(ModManifest mod, int riskTypes, Action onAccept, Action onDecline)
 	{
 		var vp = GetViewport().GetVisibleRect().Size;
 		var S = (Func<float, float>)(v => v * _uiScale);
@@ -1004,7 +1003,7 @@ public partial class MenuManager : Node
 		float msgY = S(44), msgW = pw - S(32), msgH = ph - S(96);
 		var sc = new ScrollContainer { Position = new(S(16), msgY), Size = new(msgW, msgH) };
 		sc.HorizontalScrollMode = ScrollContainer.ScrollMode.Disabled;
-		var msg = new Label { Text = Loc.TrF("mod_risk.final_msg_fmt", warningCount) };
+		var msg = new Label { Text = Loc.TrF("mod_risk.final_msg_fmt", riskTypes) };
 		msg.AddThemeFontSizeOverride("font_size", 10); msg.AddThemeColorOverride("font_color", new Color(0.12f, 0.14f, 0.18f));
 		msg.AutowrapMode = TextServer.AutowrapMode.Word;
 		msg.SizeFlagsHorizontal = Control.SizeFlags.ExpandFill;
