@@ -90,6 +90,13 @@ var b = get_node("/root/GameManager/ModBridge")
 | `b.get_employee_manager()` | EmployeeManager 节点 |
 | `b.get_tech_manager()` | TechManager 节点 |
 
+### ⌨ 自定义按键
+| GDScript 调用 | 说明 |
+|----------|------|
+| `b.register_key(KEY_F1, Callable)` | 注册按键回调（按键名为 Godot Key 枚举值） |
+| `b.unregister_key(KEY_F1)` | 取消注册按键 |
+在 `OnLoad` 中注册，按键会在游戏处理之前触发回调，不会被其他 UI 拦截。
+
 ### 📋 日志与配置
 | GDScript 调用 | 说明 |
 |----------|------|

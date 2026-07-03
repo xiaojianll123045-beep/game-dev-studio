@@ -14,6 +14,9 @@ public partial class ModBridge : Node
     private StoryEvents _storyEvt;
     private RoomManager _room;
 
+    // 注册的自定义按键 → Callable 回调
+    private Godot.Collections.Dictionary<Key, Callable> _registeredKeys = new();
+
     public void Init(GameManager gm)
     {
         _gm = gm;
@@ -24,6 +27,18 @@ public partial class ModBridge : Node
         _fan = gm.GetNodeOrNull<FanManager>("FanManager");
         _storyEvt = gm.GetNodeOrNull<StoryEvents>("StoryEvents");
         _room = gm.GetNodeOrNull<RoomManager>("RoomManager");
+    }
+
+    /// <summary>在 ProcessGameInput 之前检查注册的按键</summary>
+    public bool HandleRegisteredKey(InputEventKey ek)
+    {
+        if (!ek.Pressed || ek.Echo) return false;
+        if (_registeredKeys.TryGetValue(ek.Keycode, out var cb))
+        {
+            cb.Call();
+            return true;
+        }
+        return false;
     }
 
     // ═══════════════ 语言 ═══════════════
@@ -158,4 +173,15 @@ public partial class ModBridge : Node
     // ═══════════════ 日志 ═══════════════
     public void log(string msg) => GD.Print($"[Mod] {msg}");
     public void log_err(string msg) => GD.PrintErr($"[Mod] {msg}");
+
+    // ═══════════════ 按键注册 ═══════════════
+    /// <summary>注册自定义按键回调（按键名参考 Godot Key enum，如 KEY_F1）</summary>
+    public void register_key(int key, Callable handler)
+    {
+        _registeredKeys[(Key)key] = handler;
+    }
+    public void unregister_key(int key)
+    {
+        _registeredKeys.Remove((Key)key);
+    }
 }

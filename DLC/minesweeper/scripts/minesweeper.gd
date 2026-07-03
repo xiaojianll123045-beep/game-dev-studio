@@ -39,9 +39,20 @@ var grid_container: Control
 var _init_pw: float = 0.0
 var _init_ph: float = 0.0
 var _init_cell_size: int = 32
+var _modal_overlay: ColorRect = null
 
 func OnLoad(_gm, bridge):
 	gm = _gm
+	# 全屏遮罩 + IsAnyModalOpen（和游戏内弹窗/百科一致，阻止 3D 场景输入）
+	if gm != null:
+		var uilayer = gm.get("UiLayer") as Control
+		if uilayer != null:
+			_modal_overlay = ColorRect.new()
+			_modal_overlay.color = Color(0, 0, 0, 0.35)
+			_modal_overlay.mouse_filter = Control.MOUSE_FILTER_STOP
+			_modal_overlay.set_anchors_and_offsets_preset(Control.LayoutPreset.FULL_RECT)
+			uilayer.add_child(_modal_overlay)
+		gm.set("IsAnyModalOpen", true)
 	StartGame()
 	# 用 Timer 代替 _Process，避免暂停影响
 	var t = Timer.new()
@@ -192,10 +203,8 @@ func StartNew(nr: int, nc: int, nm: int):
 	mode_btn.pressed.connect(self._ToggleMode)
 	panel.add_child(mode_btn)
 
-	# 记录初始面板/单元格尺寸，缩放时保持不变
-	_init_pw = pw; _init_ph = ph; _init_cell_size = cell_size
 	# 重置平移 & 面板输入
-	_pan_x = 0; _pan_y = 0; _dragging = false
+	_pan_x = 0; _pan_y = 0; _dragging = false; _drag_cell_r = -1; _drag_cell_c = -1
 	panel.gui_input.connect(_OnPanelInput)
 
 func _ToggleMode():
@@ -264,12 +273,23 @@ func _RefreshLayout():
 		bottom_bar.size = Vector2(cols * cell_size, 32)
 
 func _Close():
+	_CleanupOverlay()
 	if panel != null:
 		panel.queue_free()
 		panel = null
 	queue_free()
 
-	
+func _CleanupOverlay():
+	if _modal_overlay != null:
+		_modal_overlay.queue_free()
+		_modal_overlay = null
+	if gm != null:
+		gm.set("IsAnyModalOpen", false)
+
+func OnUnload():
+	_CleanupOverlay()
+	if panel != null:
+		panel.queue_free()
 
 func _OnCellInput(ev: InputEvent, r: int, c: int):
 	if game_over or won: return

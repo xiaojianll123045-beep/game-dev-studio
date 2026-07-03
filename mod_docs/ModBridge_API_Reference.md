@@ -90,6 +90,13 @@ var b = get_node("/root/GameManager/ModBridge")
 | `b.get_employee_manager()` | EmployeeManager node |
 | `b.get_tech_manager()` | TechManager node |
 
+### ⌨ Custom Key Binding
+| GDScript | Description |
+|----------|-------------|
+| `b.register_key(KEY_F1, Callable)` | Register a key callback (key = Godot Key enum value) |
+| `b.unregister_key(KEY_F1)` | Unregister a key callback |
+Register in `OnLoad`. The callback fires before normal game input processing, so it cannot be intercepted by other UI.
+
 ### 📋 Logging & Settings
 | GDScript | Description |
 |----------|-------------|

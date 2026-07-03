@@ -582,6 +582,16 @@ public partial class GameManager : Node3D
         {
             if (_logOverlay != null) { _logOverlay.QueueFree(); _logOverlay = null; GetViewport().SetInputAsHandled(); return; }
         }
+        // Mod 注册的自定义按键（在 ProcessGameInput 之前拦截）
+        if (@event is InputEventKey ek && ek.Pressed && !ek.Echo)
+        {
+            var bridge = GetNodeOrNull<ModBridge>("ModBridge");
+            if (bridge != null && bridge.HandleRegisteredKey(ek))
+            {
+                GetViewport().SetInputAsHandled();
+                return;
+            }
+        }
         var args = ModMethodOverride.Args(("event", @event));
         ModMethodOverride.CallVoid("game_process_input", args, () => ProcessGameInput(@event));
     }
