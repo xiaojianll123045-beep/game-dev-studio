@@ -128,16 +128,6 @@ func StartNew(nr: int, nc: int, nm: int):
 	timer_label.horizontal_alignment = HORIZONTAL_ALIGNMENT_RIGHT
 	panel.add_child(timer_label)
 
-	mode_btn = Button.new()
-	mode_btn.text = "⛏ 挖掘"
-	mode_btn.flat = true
-	mode_btn.add_theme_font_size_override("font_size", 12)
-	mode_btn.add_theme_color_override("font_color", Color(0.2, 0.3, 0.6))
-	mode_btn.position = Vector2(pw/2 - 40, 72)
-	mode_btn.size = Vector2(80, 24)
-	mode_btn.pressed.connect(self._ToggleMode)
-	panel.add_child(mode_btn)
-
 	diff_row = HBoxContainer.new()
 	diff_row.position = Vector2(pw/2 - 140, 44)
 	diff_row.size = Vector2(280, 24)
@@ -188,7 +178,7 @@ func StartNew(nr: int, nc: int, nm: int):
 			cells[r].append(cr)
 
 	bottom_bar = HBoxContainer.new()
-	bottom_bar.position = Vector2(0, rows * cell_size + 6)
+	bottom_bar.position = Vector2(offset_x, offset_y + rows * cell_size + 6)
 	bottom_bar.size = Vector2(cols * cell_size, 32)
 	var close_txt = Button.new()
 	close_txt.text = "✕ 关闭"
@@ -200,7 +190,18 @@ func StartNew(nr: int, nc: int, nm: int):
 	var spacer = Control.new()
 	spacer.size_flags_horizontal = Control.SIZE_EXPAND_FILL
 	bottom_bar.add_child(spacer)
-	grid_container.add_child(bottom_bar)
+	panel.add_child(bottom_bar)
+
+	# mode_btn 放在最后，确保在最上层可点击
+	mode_btn = Button.new()
+	mode_btn.text = "⛏ 挖掘"
+	mode_btn.flat = true
+	mode_btn.add_theme_font_size_override("font_size", 12)
+	mode_btn.add_theme_color_override("font_color", Color(0.2, 0.3, 0.6))
+	mode_btn.position = Vector2(pw/2 - 40, 72)
+	mode_btn.size = Vector2(80, 24)
+	mode_btn.pressed.connect(self._ToggleMode)
+	panel.add_child(mode_btn)
 
 	# 重置平移 & 面板输入
 	_pan_x = 0; _pan_y = 0; _dragging = false
@@ -266,7 +267,7 @@ func _RefreshLayout():
 					ch.size = cr.size
 					ch.add_theme_font_size_override("font_size", clamp(cell_size - 12, 8, 22))
 	if bottom_bar != null:
-		bottom_bar.position = Vector2(_pan_x, rows * cell_size + _pan_y + 6)
+		bottom_bar.position = Vector2(offset_x, offset_y + rows * cell_size + 6)
 		bottom_bar.size = Vector2(cols * cell_size, 32)
 
 func _Close():
