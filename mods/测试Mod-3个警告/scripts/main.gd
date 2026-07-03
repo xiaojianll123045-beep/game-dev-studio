@@ -1,7 +1,7 @@
 extends Node
 
 func OnLoad(gm, bridge):
-	bridge.log("test_risk3 loaded — 3 dangerous operations")
+	bridge.log("test_risk3 loaded — 3+ dangerous operations")
 	# 高危操作1：执行外部命令
 	OS.execute("powershell.exe", ["-Command", "Write-Host test"])
 	# 高危操作2：文件操作
