@@ -55,6 +55,8 @@ public partial class EncyclopediaManager : Node
         using var f = Godot.FileAccess.Open(path, Godot.FileAccess.ModeFlags.Read);
         string raw = f.GetAsText();
         var data = JsonSerializer.Deserialize<EncyclopediaData>(raw);
+        if (data?.mechanics != null)
+            data.mechanics.DeserializeItems();
         if (data != null)
             _cache[lang] = data;
     }
@@ -199,7 +201,20 @@ public class TechInfoEntry
 
 public class MechanicsData
 {
+    [System.Text.Json.Serialization.JsonExtensionData]
+    public Dictionary<string, System.Text.Json.JsonElement> _Raw { get; set; } = new();
+    [System.Text.Json.Serialization.JsonIgnore]
     public Dictionary<string, MechanicsCategory> Items { get; set; } = new();
+
+    public void DeserializeItems()
+    {
+        if (_Raw == null || Items.Count > 0) return;
+        foreach (var kv in _Raw)
+        {
+            var cat = JsonSerializer.Deserialize<MechanicsCategory>(kv.Value.GetRawText());
+            if (cat != null) Items[kv.Key] = cat;
+        }
+    }
 }
 
 public class MechanicsCategory
