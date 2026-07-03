@@ -2287,7 +2287,7 @@ public partial class GameManager : Node3D
         _tabButtons.Clear();
 
         // 10个 SVG 图标按钮（Feather Icons 风格一致）
-        bool hasDlc = DlcManager.ActiveMinigames.Count > 0;
+        bool hasDlc = DlcManager.EnabledDlcCount > 0 && DlcManager.ActiveMinigames.Any(d => DlcManager.IsDlcEnabled(d.Id));
         string[] svgPaths = {
             "res://assets/icons/play.svg", "res://assets/icons/file-text.svg", "res://assets/icons/file.svg",
             "res://assets/icons/users.svg", "res://assets/icons/user.svg", "res://assets/icons/zap.svg",
