@@ -29,6 +29,8 @@ var _pan_x: float = 0.0
 var _pan_y: float = 0.0
 var _dragging: bool = false
 var _drag_start: Vector2 = Vector2()
+var _drag_cell_r: int = -1
+var _drag_cell_c: int = -1
 var title_label: Label
 var diff_row: HBoxContainer
 var close_x_btn: Button
@@ -115,16 +117,6 @@ func StartNew(nr: int, nc: int, nm: int):
 	timer_label.horizontal_alignment = HORIZONTAL_ALIGNMENT_RIGHT
 	panel.add_child(timer_label)
 
-	mode_btn = Button.new()
-	mode_btn.text = "⛏ 挖掘"
-	mode_btn.flat = true
-	mode_btn.add_theme_font_size_override("font_size", 12)
-	mode_btn.add_theme_color_override("font_color", Color(0.2, 0.3, 0.6))
-	mode_btn.position = Vector2(pw/2 - 40, 72)
-	mode_btn.size = Vector2(80, 24)
-	mode_btn.pressed.connect(self._ToggleMode)
-	panel.add_child(mode_btn)
-
 	diff_row = HBoxContainer.new()
 	diff_row.position = Vector2(pw/2 - 140, 44)
 	diff_row.size = Vector2(280, 24)
@@ -149,11 +141,12 @@ func StartNew(nr: int, nc: int, nm: int):
 	close_x_btn.pressed.connect(self._Close)
 	panel.add_child(close_x_btn)
 
-	# 雷区容器（裁剪超出部分）
+	# 雷区容器（裁剪超出部分，放 cell 和 bottom_bar）
 	grid_container = Control.new()
 	grid_container.clip_contents = true
+	grid_container.mouse_filter = Control.MOUSE_FILTER_PASS
 	grid_container.position = Vector2(offset_x, offset_y)
-	grid_container.size = Vector2(cols * _init_cell_size, rows * _init_cell_size + 32)
+	grid_container.size = Vector2(cols * cell_size, rows * cell_size + 38)
 	panel.add_child(grid_container)
 
 	for r in range(rows):
@@ -187,6 +180,17 @@ func StartNew(nr: int, nc: int, nm: int):
 	bottom_bar.add_child(spacer)
 	grid_container.add_child(bottom_bar)
 
+	# mode_btn 放在 grid_container 之后，确保在顶层可点击
+	mode_btn = Button.new()
+	mode_btn.text = "⛏ 挖掘"
+	mode_btn.flat = true
+	mode_btn.add_theme_font_size_override("font_size", 12)
+	mode_btn.add_theme_color_override("font_color", Color(0.2, 0.3, 0.6))
+	mode_btn.position = Vector2(pw/2 - 40, 72)
+	mode_btn.size = Vector2(80, 24)
+	mode_btn.pressed.connect(self._ToggleMode)
+	panel.add_child(mode_btn)
+
 	# 记录初始面板/单元格尺寸，缩放时保持不变
 	_init_pw = pw; _init_ph = ph; _init_cell_size = cell_size
 	# 重置平移 & 面板输入
@@ -210,6 +214,8 @@ func _OnPanelInput(ev: InputEvent):
 			_ZoomOut(); get_viewport().set_input_as_handled()
 		elif ev.button_index == MOUSE_BUTTON_RIGHT:
 			_dragging = true; _drag_start = get_viewport().get_mouse_position()
+			_drag_cell_r = -1
+			get_viewport().set_input_as_handled()
 	elif ev is InputEventMouseButton and not ev.pressed:
 		if ev.button_index == MOUSE_BUTTON_RIGHT:
 			_dragging = false
@@ -231,7 +237,7 @@ func _RefreshLayout():
 	panel.offset_left = -_init_pw/2; panel.offset_top = -_init_ph/2
 	panel.offset_right = _init_pw/2; panel.offset_bottom = _init_ph/2
 	# 裁剪容器尺寸固定（初始尺寸），超出部分自动隐藏
-	grid_container.size = Vector2(cols * _init_cell_size, rows * _init_cell_size + 32)
+	grid_container.size = Vector2(cols * _init_cell_size, rows * _init_cell_size + 38)
 	for r in range(rows):
 		for c in range(cols):
 			var cr = cells[r][c]
@@ -245,7 +251,7 @@ func _RefreshLayout():
 					ch.size = cr.size
 					ch.add_theme_font_size_override("font_size", clamp(cell_size - 12, 8, 22))
 	if bottom_bar != null:
-		bottom_bar.position = Vector2(_pan_x, rows * cell_size + _pan_y + 6)
+		bottom_bar.position = Vector2(offset_x + _pan_x, offset_y + rows * cell_size + _pan_y + 6)
 		bottom_bar.size = Vector2(cols * cell_size, 32)
 
 func _Close():
@@ -260,7 +266,9 @@ func _OnCellInput(ev: InputEvent, r: int, c: int):
 	if game_over or won: return
 	if ev is InputEventMouseButton:
 		if not ev.pressed and ev.button_index == MOUSE_BUTTON_RIGHT:
-			_dragging = false; return
+			if _drag_cell_r >= 0 and not _dragging:
+				_ToggleFlag(_drag_cell_r, _drag_cell_c)
+			_dragging = false; _drag_cell_r = -1; return
 		if ev.pressed:
 			if ev.button_index == MOUSE_BUTTON_WHEEL_UP:
 				_ZoomIn(); get_viewport().set_input_as_handled(); return
@@ -272,10 +280,12 @@ func _OnCellInput(ev: InputEvent, r: int, c: int):
 				else:
 					_RevealCell(r, c)
 			elif ev.button_index == MOUSE_BUTTON_RIGHT:
-				_ToggleFlag(r, c)
+				_drag_cell_r = r; _drag_cell_c = c; _dragging = false
+				_drag_start = get_viewport().get_mouse_position()
+				get_viewport().set_input_as_handled()
 	elif ev is InputEventMouseMotion and Input.is_mouse_button_pressed(MOUSE_BUTTON_RIGHT):
 		if not _dragging:
-			_dragging = true; _drag_start = get_viewport().get_mouse_position()
+			_dragging = true
 		var mp = get_viewport().get_mouse_position()
 		_pan_x += mp.x - _drag_start.x; _pan_y += mp.y - _drag_start.y
 		_drag_start = mp; _RefreshLayout()
