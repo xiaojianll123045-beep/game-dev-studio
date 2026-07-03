@@ -38,14 +38,13 @@ public static class ModManager
     private static void ScanMods()
     {
         LoadedMods.Clear();
-        // 扫描内置 mods/ 目录（导出时已排除，仅开发阶段有内容）
-        ScanModsFrom(ModsRoot);
-        // 扫描用户目录（方便用户安装外部 mod）
-        ScanModsFrom("user://mods/");
-        // 扫描 exe 同目录
+        // 优先扫 exe 同目录（安装包根目录），用户放 mods/ 文件夹在旁边
         string exeDir = ProjectSettings.GlobalizePath("res://").TrimEnd('/');
         if (DirAccess.DirExistsAbsolute(exeDir + "/mods"))
             ScanModsFrom(exeDir + "/mods/");
+        // 开发环境 fallback
+        if (LoadedMods.Count == 0)
+            ScanModsFrom(ModsRoot);
     }
 
     private static void ScanModsFrom(string root)
