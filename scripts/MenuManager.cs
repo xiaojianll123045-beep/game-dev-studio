@@ -851,13 +851,14 @@ public partial class MenuManager : Node
 
 	private void ShowDlcList()
 	{
+		if (DlcManager.Loaded.Count == 0) DlcManager.ScanAll();
 		float pw = 480, ph = 500;
 		var vp = GetViewport().GetVisibleRect().Size;
 		var dp = new DragPanel { Position = new((vp.X - pw) / 2, (vp.Y - ph) / 2), Size = new(pw, ph) };
 		dp.AddThemeStyleboxOverride("panel", new StyleBoxFlat { BgColor = Colors.White, CornerRadiusTopLeft = 8, CornerRadiusTopRight = 8, CornerRadiusBottomLeft = 8, CornerRadiusBottomRight = 8 });
 		_ui.AddChild(dp);
 
-		var title = LUI.Label(Loc.Tr("menu.dlc"), 18, new Color(0.10f, 0.14f, 0.22f));
+		var title = LUI.Label(Loc.Tr("menu.dlc"), 16, new Color(0.10f, 0.14f, 0.22f));
 		title.Position = new(20, 12);
 		dp.AddChild(title);
 
