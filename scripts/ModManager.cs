@@ -39,12 +39,12 @@ public static class ModManager
     {
         LoadedMods.Clear();
         // 优先扫 exe 同目录（安装包根目录），用户放 mods/ 文件夹在旁边
-        string exeDir = ProjectSettings.GlobalizePath("res://").TrimEnd('/');
-        if (DirAccess.DirExistsAbsolute(exeDir + "/mods"))
-            ScanModsFrom(exeDir + "/mods/");
-        // 开发环境 fallback
-        if (LoadedMods.Count == 0)
-            ScanModsFrom(ModsRoot);
+        string exeDir = System.IO.Path.GetDirectoryName(OS.GetExecutablePath());
+        string modsDir = exeDir + "/mods";
+        if (DirAccess.DirExistsAbsolute(modsDir))
+            ScanModsFrom(modsDir + "/");
+        else
+            ScanModsFrom(ModsRoot);  // 开发环境 fallback
     }
 
     private static void ScanModsFrom(string root)

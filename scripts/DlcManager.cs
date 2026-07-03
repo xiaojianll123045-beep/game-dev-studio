@@ -75,12 +75,12 @@ public static class DlcManager
         _loaded.Clear();
         _activeMinigames.Clear();
         // 优先扫 exe 同目录（安装包根目录），用户放 DLC/ 文件夹在旁边
-        string exeDir = ProjectSettings.GlobalizePath("res://").TrimEnd('/');
-        if (DirAccess.DirExistsAbsolute(exeDir + "/DLC"))
-            ScanDlcFrom(exeDir + "/DLC/");
-        // 开发环境 fallback
-        if (_loaded.Count == 0)
-            ScanDlcFrom("res://DLC");
+        string exeDir = System.IO.Path.GetDirectoryName(OS.GetExecutablePath());
+        string dlcDir = exeDir + "/DLC";
+        if (DirAccess.DirExistsAbsolute(dlcDir))
+            ScanDlcFrom(dlcDir + "/");
+        else
+            ScanDlcFrom("res://DLC");  // 开发环境 fallback
         LoadEnabled();
         Log("DlcManager", $"DLC scan done, {_loaded.Count} total, {_activeMinigames.Count} minigames, {_enabledDlcIds.Count} enabled");
     }
