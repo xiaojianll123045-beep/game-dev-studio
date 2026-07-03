@@ -971,7 +971,7 @@ public partial class MenuManager : Node
 			n.SetScript(dlc.LoadedScript);
 			_ui.AddChild(n);
 			DlcManager.MarkRunning(dlc.Id, n);
-			try { n.Call("OnLoad", Services.GameManager, null); } catch { }
+			try { n.Call("OnLoad", Services.GameManager, new Variant()); } catch { }
 		}
 	}
 
