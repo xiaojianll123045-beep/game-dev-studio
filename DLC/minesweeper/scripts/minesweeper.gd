@@ -33,8 +33,10 @@ var title_label: Label
 var diff_row: HBoxContainer
 var close_x_btn: Button
 var bottom_bar: HBoxContainer
+var grid_container: Control
 var _init_pw: float = 0.0
 var _init_ph: float = 0.0
+var _init_cell_size: int = 32
 
 func OnLoad(_gm, bridge):
 	gm = _gm
@@ -80,6 +82,7 @@ func StartNew(nr: int, nc: int, nm: int):
 	panel.offset_right = pw/2; panel.offset_bottom = ph/2
 	add_child(panel)
 
+	panel.mouse_filter = Control.MOUSE_FILTER_STOP
 	var bg = StyleBoxFlat.new()
 	bg.bg_color = Color(0.85, 0.85, 0.87)
 	bg.corner_radius_top_left = 8; bg.corner_radius_top_right = 8
@@ -146,24 +149,31 @@ func StartNew(nr: int, nc: int, nm: int):
 	close_x_btn.pressed.connect(self._Close)
 	panel.add_child(close_x_btn)
 
+	# 雷区容器（裁剪超出部分）
+	grid_container = Control.new()
+	grid_container.clip_contents = true
+	grid_container.position = Vector2(offset_x, offset_y)
+	grid_container.size = Vector2(cols * _init_cell_size, rows * _init_cell_size + 32)
+	panel.add_child(grid_container)
+
 	for r in range(rows):
 		cells.append([])
 		for c in range(cols):
 			var cr = ColorRect.new()
 			cr.color = Color(0.7, 0.75, 0.8)
 			cr.size = Vector2(cell_size - 2, cell_size - 2)
-			cr.position = Vector2(offset_x + c * cell_size, offset_y + r * cell_size)
+			cr.position = Vector2(c * cell_size, r * cell_size)
 			var cap_r = r; var cap_c = c
 			var gui = Control.new()
 			gui.mouse_filter = Control.MOUSE_FILTER_STOP
 			gui.gui_input.connect(func(ev): _OnCellInput(ev, cap_r, cap_c))
 			gui.size = cr.size
 			cr.add_child(gui)
-			panel.add_child(cr)
+			grid_container.add_child(cr)
 			cells[r].append(cr)
 
 	bottom_bar = HBoxContainer.new()
-	bottom_bar.position = Vector2(offset_x, offset_y + rows * cell_size + 6)
+	bottom_bar.position = Vector2(0, rows * cell_size + 6)
 	bottom_bar.size = Vector2(cols * cell_size, 32)
 	var close_txt = Button.new()
 	close_txt.text = "✕ 关闭"
@@ -175,11 +185,10 @@ func StartNew(nr: int, nc: int, nm: int):
 	var spacer = Control.new()
 	spacer.size_flags_horizontal = Control.SIZE_EXPAND_FILL
 	bottom_bar.add_child(spacer)
-	# bottom_bar is the class member — already assigned above
-	panel.add_child(bottom_bar)
+	grid_container.add_child(bottom_bar)
 
-	# 记录初始面板尺寸，缩放时保持不变
-	_init_pw = pw; _init_ph = ph
+	# 记录初始面板/单元格尺寸，缩放时保持不变
+	_init_pw = pw; _init_ph = ph; _init_cell_size = cell_size
 	# 重置平移 & 面板输入
 	_pan_x = 0; _pan_y = 0; _dragging = false
 	panel.gui_input.connect(_OnPanelInput)
@@ -196,9 +205,9 @@ func _OnPanelInput(ev: InputEvent):
 	if game_over or won: return
 	if ev is InputEventMouseButton and ev.pressed:
 		if ev.button_index == MOUSE_BUTTON_WHEEL_UP:
-			_ZoomIn()
+			_ZoomIn(); get_viewport().set_input_as_handled()
 		elif ev.button_index == MOUSE_BUTTON_WHEEL_DOWN:
-			_ZoomOut()
+			_ZoomOut(); get_viewport().set_input_as_handled()
 		elif ev.button_index == MOUSE_BUTTON_RIGHT:
 			_dragging = true; _drag_start = get_viewport().get_mouse_position()
 	elif ev is InputEventMouseButton and not ev.pressed:
@@ -221,12 +230,14 @@ func _RefreshLayout():
 	# 面板和 UI 固定，只有雷区缩放
 	panel.offset_left = -_init_pw/2; panel.offset_top = -_init_ph/2
 	panel.offset_right = _init_pw/2; panel.offset_bottom = _init_ph/2
+	# 裁剪容器尺寸固定（初始尺寸），超出部分自动隐藏
+	grid_container.size = Vector2(cols * _init_cell_size, rows * _init_cell_size + 32)
 	for r in range(rows):
 		for c in range(cols):
 			var cr = cells[r][c]
 			var sz = cell_size - 2
 			cr.size = Vector2(sz, sz)
-			cr.position = Vector2(offset_x + c * cell_size + _pan_x, offset_y + r * cell_size + _pan_y)
+			cr.position = Vector2(c * cell_size + _pan_x, r * cell_size + _pan_y)
 			for ch in cr.get_children():
 				if ch is Control:
 					ch.size = cr.size
@@ -234,7 +245,7 @@ func _RefreshLayout():
 					ch.size = cr.size
 					ch.add_theme_font_size_override("font_size", clamp(cell_size - 12, 8, 22))
 	if bottom_bar != null:
-		bottom_bar.position = Vector2(offset_x + _pan_x, offset_y + rows * cell_size + _pan_y + 6)
+		bottom_bar.position = Vector2(_pan_x, rows * cell_size + _pan_y + 6)
 		bottom_bar.size = Vector2(cols * cell_size, 32)
 
 func _Close():
@@ -252,9 +263,9 @@ func _OnCellInput(ev: InputEvent, r: int, c: int):
 			_dragging = false; return
 		if ev.pressed:
 			if ev.button_index == MOUSE_BUTTON_WHEEL_UP:
-				_ZoomIn(); return
+				_ZoomIn(); get_viewport().set_input_as_handled(); return
 			elif ev.button_index == MOUSE_BUTTON_WHEEL_DOWN:
-				_ZoomOut(); return
+				_ZoomOut(); get_viewport().set_input_as_handled(); return
 			if ev.button_index == MOUSE_BUTTON_LEFT:
 				if flag_mode:
 					_ToggleFlag(r, c)
@@ -394,10 +405,10 @@ func _GameOver():
 	msg.text = "💥 踩雷了！点难度重开"
 	msg.add_theme_font_size_override("font_size", 16)
 	msg.add_theme_color_override("font_color", Color(0.9, 0.2, 0.2))
-	msg.position = Vector2(offset_x + _pan_x, offset_y + rows * cell_size + _pan_y + 10)
+	msg.position = Vector2(_pan_x, rows * cell_size + _pan_y + 10)
 	msg.size = Vector2(cols * cell_size, 30)
 	msg.horizontal_alignment = HORIZONTAL_ALIGNMENT_CENTER
-	panel.add_child(msg)
+	grid_container.add_child(msg)
 
 func _CheckWin():
 	var revealed_count = 0
@@ -410,10 +421,10 @@ func _CheckWin():
 		msg.text = "🎉 你赢了！耗时 " + str(int(timer)) + " 秒"
 		msg.add_theme_font_size_override("font_size", 16)
 		msg.add_theme_color_override("font_color", Color(0.2, 0.7, 0.3))
-		msg.position = Vector2(offset_x + _pan_x, offset_y + rows * cell_size + _pan_y + 10)
+		msg.position = Vector2(_pan_x, rows * cell_size + _pan_y + 10)
 		msg.size = Vector2(cols * cell_size, 30)
 		msg.horizontal_alignment = HORIZONTAL_ALIGNMENT_CENTER
-		panel.add_child(msg)
+		grid_container.add_child(msg)
 		for r in range(rows):
 			for c in range(cols):
 				if flagged[r][c] and board[r][c] != -1:
