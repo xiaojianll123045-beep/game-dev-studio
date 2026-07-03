@@ -3055,7 +3055,7 @@ public partial class GameManager : Node3D
         var titleLbl = new Label { Text = Loc.Tr("tutorial.welcome_title"), Position = new(16, 12), Size = new(pw - 32, 28) };
         titleLbl.AddThemeFontSizeOverride("font_size", 18); titleLbl.AddThemeColorOverride("font_color", new Color(0.3f, 0.8f, 0.5f));
         panel.AddChild(titleLbl);
-        var desc = new RichTextLabel { Text = "[center]" + Loc.Tr("tutorial.welcome_desc") + "[/center]", Position = new(16, 48), Size = new(pw - 32, 100), BbcodeEnabled = true, FitContent = true };
+        var desc = new RichTextLabel { Text = Loc.Tr("tutorial.welcome_desc"), Position = new(16, 48), Size = new(pw - 32, 100), BbcodeEnabled = false, FitContent = true };
         desc.AddThemeFontSizeOverride("font_size", 13);
         desc.AddThemeColorOverride("default_color", new Color(0.10f, 0.14f, 0.22f));
         panel.AddChild(desc);
