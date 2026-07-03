@@ -4132,7 +4132,7 @@ public partial class GameManager : Node3D
         var p = MakePanel(Loc.Tr("panel.all_employees_title"));
         _refreshEmployeeList = () =>
         {
-            var t = new Timer { WaitTime = 0, OneShot = true };
+            var t = new Timer { WaitTime = 0.01f, OneShot = true };
             AddChild(t);
             t.Timeout += () => { CloseAll(); ShowAllEmployeesPanel(); t.QueueFree(); };
             t.Start();
@@ -4701,7 +4701,7 @@ public partial class GameManager : Node3D
         }
         _refreshEmployeeList = () =>
         {
-            var t = new Timer { WaitTime = 0, OneShot = true };
+            var t = new Timer { WaitTime = 0.01f, OneShot = true };
             AddChild(t);
             t.Timeout += () => { CloseAll(); ShowEmployeePanel(); t.QueueFree(); };
             t.Start();
