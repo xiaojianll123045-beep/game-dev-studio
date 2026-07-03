@@ -32,8 +32,8 @@ func OnLoad(_gm, bridge):
 func StartGame():
 	StartNew(9, 9, 10)
 
-func StartNew(r: int, c: int, m: int):
-	rows = r; cols = c; mine_count = m
+func StartNew(nr: int, nc: int, nm: int):
+	rows = nr; cols = nc; mine_count = nm
 	game_over = false; first_click = true; started = false; won = false
 	timer = 0.0; mines_remaining = m
 	flag_mode = false

@@ -895,7 +895,10 @@ public partial class MenuManager : Node
 				{
 					var launchBtn = new Button { Text = Loc.Tr("dlc.launch"), Position = new(pw - 110, y + 4), Size = new(90, 30) };
 					launchBtn.AddThemeFontSizeOverride("font_size", 12);
-					launchBtn.AddThemeColorOverride("font_color", new Color(0.2f, 0.5f, 0.2f));
+					launchBtn.AddThemeColorOverride("font_color", Colors.White);
+					launchBtn.AddThemeColorOverride("font_hover_color", new Color(0.8f, 0.8f, 0.8f));
+					launchBtn.AddThemeStyleboxOverride("normal", new StyleBoxFlat { BgColor = new Color(0.2f, 0.5f, 0.3f), CornerRadiusTopLeft = 4, CornerRadiusTopRight = 4, CornerRadiusBottomLeft = 4, CornerRadiusBottomRight = 4 });
+					launchBtn.AddThemeStyleboxOverride("hover", new StyleBoxFlat { BgColor = new Color(0.15f, 0.4f, 0.25f), CornerRadiusTopLeft = 4, CornerRadiusTopRight = 4, CornerRadiusBottomLeft = 4, CornerRadiusBottomRight = 4 });
 					var captured = d;
 					launchBtn.Pressed += () => { dp.QueueFree(); DlcManager.LaunchMinigame(Services.GameManager, captured); };
 					dp.AddChild(launchBtn);
