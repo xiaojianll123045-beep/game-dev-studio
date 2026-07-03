@@ -858,9 +858,9 @@ public partial class MenuManager : Node
 
 		var parts = new System.Collections.Generic.List<string>();
 
-		int warningCount = scan.Patterns.Count + scan.DllFiles.Count + scan.ScriptFiles.Count;
-		if (warningCount >= 3) parts.Add(Loc.Tr("mod_risk.summary_3"));
-		else if (warningCount == 2) parts.Add(Loc.Tr("mod_risk.summary_2"));
+		int displayCount = Mathf.Min(scan.Patterns.Count + scan.DllFiles.Count + scan.ScriptFiles.Count, 3);
+		if (displayCount >= 3) parts.Add(Loc.Tr("mod_risk.summary_3"));
+		else if (displayCount == 2) parts.Add(Loc.Tr("mod_risk.summary_2"));
 		else parts.Add(Loc.Tr("mod_risk.summary_1"));
 
 		if (scan.Patterns.Count > 0)
@@ -887,7 +887,7 @@ public partial class MenuManager : Node
 		parts.Add($"\n{Loc.Tr("mod_risk.disclaimer")}");
 
 		int riskTypes = (scan.Patterns.Count > 0 ? 1 : 0) + (scan.DllFiles.Count > 0 ? 1 : 0) + (scan.ScriptFiles.Count > 0 ? 1 : 0);
-		ShowRiskyModDetails(mod, scan, warningCount, riskTypes, string.Join("\n", parts), onAccept, onDecline);
+		ShowRiskyModDetails(mod, scan, displayCount, riskTypes, string.Join("\n", parts), onAccept, onDecline);
 	}
 
 	private void ShowRiskyModDetails(ModManifest mod, ScanResult scan, int warningCount, int riskTypes, string msg, Action onAccept, Action onDecline)
