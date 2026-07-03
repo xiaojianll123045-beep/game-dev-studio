@@ -734,13 +734,12 @@ public partial class StoryEvents : Node
             if (burnoutEmp != null && burnoutEmp.Fatigue > 70)
             {
                 _triggeredEvents.Add($"burnout_{_gm.GameMonth}");
-                _gm.ShowChoicePopup("😰 员工过劳警告",
-                    $"{burnoutEmp.Name}已经连续加班很久了，精神状态明显下滑。",
-                    "强制休假(满意度+15)", "加薪安抚(¥2万)",
+                _gm.ShowChoicePopup(Loc.Tr("evt.burnout.title"), Loc.TrF("evt.burnout.desc", burnoutEmp.Name),
+                    Loc.Tr("evt.burnout.optA"), Loc.Tr("evt.burnout.optB"),
                     () => { burnoutEmp.Fatigue = Mathf.Max(0, burnoutEmp.Fatigue - 40); burnoutEmp.Satisfaction += 15; },
                     () => { if (_res != null) _res.SpendMoney(20000, "salary"); burnoutEmp.Satisfaction += 10; burnoutEmp.Fatigue = Mathf.Max(0, burnoutEmp.Fatigue - 10); },
                     new Color(0.9f, 0.5f, 0.2f));
-                return $"过劳警告: {burnoutEmp.Name}";
+                return $"burnout: {burnoutEmp.Name}";
             }
         }
         if (!_triggeredEvents.Contains($"team_conflict_{_gm.GameMonth}") && _teamMgr.Teams.Count > 0)
@@ -753,13 +752,12 @@ public partial class StoryEvents : Node
                 if (m1.Id != m2.Id)
                 {
                     _triggeredEvents.Add($"team_conflict_{_gm.GameMonth}");
-                    _gm.ShowChoicePopup("⚡ 团队内部矛盾",
-                        $"{m1.Name}和{m2.Name}在项目方向上有严重分歧，影响团队效率。",
-                        "组织调解", "让他们自己解决",
+                    _gm.ShowChoicePopup(Loc.Tr("evt.team_conflict.title"), Loc.TrF("evt.team_conflict.desc", m1.Name, m2.Name),
+                        Loc.Tr("evt.team_conflict.optA"), Loc.Tr("evt.team_conflict.optB"),
                         () => { m1.Satisfaction += 10; m2.Satisfaction += 10; var p = conflictTeam.CurrentProject; if (p != null) p.TechDebt = Mathf.Max(0, p.TechDebt - 3); },
                         () => { m1.Satisfaction -= 10; m2.Satisfaction -= 10; if (conflictTeam.CurrentProject != null) conflictTeam.CurrentProject.TechDebt += 5; },
                         new Color(0.8f, 0.3f, 0.3f));
-                    return $"内部矛盾: {m1.Name} vs {m2.Name}";
+                    return $"conflict: {m1.Name} vs {m2.Name}";
                 }
             }
         }
@@ -1318,9 +1316,9 @@ public partial class StoryEvents : Node
         if (!_triggeredEvents.Contains($"steam_deck_{_gm.GameMonth}") && hasDev)
         {
             _triggeredEvents.Add($"steam_deck_{_gm.GameMonth}");
-            var pName = devTeams[0].CurrentProject?.Name ?? "未知";
-            _gm.ShowChoicePopup("🎮 Steam Deck认证", $"Valve联系你，邀请《{pName}》参与Steam Deck认证计划！",
-                "申请认证(¥3万)", "以后再考虑",
+            var pName = devTeams[0].CurrentProject?.Name ?? "";
+            _gm.ShowChoicePopup(Loc.Tr("evt.steam_deck.title"), Loc.TrF("evt.steam_deck.desc", pName),
+                Loc.Tr("evt.steam_deck.optA"), Loc.Tr("evt.steam_deck.optB"),
                 () => { if (_res != null) _res.SpendMoney(30000, "platform"); var p = devTeams[0].CurrentProject; if (p != null) p.MarketingHype = Mathf.Min(100, p.MarketingHype + 15); if (fanMgr != null) fanMgr.CasualFans += 400; },
                 () => {},
                 new Color(0.3f, 0.6f, 0.9f));
@@ -1329,8 +1327,8 @@ public partial class StoryEvents : Node
         if (!_triggeredEvents.Contains($"player_art_{_gm.GameMonth}"))
         {
             _triggeredEvents.Add($"player_art_{_gm.GameMonth}");
-            _gm.ShowChoicePopup("🎨 玩家二创热潮", "你的游戏在社交平台掀起了一波同人创作热潮！",
-                "官方转发推广", "默默关注",
+            _gm.ShowChoicePopup(Loc.Tr("evt.fan_art.title"), Loc.Tr("evt.fan_art.desc"),
+                Loc.Tr("evt.fan_art.optA"), Loc.Tr("evt.fan_art.optB"),
                 () => { if (fanMgr != null) fanMgr.CasualFans += 500; if (fanMgr != null) fanMgr.DiehardFans += 100; },
                 () => { if (fanMgr != null) fanMgr.DiehardFans += 50; },
                 new Color(0.9f, 0.4f, 0.6f));
@@ -1342,8 +1340,8 @@ public partial class StoryEvents : Node
             var bestGame = Services.GameDevManager.CompletedProjects.OrderByDescending(p => p.FinalScore).FirstOrDefault();
             if (bestGame != null && bestGame.FinalScore >= 80)
             {
-                _gm.ShowChoicePopup("🏆 游戏奖项提名", $"《{bestGame.Name}》获得年度独立游戏奖提名！",
-                    "准备获奖感言", "低调处理",
+                _gm.ShowChoicePopup(Loc.Tr("evt.award_nom.title"), Loc.TrF("evt.award_nom.desc", bestGame.Name),
+                    Loc.Tr("evt.award_nom.optA"), Loc.Tr("evt.award_nom.optB"),
                     () => { if (fanMgr != null) fanMgr.CasualFans += 1000; _gm.Engines.ForEach(e => e.Reputation += 20); if (_res != null) _res.GainInspiration(10); },
                     () => { if (fanMgr != null) fanMgr.DiehardFans += 200; },
                     new Color(0.9f, 0.7f, 0.1f));
