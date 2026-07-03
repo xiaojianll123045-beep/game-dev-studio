@@ -33,6 +33,8 @@ var title_label: Label
 var diff_row: HBoxContainer
 var close_x_btn: Button
 var bottom_bar: HBoxContainer
+var _init_pw: float = 0.0
+var _init_ph: float = 0.0
 
 func OnLoad(_gm, bridge):
 	gm = _gm
@@ -176,6 +178,8 @@ func StartNew(nr: int, nc: int, nm: int):
 	# bottom_bar is the class member — already assigned above
 	panel.add_child(bottom_bar)
 
+	# 记录初始面板尺寸，缩放时保持不变
+	_init_pw = pw; _init_ph = ph
 	# 重置平移 & 面板输入
 	_pan_x = 0; _pan_y = 0; _dragging = false
 	panel.gui_input.connect(_OnPanelInput)
@@ -214,16 +218,9 @@ func _ZoomOut():
 	_RefreshLayout()
 
 func _RefreshLayout():
-	var pw = cols * cell_size + 80
-	var ph = rows * cell_size + 130
-	panel.offset_left = -pw/2; panel.offset_top = -ph/2
-	panel.offset_right = pw/2; panel.offset_bottom = ph/2
-	title_label.position.x = pw/2 - 80
-	mine_counter.position.x = 10
-	timer_label.position.x = pw - 110
-	mode_btn.position.x = pw/2 - 40
-	diff_row.position.x = pw/2 - 140
-	close_x_btn.position.x = pw - 30
+	# 面板和 UI 固定，只有雷区缩放
+	panel.offset_left = -_init_pw/2; panel.offset_top = -_init_ph/2
+	panel.offset_right = _init_pw/2; panel.offset_bottom = _init_ph/2
 	for r in range(rows):
 		for c in range(cols):
 			var cr = cells[r][c]
@@ -250,18 +247,27 @@ func _Close():
 
 func _OnCellInput(ev: InputEvent, r: int, c: int):
 	if game_over or won: return
-	if ev is InputEventMouseButton and ev.pressed:
-		if ev.button_index == MOUSE_BUTTON_WHEEL_UP:
-			_ZoomIn(); return
-		elif ev.button_index == MOUSE_BUTTON_WHEEL_DOWN:
-			_ZoomOut(); return
-		if ev.button_index == MOUSE_BUTTON_LEFT:
-			if flag_mode:
+	if ev is InputEventMouseButton:
+		if not ev.pressed and ev.button_index == MOUSE_BUTTON_RIGHT:
+			_dragging = false; return
+		if ev.pressed:
+			if ev.button_index == MOUSE_BUTTON_WHEEL_UP:
+				_ZoomIn(); return
+			elif ev.button_index == MOUSE_BUTTON_WHEEL_DOWN:
+				_ZoomOut(); return
+			if ev.button_index == MOUSE_BUTTON_LEFT:
+				if flag_mode:
+					_ToggleFlag(r, c)
+				else:
+					_RevealCell(r, c)
+			elif ev.button_index == MOUSE_BUTTON_RIGHT:
 				_ToggleFlag(r, c)
-			else:
-				_RevealCell(r, c)
-		elif ev.button_index == MOUSE_BUTTON_RIGHT:
-			_ToggleFlag(r, c)
+	elif ev is InputEventMouseMotion and Input.is_mouse_button_pressed(MOUSE_BUTTON_RIGHT):
+		if not _dragging:
+			_dragging = true; _drag_start = get_viewport().get_mouse_position()
+		var mp = get_viewport().get_mouse_position()
+		_pan_x += mp.x - _drag_start.x; _pan_y += mp.y - _drag_start.y
+		_drag_start = mp; _RefreshLayout()
 
 func _ToggleFlag(r: int, c: int):
 	if r < 0 or r >= rows or c < 0 or c >= cols: return
