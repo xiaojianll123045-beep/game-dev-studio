@@ -28,7 +28,7 @@ window/per_pixel_transparency/enabled=false
 
 [dotnet]
 
-project/assembly_name="游戏开发商"
+project/assembly_name="GameTycoon"
 
 [input]
 
