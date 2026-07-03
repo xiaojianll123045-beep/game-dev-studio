@@ -48,7 +48,9 @@ var move_timer = 0.0
 var move_interval = 0.12
 
 var dirs = {0: Vector2(0,-1), 1: Vector2(1,0), 2: Vector2(0,1), 3: Vector2(-1,0)}
-var dir_angles = {0: 0, 1: 90, 2: 180, 3: 270}
+var dir_chars = {0: "▲", 1: "▶", 2: "▼", 3: "◀"}
+var bullet_move_timer = 0.0
+var bullet_move_interval = 0.08
 
 func OnLoad(_gm, bridge):
 	gm = _gm
@@ -119,7 +121,7 @@ func _build_ui():
 	panel.add_child(wave_label)
 
 	info_label = Label.new()
-	info_label.text = "↑↓←→ 移动\n空格 射击\n方向键控制坦克\n消灭所有敌军！"
+	info_label.text = "WASD/方向键 移动\n空格 射击\n▲▶▼◀ 显示朝向\n消灭所有敌军！"
 	info_label.add_theme_font_size_override("font_size", 9)
 	info_label.add_theme_color_override("font_color", Color(0.4, 0.4, 0.5))
 	info_label.position = Vector2(ox, 100)
@@ -184,17 +186,17 @@ func _unhandled_input(ev):
 	if game_over or won: return
 	if ev is InputEventKey and ev.pressed and not ev.echo:
 		match ev.keycode:
-			KEY_LEFT: left = true
-			KEY_RIGHT: right = true
-			KEY_UP: up = true
-			KEY_DOWN: down = true
+			KEY_LEFT, KEY_A: left = true
+			KEY_RIGHT, KEY_D: right = true
+			KEY_UP, KEY_W: up = true
+			KEY_DOWN, KEY_S: down = true
 			KEY_SPACE: _player_shoot()
 	if ev is InputEventKey and not ev.pressed:
 		match ev.keycode:
-			KEY_LEFT: left = false
-			KEY_RIGHT: right = false
-			KEY_UP: up = false
-			KEY_DOWN: down = false
+			KEY_LEFT, KEY_A: left = false
+			KEY_RIGHT, KEY_D: right = false
+			KEY_UP, KEY_W: up = false
+			KEY_DOWN, KEY_S: down = false
 
 func next_wave():
 	wave += 1
@@ -261,9 +263,13 @@ func _process(delta):
 			e.shoot_timer = 1.5 + randf() * 1.0
 			_fire_bullet(e, false)
 		_draw_enemy(e)
-	# 子弹更新
+	# 子弹更新（带冷却）
+	bullet_move_timer -= delta
+	if bullet_move_timer <= 0:
+		bullet_move_timer = bullet_move_interval
 	var new_bullets = []
 	for b in bullets:
+		if bullet_move_timer > 0: continue
 		b.timer -= delta
 		if b.timer <= 0: continue
 		var d = dirs[b.dir]
@@ -392,9 +398,9 @@ func _draw_player():
 	var color = Color(0.9, 0.8, 0.2)
 	if player.invincible_timer > 0:
 		color = Color(1, 1, 1) if int(player.invincible_timer * 4) % 2 == 0 else color
-	player_label.text = "🛡" if player.hp > 1 else "🚀"
-	player_label.position = Vector2(20 + player.x * CELL, 10 + player.y * CELL - 2)
-	player_label.size = Vector2(CELL, CELL)
+	player_label.text = dir_chars.get(player.dir, "▲") + "❤" + str(player.hp)
+	player_label.position = Vector2(20 + player.x * CELL - 4, 10 + player.y * CELL - 4)
+	player_label.size = Vector2(CELL + 8, CELL)
 	player_label.add_theme_color_override("font_color", color)
 
 func _draw_enemy(e):
