@@ -502,8 +502,16 @@ public partial class GameManager : Node3D
                     tp.Visible = true;
         }
 
-        if (GlobalSettings.NewGame && !_tutorialMgr.TutorialCompleted && Founder.HasCreated)
+        if (GlobalSettings.NewGame && Founder.HasCreated && _tutorialMgr != null && !_tutorialMgr.TutorialCompleted)
+        {
             _tutorialMgr.StartTutorial();
+            // 教程结束后弹出欢迎语
+            Callable.From(() => {
+                ShowPopup("🎮 欢迎成为游戏制作人！",
+                    "本游戏主流程是开发游戏积攒粉丝和金钱，最终成为第一大公司！如果您没钱了，可以考虑接外包合同哦",
+                    new Color(0.3f, 0.8f, 0.5f));
+            }).CallDeferred();
+        }
     }
 
     private void StartTutorialDeferred()
