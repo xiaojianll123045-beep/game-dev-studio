@@ -120,7 +120,7 @@ func StartNew(nr: int, nc: int, nm: int):
 	mode_btn.pressed.connect(self._ToggleMode)
 	panel.add_child(mode_btn)
 
-	var 	diff_row = HBoxContainer.new()
+	diff_row = HBoxContainer.new()
 	diff_row.position = Vector2(pw/2 - 140, 44)
 	diff_row.size = Vector2(280, 24)
 
@@ -173,6 +173,7 @@ func StartNew(nr: int, nc: int, nm: int):
 	var spacer = Control.new()
 	spacer.size_flags_horizontal = Control.SIZE_EXPAND_FILL
 	bottom_bar.add_child(spacer)
+	# bottom_bar is the class member — already assigned above
 	panel.add_child(bottom_bar)
 
 	# 重置平移 & 面板输入
