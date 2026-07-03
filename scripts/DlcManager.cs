@@ -23,8 +23,10 @@ public static class DlcManager
 {
     private static List<DlcManifest> _loaded = new();
     private static List<DlcManifest> _activeMinigames = new();
+    private static HashSet<string> _runningDlcIds = new();
     public static IReadOnlyList<DlcManifest> Loaded => _loaded;
     public static IReadOnlyList<DlcManifest> ActiveMinigames => _activeMinigames;
+    public static bool IsDlcRunning(string id) => _runningDlcIds.Contains(id);
 
     public static void ScanAll()
     {
@@ -121,7 +123,9 @@ public static class DlcManager
             var n = new Node { Name = "DLC_" + dlc.Id };
             n.SetScript(dlc.LoadedScript);
             gm.AddChild(n);
-            // 调用 OnLoad 初始化（同 Mod 系统行为）
+            _runningDlcIds.Add(dlc.Id);
+            // 节点被释放时自动移除运行标记
+            n.TreeExited += () => { _runningDlcIds.Remove(dlc.Id); };
             var bridge = gm.GetNodeOrNull<ModBridge>("ModBridge");
             try { n.Call("OnLoad", gm, bridge); } catch (Exception ex) { GD.PrintErr($"[DLC] OnLoad error: {ex.Message}"); }
             return n;

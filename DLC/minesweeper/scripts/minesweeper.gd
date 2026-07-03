@@ -27,8 +27,17 @@ var mode_btn: Button
 
 func OnLoad(_gm, bridge):
 	gm = _gm
-	process_mode = PROCESS_MODE_ALWAYS
 	StartGame()
+	# 用 Timer 代替 _Process，避免暂停影响
+	var t = Timer.new()
+	t.wait_time = 0.5; t.one_shot = false
+	t.timeout.connect(func(): 
+		if started and not game_over and not won:
+			timer += 0.5
+			timer_label.text = "⏱ " + str(int(timer))
+	)
+	add_child(t)
+	t.start()
 
 func StartGame():
 	StartNew(9, 9, 10)
@@ -170,10 +179,7 @@ func _Close():
 		panel = null
 	queue_free()
 
-func _Process(delta):
-	if started and not game_over and not won:
-		timer += delta
-		timer_label.text = "⏱ " + str(int(timer))
+	
 
 func _OnCellInput(ev: InputEvent, r: int, c: int):
 	if game_over or won: return
