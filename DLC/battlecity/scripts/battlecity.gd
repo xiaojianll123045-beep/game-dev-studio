@@ -260,7 +260,7 @@ func _process(delta):
 		b.timer -= delta
 		if b.timer <= 0: continue
 		var d = dirs[b.dir]
-		b.x += d.x * 2; b.y += d.y * 2
+		b.x += d.x; b.y += d.y
 		# 边界
 		if b.x < 0 or b.x >= COLS or b.y < 0 or b.y >= ROWS: continue
 		# 命中砖墙
@@ -325,7 +325,7 @@ func _player_shoot():
 	_fire_bullet(player, true)
 
 func _fire_bullet(src, is_player):
-	var b = {x = src.x, y = src.y, dir = src.dir, timer = 1.5, is_player_bullet = is_player}
+	var b = {x = float(src.x), y = float(src.y), dir = src.dir, timer = 2.0, is_player_bullet = is_player}
 	var d = dirs[src.dir]
 	b.x += d.x; b.y += d.y
 	if b.x >= 0 and b.x < COLS and b.y >= 0 and b.y < ROWS:
@@ -369,7 +369,7 @@ func _update_ui():
 	score_label.text = "得分: " + str(score)
 	wave_label.text = "波次: " + str(wave)
 	if player != null:
-		score_label.text += "  ❤x" + str(player.hp)
+		score_label.text = "得分: " + str(score) + "  ❤x" + str(player.hp)
 
 func _close():
 	if _modal_overlay != null: _modal_overlay.queue_free(); _modal_overlay = null
