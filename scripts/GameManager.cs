@@ -7503,6 +7503,13 @@ public partial class GameManager : Node3D
         { if (ci++ > 0) s.Append(","); s.Append($"{{\"k\":{kv.Key},\"v\":{kv.Value}}}"); }
         s.Append($"],\"targetTech\":{JsonStr(t.TargetTech?.Id ?? "")}");
         s.Append($",\"outsourceRemaining\":{t.OutsourceMonthsRemaining}");
+        s.Append(",\"contract\":");
+        if (t.CurrentContract.HasValue)
+        {
+            var c = t.CurrentContract.Value;
+            s.Append($"{{\"name\":{JsonStr(c.Name)},\"diff\":{(int)c.Difficulty},\"months\":{c.RequiredMonths},\"pay\":{c.Payment},\"penalty\":{c.PenaltyRate},\"skill\":{(int)c.PrimarySkill},\"minLv\":{c.MinSkillLevel},\"exp\":{c.ExpReward}}}");
+        }
+        else s.Append("null");
         s.Append(",\"project\":");
         if (t.CurrentProject != null) s.Append(SerializeProj(t.CurrentProject));
         else s.Append("null");
@@ -7529,6 +7536,20 @@ public partial class GameManager : Node3D
         string techId = e.GetProperty("targetTech").GetString();
         if (!string.IsNullOrEmpty(techId) && TechTreeData.AllTech.ContainsKey(techId))
             t.TargetTech = TechTreeData.AllTech[techId];
+        if (e.TryGetProperty("contract", out var ct) && ct.ValueKind != JsonValueKind.Null)
+        {
+            t.CurrentContract = new OutsourceContract
+            {
+                Name = ct.GetProperty("name").GetString(),
+                Difficulty = (OutsourceDifficulty)ct.GetProperty("diff").GetInt32(),
+                RequiredMonths = ct.GetProperty("months").GetInt32(),
+                Payment = ct.GetProperty("pay").GetSingle(),
+                PenaltyRate = ct.GetProperty("penalty").GetSingle(),
+                PrimarySkill = (SkillType)ct.GetProperty("skill").GetInt32(),
+                MinSkillLevel = ct.GetProperty("minLv").GetInt32(),
+                ExpReward = ct.GetProperty("exp").GetInt32()
+            };
+        }
         if (e.TryGetProperty("project", out var pj) && pj.ValueKind != JsonValueKind.Null)
             t.CurrentProject = DeserializeProj(pj);
         return t;
