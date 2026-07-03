@@ -5,7 +5,7 @@ using Godot;
 public partial class MenuManager : Node
 {
 	private CanvasLayer _canvas;
-	private Panel _settingsPanel, _aboutPanel, _loadPanel;
+	private Panel _settingsPanel, _aboutPanel, _thanksPanel, _loadPanel;
 	private Control _ui;
 	private OptionButton _modeBtn, _resBtn;
 	private CheckBox _vsyncCb;
@@ -504,71 +504,16 @@ public partial class MenuManager : Node
 			ly += 34;
 		}
 
-		// 特别鸣谢（从 JSON 加载）
-		var thanksList = new System.Collections.Generic.List<(string name, string role, string contact)>();
-		try
-		{
-			string lang = Loc.CurrentLang == 0 ? "zh" : "en";
-			if (FileAccess.FileExists("res://locales/thanks.json"))
-			{
-				using var tf = FileAccess.Open("res://locales/thanks.json", FileAccess.ModeFlags.Read);
-				if (tf != null)
-				{
-					var raw = tf.GetAsText();
-					var doc = System.Text.Json.JsonDocument.Parse(raw);
-					if (doc.RootElement.TryGetProperty(lang, out var arr))
-					{
-						foreach (var item in arr.EnumerateArray())
-						{
-							string n = item.TryGetProperty("name", out var nn) ? nn.GetString() ?? "" : "";
-							string r = item.TryGetProperty("role", out var rr) ? rr.GetString() ?? "" : "";
-							string c = item.TryGetProperty("contact", out var cc) ? cc.GetString() ?? "" : "";
-							if (!string.IsNullOrEmpty(n)) thanksList.Add((n, r, c));
-						}
-					}
-				}
-			}
-		}
-		catch { }
-		if (thanksList.Count > 0)
-		{
-			ly += 8;
-			var thTitle = new Label { Text = Loc.Tr("about.thanks"), Position = new(pw / 2 - 80, ly), Size = new(160, 20) };
-			thTitle.AddThemeFontSizeOverride("font_size", 11);
-			thTitle.AddThemeColorOverride("font_color", new Color(0.15f, 0.15f, 0.25f));
-			thTitle.HorizontalAlignment = HorizontalAlignment.Center;
-			_aboutPanel.AddChild(thTitle);
-			ly += 20;
-			foreach (var t in thanksList)
-			{
-				var tn = new RichTextLabel { Position = new(editX, ly), Size = new(editW, 20), BbcodeEnabled = true };
-				tn.Text = "[center]" + t.name + "[/center]";
-				tn.AddThemeFontSizeOverride("font_size", 12);
-				tn.AddThemeColorOverride("default_color", new Color(0.3f, 0.3f, 0.4f));
-				tn.SelectionEnabled = true; tn.MouseFilter = Control.MouseFilterEnum.Stop;
-				_aboutPanel.AddChild(tn);
-				ly += 18;
-				if (!string.IsNullOrEmpty(t.role))
-				{
-					var tr = new Label { Text = t.role, Position = new(pw / 2 - 120, ly), Size = new(240, 16) };
-					tr.AddThemeFontSizeOverride("font_size", 9);
-					tr.AddThemeColorOverride("font_color", new Color(0.45f, 0.45f, 0.55f));
-					tr.HorizontalAlignment = HorizontalAlignment.Center;
-					_aboutPanel.AddChild(tr);
-					ly += 14;
-				}
-				if (!string.IsNullOrEmpty(t.contact))
-				{
-					var tc = new RichTextLabel { Position = new(editX, ly), Size = new(editW, 18), BbcodeEnabled = true };
-					tc.Text = "[center]" + t.contact + "[/center]";
-					tc.AddThemeFontSizeOverride("font_size", 10);
-					tc.AddThemeColorOverride("default_color", new Color(0.4f, 0.4f, 0.5f));
-					tc.SelectionEnabled = true; tc.MouseFilter = Control.MouseFilterEnum.Stop;
-					_aboutPanel.AddChild(tc);
-					ly += 20;
-				}
-			}
-		}
+		// 特别鸣谢 → 按钮，点击打开独立页面
+		var thanksBtn = new Button { Text = Loc.Tr("about.thanks"), Position = new(pw / 2 - 80, ly + 6), Size = new(160, 28), CustomMinimumSize = new(160, 28), Flat = true };
+		thanksBtn.AddThemeFontSizeOverride("font_size", 12);
+		thanksBtn.AddThemeColorOverride("font_color", new Color(0.15f, 0.18f, 0.22f));
+		thanksBtn.AddThemeColorOverride("font_hover_color", new Color(0.40f, 0.40f, 0.40f));
+		thanksBtn.AddThemeStyleboxOverride("normal", MakeStyle(new(0.90f, 0.89f, 0.86f), new(0.45f, 0.5f, 0.55f)));
+		thanksBtn.AddThemeStyleboxOverride("hover", MakeStyle(new(0.80f, 0.79f, 0.76f), new(0.3f, 0.4f, 0.55f)));
+		thanksBtn.Pressed += () => { if (_aboutPanel != null) _aboutPanel.Visible = false; ShowThanksPanel(cx, cy); };
+		_aboutPanel.AddChild(thanksBtn);
+		ly += 38;
 
 		ly += 6;
 		var tip = new Label { Text = Loc.Tr("about.copy_tip"), Position = new(pw / 2 - 130, ly), Size = new(260, 18) };
@@ -595,6 +540,94 @@ public partial class MenuManager : Node
 		closeBtn.AddThemeStyleboxOverride("hover", MakeStyle(new(0.80f, 0.79f, 0.76f), new(0.3f, 0.4f, 0.55f)));
 		closeBtn.Pressed += () => _aboutPanel.Visible = false;
 		_aboutPanel.AddChild(closeBtn);
+	}
+
+	// 特别鸣谢 ─ 弹出独立页面
+	private List<(string name, string role, string contact)> _LoadThanksList()
+	{
+		var list = new List<(string name, string role, string contact)>();
+		try
+		{
+			string lang = Loc.CurrentLang == 0 ? "zh" : "en";
+			if (FileAccess.FileExists("res://locales/thanks.json"))
+			{
+				using var tf = FileAccess.Open("res://locales/thanks.json", FileAccess.ModeFlags.Read);
+				if (tf != null)
+				{
+					var raw = tf.GetAsText();
+					var doc = System.Text.Json.JsonDocument.Parse(raw);
+					if (doc.RootElement.TryGetProperty(lang, out var arr))
+					{
+						foreach (var item in arr.EnumerateArray())
+						{
+							string n = item.TryGetProperty("name", out var nn) ? nn.GetString() ?? "" : "";
+							string r = item.TryGetProperty("role", out var rr) ? rr.GetString() ?? "" : "";
+							string c = item.TryGetProperty("contact", out var cc) ? cc.GetString() ?? "" : "";
+							if (!string.IsNullOrEmpty(n)) list.Add((n, r, c));
+						}
+					}
+				}
+			}
+		}
+		catch { }
+		return list;
+	}
+	private void _RebuildThanksPanel(float cx, float cy)
+	{
+		if (_thanksPanel != null) { _thanksPanel.QueueFree(); _thanksPanel = null; }
+		var list = _LoadThanksList();
+		if (list.Count == 0) return;
+		float pw = 480, ph = 60 + list.Count * 60;
+		if (ph > 520) ph = 520;
+		_thanksPanel = MkPanel(cx - pw / 2, cy - ph / 2, pw, ph);
+		_thanksPanel.Visible = true;
+		_ui.AddChild(_thanksPanel);
+		_thanksPanel.AddChild(MkLabel(Loc.Tr("about.thanks"), pw / 2 - 60, 10, 120, 24, 16, new Color(0.10f, 0.14f, 0.22f), HorizontalAlignment.Center));
+		_thanksPanel.AddChild(new ColorRect { Position = new(20, 38), Size = new(pw - 40, 1), Color = new Color(0.70f, 0.72f, 0.75f, 0.25f), MouseFilter = Control.MouseFilterEnum.Ignore });
+		float editW = pw - 80, editX = (pw - editW) / 2;
+		float ly = 48;
+		foreach (var t in list)
+		{
+			var tn = new RichTextLabel { Position = new(editX, ly), Size = new(editW, 20), BbcodeEnabled = true };
+			tn.Text = "[center]" + t.name + "[/center]";
+			tn.AddThemeFontSizeOverride("font_size", 13);
+			tn.AddThemeColorOverride("default_color", new Color(0.15f, 0.15f, 0.25f));
+			tn.SelectionEnabled = true; tn.MouseFilter = Control.MouseFilterEnum.Stop;
+			_thanksPanel.AddChild(tn);
+			ly += 18;
+			if (!string.IsNullOrEmpty(t.role))
+			{
+				var tr = new Label { Text = t.role, Position = new(pw / 2 - 120, ly), Size = new(240, 16) };
+				tr.AddThemeFontSizeOverride("font_size", 10);
+				tr.AddThemeColorOverride("font_color", new Color(0.45f, 0.45f, 0.55f));
+				tr.HorizontalAlignment = HorizontalAlignment.Center;
+				_thanksPanel.AddChild(tr);
+				ly += 16;
+			}
+			if (!string.IsNullOrEmpty(t.contact))
+			{
+				var tc = new RichTextLabel { Position = new(editX, ly), Size = new(editW, 18), BbcodeEnabled = true };
+				tc.Text = "[center]" + t.contact + "[/center]";
+				tc.AddThemeFontSizeOverride("font_size", 10);
+				tc.AddThemeColorOverride("default_color", new Color(0.4f, 0.4f, 0.5f));
+				tc.SelectionEnabled = true; tc.MouseFilter = Control.MouseFilterEnum.Stop;
+				_thanksPanel.AddChild(tc);
+				ly += 22;
+			}
+		}
+		ly += 4;
+		var closeBtn = new Button { Text = Loc.Tr("menu.close"), Position = new(pw / 2 - 50, ly), Size = new(100, 28), CustomMinimumSize = new(100, 28), Flat = true };
+		closeBtn.AddThemeFontSizeOverride("font_size", 12);
+		closeBtn.AddThemeColorOverride("font_color", new Color(0.15f, 0.18f, 0.22f));
+		closeBtn.AddThemeColorOverride("font_hover_color", new Color(0.40f, 0.40f, 0.40f));
+		closeBtn.AddThemeStyleboxOverride("normal", MakeStyle(new(0.90f, 0.89f, 0.86f), new(0.45f, 0.5f, 0.55f)));
+		closeBtn.AddThemeStyleboxOverride("hover", MakeStyle(new(0.80f, 0.79f, 0.76f), new(0.3f, 0.4f, 0.55f)));
+		closeBtn.Pressed += () => { _thanksPanel.QueueFree(); _thanksPanel = null; };
+		_thanksPanel.AddChild(closeBtn);
+	}
+	private void ShowThanksPanel(float cx, float cy)
+	{
+		_RebuildThanksPanel(cx, cy);
 	}
 
 	private void ApplyDisplayMode(int idx)
