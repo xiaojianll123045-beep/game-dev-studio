@@ -5746,7 +5746,7 @@ public partial class GameManager : Node3D
         }
         vc.AddChild(shareBox);
         content.AddChild(vc); panel.AddChild(content);
-        _uiLayer.AddChild(panel); PushPanel(panel);
+        PushPanel(panel);
     }
 
     private void RefreshCompanyDetailDelayed()
