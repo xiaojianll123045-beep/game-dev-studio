@@ -7589,6 +7589,12 @@ public partial class GameManager : Node3D
                 ExpReward = ct.GetProperty("exp").GetInt32()
             };
         }
+        // 兼容旧存档：contract 缺失但有 outsourceRemaining → 清除外包状态
+        else if (t.OutsourceMonthsRemaining > 0)
+        {
+            t.Task = TeamTask.None;
+            t.OutsourceMonthsRemaining = 0;
+        }
         if (e.TryGetProperty("project", out var pj) && pj.ValueKind != JsonValueKind.Null)
             t.CurrentProject = DeserializeProj(pj);
         return t;
