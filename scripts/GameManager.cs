@@ -3907,9 +3907,9 @@ public partial class GameManager : Node3D
                     ShowToast("已解雇", $"{Loc.DisplayName(emp.Name)} 已离开公司", new Color(0.8f, 0.2f, 0.2f));
                     break;
             }
-            menu.QueueFree();
+            _ctxMenuOpen = false; menu.QueueFree();
         };
-        menu.PopupHide += () => menu.QueueFree();
+        menu.PopupHide += () => { _ctxMenuOpen = false; menu.QueueFree(); };
 
         _uiLayer.AddChild(menu);
         _ctxMenuOpen = true;
@@ -4110,7 +4110,7 @@ public partial class GameManager : Node3D
                     CloseAll(); ShowTeamPanel();
                     break;
             }
-            menu.QueueFree();
+            _ctxMenuOpen = false; menu.QueueFree();
         };
         _ctxMenuOpen = true;
         menu.PopupHide += () => { _ctxMenuOpen = false; menu.QueueFree(); };
