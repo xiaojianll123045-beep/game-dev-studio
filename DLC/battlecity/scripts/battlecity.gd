@@ -34,6 +34,7 @@ var player_label: Label
 var info_label: Label
 var score_label: Label
 var wave_label: Label
+var enemy_labels: Dictionary = {}
 
 var left = false
 var right = false
@@ -283,6 +284,9 @@ func _process(delta):
 			var hit = false
 			for e in enemies:
 				if abs(e.x - b.x) < 1 and abs(e.y - b.y) < 1:
+					if enemy_labels.has(e.id):
+						enemy_labels[e.id].queue_free()
+						enemy_labels.erase(e.id)
 					enemies.erase(e); enemies_killed += 1; score += 100
 					_add_explosion(e.x, e.y); hit = true; break
 			if hit: continue
@@ -318,10 +322,18 @@ func _spawn_enemy():
 	var spawns = [Vector2(1,0), Vector2(COLS-2,0), Vector2(COLS/2,0)]
 	var s = spawns[randi() % spawns.size()]
 	if _tank_at(s.x, s.y): return
-	var e = {x = s.x, y = s.y, dir = 2, hp = 1, move_timer = 0.5, shoot_timer = 2.0}
+	var id = enemies_spawned
+	var e = {x = s.x, y = s.y, dir = 2, hp = 1, move_timer = 0.5, shoot_timer = 2.0, id = id}
 	enemies.append(e)
 	enemies_spawned += 1
-	_draw_enemy(e)
+	# 创建敌人视觉元素
+	var lbl = Label.new()
+	lbl.text = "🔻"
+	lbl.position = Vector2(20 + e.x * CELL, 10 + e.y * CELL - 4)
+	lbl.size = Vector2(CELL, CELL)
+	lbl.add_theme_font_size_override("font_size", 20)
+	panel.add_child(lbl)
+	enemy_labels[id] = lbl
 
 func _player_shoot():
 	if player == null or shoot_timer > 0: return
@@ -357,7 +369,9 @@ func _draw_player():
 	player_label.add_theme_color_override("font_color", color)
 
 func _draw_enemy(e):
-	pass
+	var lbl = enemy_labels.get(e.id)
+	if lbl != null:
+		lbl.position = Vector2(20 + e.x * CELL, 10 + e.y * CELL - 4)
 
 func _info_msg(msg):
 	var lbl = Label.new()
