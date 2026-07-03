@@ -648,6 +648,109 @@ public partial class StoryEvents : Node
             }
         }
 
+        // ── 更多内部事件（国际化） ──
+        if (emps.Count >= 3 && !_triggeredEvents.Contains($"promotion_{_gm.GameMonth}"))
+        {
+            var cand = emps.Where(e => e.GetHighestLevel() >= 3 && !e.IsCaptain).OrderByDescending(e => e.Satisfaction).FirstOrDefault();
+            if (cand != null)
+            {
+                _triggeredEvents.Add($"promotion_{_gm.GameMonth}");
+                _gm.ShowChoicePopup(Loc.Tr("evt.promotion_title"), Loc.TrF("evt.promotion_desc", cand.Name),
+                    Loc.Tr("evt.promotion_yes"), Loc.Tr("evt.promotion_no"),
+                    () => { cand.IsCaptain = true; cand.Satisfaction += 20; },
+                    () => { cand.Satisfaction -= 10; },
+                    new Color(0.3f, 0.7f, 0.5f));
+                return $"{cand.Name}晋升讨论";
+            }
+        }
+        if (emps.Count >= 3 && !_triggeredEvents.Contains($"salary_negotiate_{_gm.GameMonth}"))
+        {
+            var topPerformer = emps.OrderByDescending(e => e.GetHighestLevel()).FirstOrDefault(e => e.Salary > 0);
+            if (topPerformer != null)
+            {
+                _triggeredEvents.Add($"salary_negotiate_{_gm.GameMonth}");
+                _gm.ShowChoicePopup(Loc.Tr("evt.salary_title"), Loc.TrF("evt.salary_desc", topPerformer.Name),
+                    Loc.Tr("evt.salary_raise"), Loc.Tr("evt.salary_refuse"),
+                    () => { if (_res != null) _res.SpendMoney(5000, "salary"); topPerformer.Satisfaction += 15; },
+                    () => { topPerformer.Satisfaction -= 15; if (rng.Next(100) < 20) { _empMgr.FireEmployee(topPerformer); _gm.ShowPopup(Loc.Tr("evt.salary_left"), Loc.TrF("evt.salary_left_msg", topPerformer.Name), new Color(0.9f, 0.3f, 0.2f)); } },
+                    new Color(0.8f, 0.6f, 0.1f));
+                return $"{topPerformer.Name}要求加薪";
+            }
+        }
+        if (!_triggeredEvents.Contains($"whistleblower_{_gm.GameMonth}"))
+        {
+            var lowSat = emps.Where(e => e.Satisfaction < 25).ToList();
+            if (lowSat.Count >= 2)
+            {
+                _triggeredEvents.Add($"whistleblower_{_gm.GameMonth}");
+                _gm.ShowChoicePopup(Loc.Tr("evt.whistleblower_title"), Loc.TrF("evt.whistleblower_desc", lowSat[0].Name, lowSat[1].Name),
+                    Loc.Tr("evt.whistleblower_improve"), Loc.Tr("evt.whistleblower_ignore"),
+                    () => { foreach (var e in lowSat) e.Satisfaction += 20; if (_res != null) _res.SpendMoney(20000, "welfare"); },
+                    () => { foreach (var e in lowSat) e.Satisfaction -= 10; },
+                    new Color(0.9f, 0.3f, 0.2f));
+                return "员工举报";
+            }
+        }
+        if (!_triggeredEvents.Contains($"team_building_{_gm.GameMonth}") && _res != null && _res.Money > 100000)
+        {
+            _triggeredEvents.Add($"team_building_{_gm.GameMonth}");
+            _gm.ShowChoicePopup(Loc.Tr("evt.teambuild_title"), Loc.Tr("evt.teambuild_desc"),
+                Loc.Tr("evt.teambuild_yes"), Loc.Tr("evt.teambuild_no"),
+                () => { if (_res != null) _res.SpendMoney(15000, "welfare"); foreach (var e in emps) e.Satisfaction = Mathf.Min(100, e.Satisfaction + 15); },
+                () => { foreach (var e in emps.Where(e => e.Trait == EmployeeTrait.Ambitious)) e.Satisfaction -= 5; },
+                new Color(0.3f, 0.8f, 0.4f));
+            return "团建活动";
+        }
+        if (!_triggeredEvents.Contains($"training_opp_{_gm.GameMonth}") && _res != null && _res.Money > 50000)
+        {
+            var junior = emps.FirstOrDefault(e => e.GetHighestLevel() <= 2);
+            if (junior != null)
+            {
+                _triggeredEvents.Add($"training_opp_{_gm.GameMonth}");
+                _gm.ShowChoicePopup(Loc.Tr("evt.training_title"), Loc.TrF("evt.training_desc", junior.Name),
+                    Loc.Tr("evt.training_yes"), Loc.Tr("evt.training_no"),
+                    () => { if (_res != null) _res.SpendMoney(20000, "training"); foreach (var sk in junior.Skills.Keys.ToList()) junior.AddExp(sk, 20, true); junior.Satisfaction += 10; },
+                    () => { junior.Satisfaction -= 5; },
+                    new Color(0.3f, 0.5f, 0.9f));
+                return $"培训机会: {junior.Name}";
+            }
+        }
+        if (!_triggeredEvents.Contains($"hackathon_{_gm.GameMonth}"))
+        {
+            _triggeredEvents.Add($"hackathon_{_gm.GameMonth}");
+            _gm.ShowChoicePopup(Loc.Tr("evt.hackathon_title"), Loc.Tr("evt.hackathon_desc"),
+                Loc.Tr("evt.hackathon_yes"), Loc.Tr("evt.hackathon_no"),
+                () => { if (_res != null) _res.SpendMoney(8000, "hackathon"); if (rng.Next(100) < 40) { _gm.ShowPopup(Loc.Tr("evt.hackathon_result"), Loc.Tr("evt.hackathon_result_ok"), new Color(0.3f, 0.8f, 0.5f)); if (_res != null) _res.GainInspiration(20); } else { _gm.ShowPopup(Loc.Tr("evt.hackathon_result"), Loc.Tr("evt.hackathon_result_fail"), new Color(0.7f, 0.3f, 0.3f)); } },
+                () => {},
+                new Color(0.6f, 0.3f, 0.9f));
+            return "黑客马拉松";
+        }
+        if (!_triggeredEvents.Contains($"resign_scare_{_gm.GameMonth}"))
+        {
+            var unhappy = emps.Where(e => e.Satisfaction < 30).OrderBy(e => e.Satisfaction).FirstOrDefault();
+            if (unhappy != null && emps.Count >= 3)
+            {
+                _triggeredEvents.Add($"resign_scare_{_gm.GameMonth}");
+                _gm.ShowChoicePopup(Loc.Tr("evt.resign_title"), Loc.TrF("evt.resign_desc", unhappy.Name),
+                    Loc.Tr("evt.resign_retain"), Loc.Tr("evt.resign_letgo"),
+                    () => { if (_res != null) _res.SpendMoney(15000, "salary"); unhappy.Satisfaction += 25; },
+                    () => { _empMgr.FireEmployee(unhappy); _gm.ShowPopup(Loc.Tr("evt.resign_gone"), Loc.TrF("evt.resign_gone_msg", unhappy.Name), new Color(0.8f, 0.5f, 0.2f)); },
+                    new Color(0.8f, 0.2f, 0.2f));
+                return $"{unhappy.Name}辞职风波";
+            }
+        }
+        if (!_triggeredEvents.Contains($"new_recruit_{_gm.GameMonth}") && _res != null && _res.Money > 30000)
+        {
+            _triggeredEvents.Add($"new_recruit_{_gm.GameMonth}");
+            var recruit = _empMgr.GenerateRecruit();
+            _gm.ShowChoicePopup(Loc.Tr("evt.recruit_title"), Loc.TrF("evt.recruit_desc", recruit.Name, recruit.GetHighestLevel()),
+                Loc.Tr("evt.recruit_hire"), Loc.Tr("evt.recruit_pass"),
+                () => { if (_res != null) _res.SpendMoney(recruit.GetHighestLevel() * 5000, "salary"); _empMgr.Employees.Add(recruit); _gm.ShowPopup(Loc.Tr("evt.recruit_hired"), Loc.TrF("evt.recruit_hired_msg", recruit.Name), new Color(0.3f, 0.7f, 0.4f)); },
+                () => {},
+                new Color(0.4f, 0.7f, 0.4f));
+            return $"新人推荐: {recruit.Name}";
+        }
+
         return null;
     }
 
