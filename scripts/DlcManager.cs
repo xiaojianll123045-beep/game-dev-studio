@@ -74,13 +74,12 @@ public static class DlcManager
         Log("DlcManager", "=== DLC Scan Start ===");
         _loaded.Clear();
         _activeMinigames.Clear();
-        // 优先扫 exe 同目录（安装包根目录），用户放 DLC/ 文件夹在旁边
+        // 扫 exe 同目录（安装包根目录），用户放 DLC/ 文件夹在旁边
         string exeDir = System.IO.Path.GetDirectoryName(OS.GetExecutablePath());
-        string dlcDir = exeDir + "/DLC";
-        if (DirAccess.DirExistsAbsolute(dlcDir))
-            ScanDlcFrom(dlcDir + "/");
-        else
-            ScanDlcFrom("res://DLC");  // 开发环境 fallback
+        if (DirAccess.DirExistsAbsolute(exeDir + "/DLC"))
+            ScanDlcFrom(exeDir + "/DLC/");
+        // 始终扫 res://DLC（开发环境 / 内置 DLC）
+        ScanDlcFrom("res://DLC");
         LoadEnabled();
         Log("DlcManager", $"DLC scan done, {_loaded.Count} total, {_activeMinigames.Count} minigames, {_enabledDlcIds.Count} enabled");
     }

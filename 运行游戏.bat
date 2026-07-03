@@ -1,4 +1,4 @@
-@echo off
+﻿@echo off
 chcp 65001 >nul
 setlocal
 
@@ -13,5 +13,11 @@ if errorlevel 1 (
     exit /b 1
 )
 
-echo [2/2] Launching game
-start "" "%ENG%" --path "%~dp0." --rendering-driver d3d12
+echo.
+echo [2/2] Launching game (close game window to return here)
+echo.
+"%ENG%" --path "%~dp0." --rendering-driver d3d12
+
+echo.
+echo === Game closed ===
+pause
