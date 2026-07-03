@@ -185,9 +185,10 @@ public static class DlcManager
     {
         if (gm == null || dlc == null) return null;
         if (dlc.Type != "minigame") return null;
-        // 启动时重新加载脚本，避免编辑器缓存了旧版本
-        Script script = dlc.LoadedScript;
-        if (script != null && !string.IsNullOrEmpty(dlc.Folder))
+
+        // 启动时从源码创建 GDScript，彻底绕过编辑器资源缓存
+        Script script = null;
+        if (!string.IsNullOrEmpty(dlc.Folder))
         {
             var sd = DirAccess.Open(dlc.Folder + "/scripts");
             if (sd != null)
@@ -199,13 +200,31 @@ public static class DlcManager
                     if (string.IsNullOrEmpty(sf)) break;
                     if (sf.EndsWith(".gd"))
                     {
-                        script = ResourceLoader.Load<Script>(dlc.Folder + "/scripts/" + sf);
+                        string gdPath = dlc.Folder + "/scripts/" + sf;
+                        string source = FileAccess.GetFileAsString(gdPath);
+                        if (!string.IsNullOrEmpty(source) && source.TrimStart().StartsWith("extends"))
+                        {
+                            var gd = new GDScript();
+                            gd.SourceCode = source;
+                            gd.Reload();
+                            script = gd;
+                            Log("DLC", $"[{dlc.Name}] script loaded from source: {sf} ({source.Length} chars)");
+                        }
+                        else
+                        {
+                            Log("DLC", $"[{dlc.Name}] fallback to ResourceLoader for: {sf}");
+                            script = ResourceLoader.Load<Script>(gdPath);
+                        }
                         break;
                     }
                 }
                 sd.ListDirEnd();
             }
         }
+
+        if (script == null && dlc.LoadedScript != null)
+            script = dlc.LoadedScript;
+
         if (script != null)
         {
             var n = new Node { Name = "DLC_" + dlc.Id };
