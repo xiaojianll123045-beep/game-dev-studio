@@ -238,25 +238,25 @@ func _process(delta):
 	# 敌人 AI
 	for e in enemies:
 		e.move_timer -= delta
+		e.shoot_timer -= delta
 		if e.move_timer <= 0:
-			e.move_timer = 0.3 + randf() * 0.5
+			e.move_timer = 0.3 + randf() * 0.4
 			# 50% 概率改变方向
 			if randf() < 0.5:
 				e.dir = randi() % 4
-			e.shoot_timer -= 0.5  # 加快射击频率
-		e.shoot_timer -= delta
-		# 移动
-		var d = dirs[e.dir]
-		var nx = e.x + d.x; var ny = e.y + d.y
-		var moved = false
-		if nx >= 0 and nx < COLS and ny >= 0 and ny < ROWS and grid[ny][nx] == Tile.EMPTY:
-			if not _tank_at(nx, ny):
-				e.x = nx; e.y = ny; moved = true
-		if not moved:
-			e.dir = randi() % 4
+			# 移动（只在 move_timer 到期时移动）
+			var d = dirs[e.dir]
+			var nx = e.x + d.x; var ny = e.y + d.y
+			if nx >= 0 and nx < COLS and ny >= 0 and ny < ROWS and grid[ny][nx] == Tile.EMPTY:
+				if not _tank_at(nx, ny):
+					e.x = nx; e.y = ny
+				else:
+					e.dir = randi() % 4
+			else:
+				e.dir = randi() % 4
 		# 射击
 		if e.shoot_timer <= 0:
-			e.shoot_timer = 1.0 + randf() * 1.5
+			e.shoot_timer = 1.5 + randf() * 1.0
 			_fire_bullet(e, false)
 		_draw_enemy(e)
 	# 子弹更新
