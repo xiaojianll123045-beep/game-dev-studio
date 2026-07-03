@@ -35,6 +35,8 @@ var info_label: Label
 var score_label: Label
 var wave_label: Label
 var enemy_labels: Dictionary = {}
+var bullet_labels: Dictionary = {}
+var bullet_id_counter = 0
 
 var left = false
 var right = false
@@ -178,7 +180,7 @@ func _draw_map():
 						cr.size = Vector2(CELL, CELL)
 				panel.add_child(cr)
 
-func _input(ev):
+func _unhandled_input(ev):
 	if game_over or won: return
 	if ev is InputEventKey and ev.pressed and not ev.echo:
 		match ev.keycode:
@@ -266,17 +268,24 @@ func _process(delta):
 		if b.timer <= 0: continue
 		var d = dirs[b.dir]
 		b.x += d.x; b.y += d.y
+		# 更新子弹位置
+		if bullet_labels.has(b.id):
+			bullet_labels[b.id].position = Vector2(20 + b.x * CELL, 10 + b.y * CELL - 4)
 		# 边界
-		if b.x < 0 or b.x >= COLS or b.y < 0 or b.y >= ROWS: continue
+		if b.x < 0 or b.x >= COLS or b.y < 0 or b.y >= ROWS:
+			if bullet_labels.has(b.id): bullet_labels[b.id].queue_free(); bullet_labels.erase(b.id)
+			continue
 		# 命中砖墙
 		if grid[b.y][b.x] == Tile.BRICK:
 			grid[b.y][b.x] = Tile.EMPTY
 			_draw_map()
 			_add_explosion(b.x, b.y)
+			if bullet_labels.has(b.id): bullet_labels[b.id].queue_free(); bullet_labels.erase(b.id)
 			continue
 		if grid[b.y][b.x] == Tile.BASE:
 			base_alive = false; game_over = true
 			_add_explosion(b.x, b.y)
+			if bullet_labels.has(b.id): bullet_labels[b.id].queue_free(); bullet_labels.erase(b.id)
 			_info_msg("💥 基地被摧毁！")
 			continue
 		# 命中坦克
@@ -289,7 +298,9 @@ func _process(delta):
 						enemy_labels.erase(e.id)
 					enemies.erase(e); enemies_killed += 1; score += 100
 					_add_explosion(e.x, e.y); hit = true; break
-			if hit: continue
+			if hit:
+				if bullet_labels.has(b.id): bullet_labels[b.id].queue_free(); bullet_labels.erase(b.id)
+				continue
 		else:
 			if player != null and abs(player.x - b.x) < 1 and abs(player.y - b.y) < 1:
 				if player.invincible_timer <= 0:
@@ -301,9 +312,17 @@ func _process(delta):
 						_info_msg("💥 坦克被摧毁！")
 					else:
 						_draw_player()
+				if bullet_labels.has(b.id): bullet_labels[b.id].queue_free(); bullet_labels.erase(b.id)
 				continue
 		new_bullets.append(b)
 	bullets = new_bullets
+	# 清理残留的子弹标签
+	var active_ids = []
+	for b in bullets: active_ids.append(b.id)
+	for bid in bullet_labels.keys():
+		if not bid in active_ids:
+			bullet_labels[bid].queue_free()
+			bullet_labels.erase(bid)
 	# 检查胜利
 	if enemies_killed >= enemies_per_wave and enemies.size() == 0:
 		wave_timer += delta
@@ -341,11 +360,21 @@ func _player_shoot():
 	_fire_bullet(player, true)
 
 func _fire_bullet(src, is_player):
-	var b = {x = float(src.x), y = float(src.y), dir = src.dir, timer = 2.0, is_player_bullet = is_player}
+	var b = {x = float(src.x), y = float(src.y), dir = src.dir, timer = 2.0, is_player_bullet = is_player, id = bullet_id_counter}
+	bullet_id_counter += 1
 	var d = dirs[src.dir]
 	b.x += d.x; b.y += d.y
 	if b.x >= 0 and b.x < COLS and b.y >= 0 and b.y < ROWS:
 		bullets.append(b)
+		# 子弹视觉
+		var lbl = Label.new()
+		lbl.text = "●"
+		lbl.position = Vector2(20 + b.x * CELL, 10 + b.y * CELL - 4)
+		lbl.size = Vector2(CELL, CELL)
+		lbl.add_theme_font_size_override("font_size", 14)
+		lbl.add_theme_color_override("font_color", Color(1,1,0) if is_player else Color(1,0,0))
+		panel.add_child(lbl)
+		bullet_labels[b.id] = lbl
 
 func _add_explosion(x, y):
 	var e = {x = x, y = y, timer = 0.3, label = null}
