@@ -970,8 +970,8 @@ public partial class MenuManager : Node
 			var n = new Node { Name = "MG_" + dlc.Id };
 			n.SetScript(dlc.LoadedScript);
 			_ui.AddChild(n);
-			var bridge = GetNodeOrNull("/root/GameManager/ModBridge") as ModBridge;
-			try { n.Call("OnLoad", Services.GameManager, bridge); } catch { }
+			DlcManager.MarkRunning(dlc.Id, n);
+			try { n.Call("OnLoad", Services.GameManager, null); } catch { }
 		}
 	}
 
