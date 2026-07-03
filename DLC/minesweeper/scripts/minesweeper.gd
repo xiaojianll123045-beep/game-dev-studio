@@ -140,6 +140,21 @@ func StartNew(nr: int, nc: int, nm: int):
 			panel.add_child(cr)
 			cells[r].append(cr)
 
+	var bottom_bar = HBoxContainer.new()
+	bottom_bar.position = Vector2(offset_x, offset_y + rows * cell_size + 6)
+	bottom_bar.size = Vector2(cols * cell_size, 32)
+	var close_txt = Button.new()
+	close_txt.text = "✕ 关闭"
+	close_txt.flat = true
+	close_txt.add_theme_font_size_override("font_size", 12)
+	close_txt.add_theme_color_override("font_color", Color(0.6, 0.2, 0.2))
+	close_txt.pressed.connect(self._Close)
+	bottom_bar.add_child(close_txt)
+	var spacer = Control.new()
+	spacer.size_flags_horizontal = Control.SIZE_EXPAND_FILL
+	bottom_bar.add_child(spacer)
+	panel.add_child(bottom_bar)
+
 func _ToggleMode():
 	flag_mode = not flag_mode
 	mode_btn.text = "🚩 标记" if flag_mode else "⛏ 挖掘"
