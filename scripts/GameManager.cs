@@ -7589,8 +7589,8 @@ public partial class GameManager : Node3D
                 ExpReward = ct.GetProperty("exp").GetInt32()
             };
         }
-        // 兼容旧存档：contract 缺失但有 outsourceRemaining → 清除外包状态
-        else if (t.OutsourceMonthsRemaining > 0)
+        // 兼容旧存档：contract 缺失但 task=Outsource → 清除悬空的外包状态
+        else if (t.Task == TeamTask.Outsource)
         {
             t.Task = TeamTask.None;
             t.OutsourceMonthsRemaining = 0;
