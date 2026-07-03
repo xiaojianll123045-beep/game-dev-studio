@@ -3359,40 +3359,28 @@ public partial class GameManager : Node3D
     {
         bool selected = _selectedEmployees.Contains(empId);
         bool hovered = _hoveredEmpId == empId;
-        const int BW = 1, BL = 3;
 
-        pc.RemoveThemeStyleboxOverride("panel");
+        // 通过名为 "_selBar" 的子 ColorRect 控制选中指示
+        Node selBar = null;
+        foreach (var c in pc.GetChildren())
+        {
+            if (c is ColorRect cr && cr.Name == "_selBar")
+            {
+                selBar = cr;
+                break;
+            }
+        }
+        if (selBar is ColorRect bar)
+        {
+            bar.Visible = selected;
+        }
 
-        if (selected)
+        // 悬停背景
+        pc.AddThemeStyleboxOverride("panel", new StyleBoxFlat
         {
-            pc.AddThemeStyleboxOverride("panel", new StyleBoxFlat
-            {
-                BgColor = new Color(0.15f, 0.4f, 0.85f, 0.15f),
-                BorderWidthLeft = BL, BorderWidthTop = BW, BorderWidthRight = BW, BorderWidthBottom = BW,
-                BorderColor = new Color(0.15f, 0.5f, 0.9f, 0.7f),
-                ContentMarginLeft = 4, ContentMarginRight = 4, ContentMarginTop = 2, ContentMarginBottom = 2,
-            });
-        }
-        else if (hovered)
-        {
-            pc.AddThemeStyleboxOverride("panel", new StyleBoxFlat
-            {
-                BgColor = new Color(1, 1, 1, 0.02f),
-                BorderWidthLeft = BL, BorderWidthTop = BW, BorderWidthRight = BW, BorderWidthBottom = BW,
-                BorderColor = new Color(0.6f, 0.6f, 0.6f, 0.35f),
-                ContentMarginLeft = 4, ContentMarginRight = 4, ContentMarginTop = 2, ContentMarginBottom = 2,
-            });
-        }
-        else
-        {
-            pc.AddThemeStyleboxOverride("panel", new StyleBoxFlat
-            {
-                BgColor = new Color(1, 1, 1, 0.01f),
-                BorderWidthLeft = BL, BorderWidthTop = BW, BorderWidthRight = BW, BorderWidthBottom = BW,
-                BorderColor = new Color(0, 0, 0, 0),
-                ContentMarginLeft = 4, ContentMarginRight = 4, ContentMarginTop = 2, ContentMarginBottom = 2,
-            });
-        }
+            BgColor = selected ? new Color(0.15f, 0.4f, 0.85f, 0.12f) : hovered ? new Color(0.25f, 0.25f, 0.25f, 0.06f) : new Color(1, 1, 1, 0.01f),
+            ContentMarginLeft = 4, ContentMarginRight = 4, ContentMarginTop = 2, ContentMarginBottom = 2,
+        });
     }
 
     private void RefreshEmpListHighlights(Control row)
@@ -3425,6 +3413,13 @@ public partial class GameManager : Node3D
         pc.SizeFlagsHorizontal = Control.SizeFlags.Fill;
         pc.MouseFilter = Control.MouseFilterEnum.Stop;
         pc.SetMeta("_empId", emp.Id);
+
+        // 选中指示条（蓝色竖条），默认隐藏
+        var selBar = new ColorRect { Name = "_selBar", Color = new Color(0.15f, 0.5f, 0.9f, 0.8f), Size = new Vector2(3, 0), Visible = false };
+        selBar.SizeFlagsVertical = Control.SizeFlags.ExpandFill;
+        selBar.MouseFilter = Control.MouseFilterEnum.Ignore;
+        pc.AddChild(selBar);
+
         ApplyEmpRowHighlight(pc, emp.Id);
 
         var hb = new HBoxContainer();
