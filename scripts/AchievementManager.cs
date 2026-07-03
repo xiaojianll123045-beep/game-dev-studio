@@ -2478,7 +2478,7 @@ public partial class AchievementManager : Node
             TryUnlock("easter_name_clash", _hasNameClash);
             TryUnlock("easter_fired_ceo", _hasFiredCEO);
             TryUnlock("easter_996", debtMgr != null && debtMgr.ActiveCrunchMonths >= 6);
-            TryUnlock("easter_lay_flat", _idleMonths >= 6);
+            TryUnlock("easter_lay_flat", _idleMonths >= 120);
         }
         ShowNewUnlocks();
     }
@@ -2559,12 +2559,12 @@ public partial class AchievementManager : Node
         if (empMgr != null)
             TryUnlock("easter_broken", empMgr.Employees.Count > 0 && empMgr.Employees.All(e => e.Satisfaction < 20));
         TryUnlock("easter_god_like", devMgr.CompletedProjects.Any(p => p.MonthsOnMarket >= 18));
-        // 躺平计数器：连续6个月没有进行任何项目（含规划阶段都不行）
+        // 躺平计数器：连续10年没有任何项目（含规划阶段都不行）
         bool anyProjectOngoing = devMgr.Projects.Any(p => !p.IsReleased
             && p.Phase != DevPhase.Idle);
         if (anyProjectOngoing) _idleMonths = 0;
         else _idleMonths++;
-        TryUnlock("easter_lay_flat", _idleMonths >= 6);
+        TryUnlock("easter_lay_flat", _idleMonths >= 120);
 
         ShowNewUnlocks();
     }
