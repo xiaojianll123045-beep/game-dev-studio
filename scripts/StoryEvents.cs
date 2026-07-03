@@ -783,7 +783,7 @@ public partial class StoryEvents : Node
             _triggeredEvents.Add($"founder_speech_{_gm.GameMonth}");
             _gm.ShowChoicePopup("🎤 创始人演讲", "公司创始人受邀参加游戏开发者大会并发表演讲！",
                 "去！（灵感+10,粉丝+300）", "让总监代劳",
-                () => { if (_res != null) _res.GainInspiration(10); if (fanMgr != null) fanMgr.CasualFans += 300; },
+                () => { if (_res != null) _res.GainInspiration(10); var fm = Services.FanManager; if (fm != null) fm.CasualFans += 300; },
                 () => {},
                 new Color(0.4f, 0.3f, 0.8f));
             return $"创始人演讲";
