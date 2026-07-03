@@ -277,57 +277,47 @@ func _process(delta):
 		bullet_move_timer = bullet_move_interval
 	var new_bullets = []
 	for b in bullets:
-		if not bullet_ready: continue
-		b.timer -= delta
-		if b.timer <= 0: continue
-		var d = dirs[b.dir]
-		b.x += d.x; b.y += d.y
-		# 更新子弹位置
-		if bullet_labels.has(b.id):
-			bullet_labels[b.id].position = Vector2(20 + b.x * CELL, 10 + b.y * CELL - 4)
-		# 边界
-		if b.x < 0 or b.x >= COLS or b.y < 0 or b.y >= ROWS:
-			if bullet_labels.has(b.id): bullet_labels[b.id].queue_free(); bullet_labels.erase(b.id)
-			continue
-		# 命中砖墙
-		if grid[b.y][b.x] == Tile.BRICK:
-			grid[b.y][b.x] = Tile.EMPTY
-			_draw_map()
-			_add_explosion(b.x, b.y)
-			if bullet_labels.has(b.id): bullet_labels[b.id].queue_free(); bullet_labels.erase(b.id)
-			continue
-		if grid[b.y][b.x] == Tile.BASE:
-			base_alive = false; game_over = true
-			_add_explosion(b.x, b.y)
-			if bullet_labels.has(b.id): bullet_labels[b.id].queue_free(); bullet_labels.erase(b.id)
-			_info_msg("💥 基地被摧毁！")
-			continue
-		# 命中坦克
-		if b.is_player_bullet:
-			var hit = false
-			for e in enemies:
-				if abs(e.x - b.x) < 1 and abs(e.y - b.y) < 1:
-					if enemy_labels.has(e.id):
-						enemy_labels[e.id].queue_free()
-						enemy_labels.erase(e.id)
-					enemies.erase(e); enemies_killed += 1; score += 100
-					_add_explosion(e.x, e.y); hit = true; break
-			if hit:
+		if bullet_ready:
+			b.timer -= delta
+			if b.timer <= 0: continue
+			var d = dirs[b.dir]
+			b.x += d.x; b.y += d.y
+			# 更新子弹位置
+			if bullet_labels.has(b.id):
+				bullet_labels[b.id].position = Vector2(20 + b.x * CELL, 10 + b.y * CELL - 4)
+			# 边界
+			if b.x < 0 or b.x >= COLS or b.y < 0 or b.y >= ROWS:
 				if bullet_labels.has(b.id): bullet_labels[b.id].queue_free(); bullet_labels.erase(b.id)
 				continue
-		else:
-			if player != null and abs(player.x - b.x) < 1 and abs(player.y - b.y) < 1:
-				if player.invincible_timer <= 0:
-					player.hp -= 1
-					player.invincible_timer = 1.5
-					_add_explosion(player.x, player.y)
-					if player.hp <= 0:
-						player = null; game_over = true
-						_info_msg("💥 坦克被摧毁！")
-					else:
-						_draw_player()
+			# 命中砖墙
+			if grid[b.y][b.x] == Tile.BRICK:
+				grid[b.y][b.x] = Tile.EMPTY; _draw_map(); _add_explosion(b.x, b.y)
 				if bullet_labels.has(b.id): bullet_labels[b.id].queue_free(); bullet_labels.erase(b.id)
 				continue
+			if grid[b.y][b.x] == Tile.BASE:
+				base_alive = false; game_over = true; _add_explosion(b.x, b.y)
+				if bullet_labels.has(b.id): bullet_labels[b.id].queue_free(); bullet_labels.erase(b.id)
+				_info_msg("💥 基地被摧毁！"); continue
+			# 命中坦克
+			if b.is_player_bullet:
+				var hit = false
+				for e in enemies:
+					if abs(e.x - b.x) < 1 and abs(e.y - b.y) < 1:
+						if enemy_labels.has(e.id): enemy_labels[e.id].queue_free(); enemy_labels.erase(e.id)
+						enemies.erase(e); enemies_killed += 1; score += 100
+						_add_explosion(e.x, e.y); hit = true; break
+				if hit:
+					if bullet_labels.has(b.id): bullet_labels[b.id].queue_free(); bullet_labels.erase(b.id)
+					continue
+			else:
+				if player != null and abs(player.x - b.x) < 1 and abs(player.y - b.y) < 1:
+					if player.invincible_timer <= 0:
+						player.hp -= 1; player.invincible_timer = 1.5
+						_add_explosion(player.x, player.y)
+						if player.hp <= 0: player = null; game_over = true; _info_msg("💥 坦克被摧毁！")
+						else: _draw_player()
+					if bullet_labels.has(b.id): bullet_labels[b.id].queue_free(); bullet_labels.erase(b.id)
+					continue
 		new_bullets.append(b)
 	bullets = new_bullets
 	# 清理残留的子弹标签
