@@ -3355,14 +3355,50 @@ public partial class GameManager : Node3D
     }
 
     /// <summary>员工行高亮：完全照搬 ApplyPCRowHighlight，读 _hoveredEmpId</summary>
+    /// <summary>员工行高亮：完全照搬公司列表的 ApplyPCRowHighlight，读 _hoveredEmpId + _selectedEmployees</summary>
     private void ApplyEmpRowHighlight(Control pc, int empId)
     {
-        // 仅控制选中指示条的显隐，悬停效果由 ApplyRowHover 独立处理
+        bool selected = _selectedEmployees.Contains(empId);
+        bool hovered = _hoveredEmpId == empId;
+        const int BW = 1, BL = 3;
+
+        // 选中指示条
         Node selBar = null;
         foreach (var c in pc.GetChildren())
             if (c is ColorRect cr && cr.Name == "_selBar") { selBar = cr; break; }
         if (selBar is ColorRect bar)
-            bar.Visible = _selectedEmployees.Contains(empId);
+            bar.Visible = selected;
+
+        if (selected)
+        {
+            pc.AddThemeStyleboxOverride("panel", new StyleBoxFlat
+            {
+                BgColor = new Color(0.15f, 0.4f, 0.85f, 0.15f),
+                BorderWidthLeft = BL, BorderWidthTop = BW, BorderWidthRight = BW, BorderWidthBottom = BW,
+                BorderColor = new Color(0.15f, 0.5f, 0.9f, 0.7f),
+                ContentMarginLeft = 4, ContentMarginRight = 4, ContentMarginTop = 2, ContentMarginBottom = 2,
+            });
+        }
+        else if (hovered)
+        {
+            pc.AddThemeStyleboxOverride("panel", new StyleBoxFlat
+            {
+                BgColor = new Color(1, 1, 1, 0.02f),
+                BorderWidthLeft = BL, BorderWidthTop = BW, BorderWidthRight = BW, BorderWidthBottom = BW,
+                BorderColor = new Color(0.6f, 0.6f, 0.6f, 0.35f),
+                ContentMarginLeft = 4, ContentMarginRight = 4, ContentMarginTop = 2, ContentMarginBottom = 2,
+            });
+        }
+        else
+        {
+            pc.AddThemeStyleboxOverride("panel", new StyleBoxFlat
+            {
+                BgColor = new Color(1, 1, 1, 0.01f),
+                BorderWidthLeft = BL, BorderWidthTop = BW, BorderWidthRight = BW, BorderWidthBottom = BW,
+                BorderColor = new Color(0, 0, 0, 0),
+                ContentMarginLeft = 4, ContentMarginRight = 4, ContentMarginTop = 2, ContentMarginBottom = 2,
+            });
+        }
     }
 
     private void RefreshEmpListHighlights(Control row)
@@ -3431,8 +3467,18 @@ public partial class GameManager : Node3D
         hb.MouseFilter = Control.MouseFilterEnum.Ignore;
         pc.AddChild(hb);
 
-        pc.MouseEntered += () => { if (GodotObject.IsInstanceValid(pc)) ApplyRowHover(pc, true); };
-        pc.MouseExited += () => { if (GodotObject.IsInstanceValid(pc)) ApplyRowHover(pc, false); };
+        pc.MouseEntered += () =>
+        {
+            if (!GodotObject.IsInstanceValid(pc)) return;
+            _hoveredEmpId = emp.Id;
+            ApplyEmpRowHighlight(pc, emp.Id);
+        };
+        pc.MouseExited += () =>
+        {
+            if (!GodotObject.IsInstanceValid(pc)) return;
+            _hoveredEmpId = -1;
+            ApplyEmpRowHighlight(pc, emp.Id);
+        };
 
         return (pc, hb);
     }
