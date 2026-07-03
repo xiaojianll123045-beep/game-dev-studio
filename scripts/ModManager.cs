@@ -42,6 +42,10 @@ public static class ModManager
         ScanModsFrom(ModsRoot);
         // 扫描用户目录（方便用户安装外部 mod）
         ScanModsFrom("user://mods/");
+        // 扫描 exe 同目录
+        string exeDir = ProjectSettings.GlobalizePath("res://").TrimEnd('/');
+        if (DirAccess.DirExistsAbsolute(exeDir + "/mods"))
+            ScanModsFrom(exeDir + "/mods/");
     }
 
     private static void ScanModsFrom(string root)

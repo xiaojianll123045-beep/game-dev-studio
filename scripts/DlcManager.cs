@@ -76,6 +76,10 @@ public static class DlcManager
         _activeMinigames.Clear();
         ScanDlcFrom("res://DLC");
         ScanDlcFrom("user://dlc/");
+        // 扫描 exe 同目录（导出后可放 DLC/ 文件夹在旁边）
+        string exeDir = ProjectSettings.GlobalizePath("res://").TrimEnd('/');
+        if (DirAccess.DirExistsAbsolute(exeDir + "/DLC"))
+            ScanDlcFrom(exeDir + "/DLC/");
         LoadEnabled();
         Log("DlcManager", $"DLC scan done, {_loaded.Count} total, {_activeMinigames.Count} minigames, {_enabledDlcIds.Count} enabled");
     }
