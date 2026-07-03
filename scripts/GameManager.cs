@@ -2275,7 +2275,7 @@ public partial class GameManager : Node3D
             _founderOverlay.QueueFree(); _founderOverlay = null;
             _soundMgr?.PlayGameBgm();
             // 开局欢迎弹窗
-            ShowPopup(Loc.Tr("tutorial.welcome_title"), Loc.Tr("tutorial.welcome_desc"), new Color(0.3f, 0.8f, 0.5f));
+            CallDeferred(nameof(ShowWelcomePopup));
             // 启动教程
             if (!_tutorialMgr.TutorialCompleted)
                 CallDeferred(nameof(StartTutorialDeferred));
@@ -3041,6 +3041,29 @@ public partial class GameManager : Node3D
             ShowChoicePopup(q.title, q.msg, q.optA, q.optB, q.onA, q.onB, q.color);
         else
             ShowPopup(q.title, q.msg, q.color);
+    }
+
+    private void ShowWelcomePopup()
+    {
+        if (_uiLayer == null) return;
+        var vp = GetViewport().GetVisibleRect().Size;
+        float pw = 440, ph = 200;
+        var bg = new ColorRect { Color = new Color(0, 0, 0, 0.5f), MouseFilter = Control.MouseFilterEnum.Stop };
+        bg.SetAnchorsAndOffsetsPreset(Control.LayoutPreset.FullRect);
+        var panel = new Panel { Position = new((vp.X - pw) / 2, (vp.Y - ph) / 2), Size = new(pw, ph) };
+        panel.AddThemeStyleboxOverride("panel", new StyleBoxFlat { BgColor = new Color(0.97f, 0.96f, 0.94f), CornerRadiusTopLeft = 10, CornerRadiusTopRight = 10, CornerRadiusBottomLeft = 10, CornerRadiusBottomRight = 10 });
+        var titleLbl = new Label { Text = Loc.Tr("tutorial.welcome_title"), Position = new(16, 12), Size = new(pw - 32, 28) };
+        titleLbl.AddThemeFontSizeOverride("font_size", 18); titleLbl.AddThemeColorOverride("font_color", new Color(0.3f, 0.8f, 0.5f));
+        panel.AddChild(titleLbl);
+        var desc = new RichTextLabel { Text = "[center]" + Loc.Tr("tutorial.welcome_desc") + "[/center]", Position = new(16, 48), Size = new(pw - 32, 100), BbcodeEnabled = true, FitContent = true };
+        desc.AddThemeFontSizeOverride("font_size", 13);
+        desc.AddThemeColorOverride("default_color", new Color(0.10f, 0.14f, 0.22f));
+        panel.AddChild(desc);
+        var okBtn = new Button { Text = Loc.Tr("ui.got_it"), Position = new(pw / 2 - 50, 156), Size = new(100, 30) };
+        okBtn.Pressed += () => { bg.QueueFree(); };
+        panel.AddChild(okBtn);
+        bg.AddChild(panel);
+        _uiLayer.AddChild(bg);
     }
 
     public void ShowPopup(string title, string message, Color titleColor)
