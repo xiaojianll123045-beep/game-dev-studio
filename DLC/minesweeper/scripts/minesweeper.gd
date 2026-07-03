@@ -186,6 +186,10 @@ func _OnCellInput(ev: InputEvent, r: int, c: int):
 
 func _ToggleFlag(r: int, c: int):
 	if r < 0 or r >= rows or c < 0 or c >= cols: return
+	if first_click:
+		_GenerateBoard(r, c)
+		first_click = false
+		started = true
 	if revealed[r][c]: return
 	flagged[r][c] = not flagged[r][c]
 	_UpdateCellVisual(r, c)
@@ -194,12 +198,13 @@ func _ToggleFlag(r: int, c: int):
 
 func _RevealCell(r: int, c: int):
 	if r < 0 or r >= rows or c < 0 or c >= cols: return
-	if revealed[r][c] or flagged[r][c]: return
 
 	if first_click:
 		_GenerateBoard(r, c)
 		first_click = false
 		started = true
+
+	if revealed[r][c] or flagged[r][c]: return
 
 	revealed[r][c] = true
 
