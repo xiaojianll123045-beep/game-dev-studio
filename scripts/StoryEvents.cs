@@ -919,7 +919,7 @@ public partial class StoryEvents : Node
     public void PickFanCommunityEvent()
     {
         if (!GodotObject.IsInstanceValid(_gm)) return;
-        if (new Random().Next(100) > 20) return;
+        if (new Random().Next(100) > 40) return;
         var fanMgr = Services.FanManager;
         var res = Services.ResourceManager;
 
@@ -1097,7 +1097,7 @@ public partial class StoryEvents : Node
     {
         if (_teamMgr == null || !GodotObject.IsInstanceValid(_gm)) return;
         var rng = new Random();
-        if (rng.Next(100) > 3) return; // 每月3%概率
+        if (rng.Next(100) > 8) return; // 每月8%概率
 
         var pool = new List<(string id, string title, string desc, string optA, string optB, Action onA, Action onB, Color color)>();
 
