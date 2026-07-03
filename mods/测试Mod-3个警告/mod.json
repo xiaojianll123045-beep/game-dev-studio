@@ -2,6 +2,6 @@
     "name": "测试Mod-3个警告",
     "version": "1.0",
     "author": "测试",
-    "description": "包含3个高危操作：OS.execute + 文件删除 + DLL加载",
+    "description": "3种风险：GDScript + DLL + 脚本文件",
     "type": "script"
 }
