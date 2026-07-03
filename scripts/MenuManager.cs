@@ -172,8 +172,8 @@ public partial class MenuManager : Node
 		btnContainer.AddThemeConstantOverride("separation", 10);
 		_ui.AddChild(btnContainer);
 
-		string[] labels = { Loc.Tr("menu.new_game"), Loc.Tr("menu.continue"), Loc.Tr("menu.load_game"), Loc.Tr("menu.settings"), Loc.Tr("menu.about"), Loc.Tr("mod.title"), Loc.Tr("menu.exit") };
-		System.Action[] actions = { OnNewGame, OnContinue, OnLoadGame, OnSettings, OnAbout, ShowModList, () => GetTree().Quit() };
+		string[] labels = { Loc.Tr("menu.new_game"), Loc.Tr("menu.continue"), Loc.Tr("menu.load_game"), Loc.Tr("menu.settings"), Loc.Tr("menu.about"), Loc.Tr("mod.title"), Loc.Tr("menu.dlc"), Loc.Tr("menu.exit") };
+		System.Action[] actions = { OnNewGame, OnContinue, OnLoadGame, OnSettings, OnAbout, ShowModList, ShowDlcList, () => GetTree().Quit() };
 
 		var buttonRefs = new List<Button>();
 		for (int i = 0; i < labels.Length; i++)
