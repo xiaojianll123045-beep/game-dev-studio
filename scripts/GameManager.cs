@@ -105,6 +105,7 @@ public partial class GameManager : Node3D
     private bool _lastPaused = false; // 强制首次刷新 + 暂停按钮初始为 ▶
     private float _scoreUpdateTimer;
     private int _hudFrameCounter;           // UI 节流帧计数器
+    private int _frameCount;                // 成就检查帧计数器
     private bool _hudNeedsFullRefresh;      // 完整 HUD 刷新脏标记
     private bool _predictionDirty = true;   // 预测面板脏标记
     private bool _needCompanyDetailRefresh;
@@ -521,6 +522,9 @@ public partial class GameManager : Node3D
     {
         if (_res == null) return; // 防御：初始化未完成时跳过
         UpdateCameraPos();
+        // 每120帧检查成就（暂停时也触发）
+        if (_frameCount++ % 120 == 0)
+            Services.AchievementManager?.CheckNow();
         if (!IsUIPanelOpen) HandleCameraKeys((float)delta);
         if (Paused) { UpdateHUDTimeSensitive(); return; }
         MonthProgress += (float)delta * BaseMonthSpeed * _gameSpeed;
@@ -543,10 +547,6 @@ public partial class GameManager : Node3D
             UpdatePredictionPanel();
             UpdateRevenueChart();
         }
-
-        // 每120帧（约2秒）检查一次成就，避免月结延迟
-        if (_hudFrameCounter % 120 == 0)
-            Services.AchievementManager?.CheckNow();
 
         // 买卖股票后刷新公司详情
         if (_needCompanyDetailRefresh)

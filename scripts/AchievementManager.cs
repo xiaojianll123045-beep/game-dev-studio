@@ -2443,6 +2443,7 @@ public partial class AchievementManager : Node
     /// <summary>立即检查所有非发售触发的成就</summary>
     public void CheckNow()
     {
+        NewUnlocks.Clear();
         var res = _gm.GetNodeOrNull<ResourceManager>("ResourceManager");
         var empMgr = _gm.GetNodeOrNull<EmployeeManager>("EmployeeManager");
         var devMgr = _gm.GetNodeOrNull<GameDevManager>("GameDevManager");
