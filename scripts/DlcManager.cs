@@ -185,13 +185,33 @@ public static class DlcManager
     {
         if (gm == null || dlc == null) return null;
         if (dlc.Type != "minigame") return null;
-        if (dlc.LoadedScript != null)
+        // 启动时重新加载脚本，避免编辑器缓存了旧版本
+        Script script = dlc.LoadedScript;
+        if (script != null && !string.IsNullOrEmpty(dlc.Folder))
+        {
+            var sd = DirAccess.Open(dlc.Folder + "/scripts");
+            if (sd != null)
+            {
+                sd.ListDirBegin();
+                while (true)
+                {
+                    var sf = sd.GetNext();
+                    if (string.IsNullOrEmpty(sf)) break;
+                    if (sf.EndsWith(".gd"))
+                    {
+                        script = ResourceLoader.Load<Script>(dlc.Folder + "/scripts/" + sf);
+                        break;
+                    }
+                }
+                sd.ListDirEnd();
+            }
+        }
+        if (script != null)
         {
             var n = new Node { Name = "DLC_" + dlc.Id };
-            n.SetScript(dlc.LoadedScript);
+            n.SetScript(script);
             gm.AddChild(n);
             _runningDlcIds.Add(dlc.Id);
-            // 节点被释放时自动移除运行标记
             n.TreeExited += () => { _runningDlcIds.Remove(dlc.Id); };
             var bridge = gm.GetNodeOrNull<ModBridge>("ModBridge");
             try { n.Call("OnLoad", gm, bridge); } catch (Exception ex) { GD.PrintErr($"[DLC] OnLoad error: {ex.Message}"); }
