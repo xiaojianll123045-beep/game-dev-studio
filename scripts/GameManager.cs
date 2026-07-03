@@ -3398,8 +3398,10 @@ public partial class GameManager : Node3D
     private void RefreshEmpListHighlights(Control row)
     {
         var parent = row.GetParent();
+        if (parent == null) { DlcManager.Log("EmpHL", "parent is null"); return; }
         if (parent is VBoxContainer list && _empListSources.TryGetValue(list, out var sourceList))
         {
+            DlcManager.Log("EmpHL", $"refreshing {sourceList.Count} rows, sel=[{string.Join(",", _selectedEmployees)}]");
             int idx = 0;
             foreach (var ch in list.GetChildren())
             {
@@ -3411,6 +3413,7 @@ public partial class GameManager : Node3D
                 }
             }
         }
+        else DlcManager.Log("EmpHL", $"list not found in _empListSources, parentType={parent?.GetType().Name ?? "null"}");
     }
 
     private void ApplyAllEmpHighlights()
@@ -3484,13 +3487,17 @@ public partial class GameManager : Node3D
 
             if (mb.ButtonIndex == MouseButton.Right)
             {
-                if (!_selectedEmployees.Contains(emp.Id))
+                bool wasSelected = _selectedEmployees.Contains(emp.Id);
+                if (!wasSelected)
                 {
+                    DlcManager.Log("Select", $"right-click on emp {emp.Id} (not selected), clearing {_selectedEmployees.Count} existing");
                     _selectedEmployees.Clear();
                     _selectedEmployees.Add(emp.Id);
                     _lastEmpClickIndex = empIdx;
                 }
+                else DlcManager.Log("Select", $"right-click on selected emp {emp.Id}, keeping {_selectedEmployees.Count} selections");
                 RefreshEmpListHighlights(row);
+                DlcManager.Log("Select", $"after right-click: count={_selectedEmployees.Count}, {( _selectedEmployees.Count > 1 ? "batch menu" : "context menu")}");
                 if (_selectedEmployees.Count > 1) ShowBatchEmployeeMenu();
                 else ShowEmployeeContextMenu(emp, teamContext);
                 return;
@@ -3498,6 +3505,7 @@ public partial class GameManager : Node3D
 
             if (mb.ButtonIndex != MouseButton.Left) return;
             ProcessSelect(ctrl, shift);
+            DlcManager.Log("Select", $"left-click emp {emp.Id} ctrl={ctrl} shift={shift} → sel=[{string.Join(",", _selectedEmployees)}]");
             RefreshEmpListHighlights(row);
 
             void ProcessSelect(bool c, bool s)
@@ -3914,6 +3922,7 @@ public partial class GameManager : Node3D
             {
                 var targetTeam = teams[idx];
                 _teamMgr.AddToTeam(targetTeam, emp);
+                DlcManager.Log("Assign", $"assigned emp {emp.Id} to team, refresh={( _refreshEmployeeList == null ? "NULL" : "set")}");
                 _refreshEmployeeList?.Invoke();
                 ShowToast(Loc.Tr("toast.assign_ok"), Loc.TrF("toast.assign_msg", Loc.DisplayName(emp.Name), targetTeam.Name), new Color(0.3f, 0.7f, 0.4f));
             }
@@ -4701,9 +4710,10 @@ public partial class GameManager : Node3D
         }
         _refreshEmployeeList = () =>
         {
+            DlcManager.Log("Refresh", "queuing panel refresh via timer");
             var t = new Timer { WaitTime = 0.01f, OneShot = true };
             AddChild(t);
-            t.Timeout += () => { CloseAll(); ShowEmployeePanel(); t.QueueFree(); };
+            t.Timeout += () => { DlcManager.Log("Refresh", "timer fired"); CloseAll(); ShowEmployeePanel(); t.QueueFree(); };
             t.Start();
         };
 
