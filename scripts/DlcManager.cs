@@ -202,17 +202,33 @@ public static class DlcManager
                     {
                         string gdPath = dlc.Folder + "/scripts/" + sf;
                         string source = FileAccess.GetFileAsString(gdPath);
-                        if (!string.IsNullOrEmpty(source) && source.TrimStart().StartsWith("extends"))
+                        if (!string.IsNullOrEmpty(source))
                         {
-                            var gd = new GDScript();
-                            gd.SourceCode = source;
-                            gd.Reload();
-                            script = gd;
-                            Log("DLC", $"[{dlc.Name}] script loaded from source: {sf} ({source.Length} chars)");
+                            if (source.TrimStart().StartsWith("extends"))
+                            {
+                                var gd = new GDScript();
+                                gd.SourceCode = source;
+                                var err = gd.Reload();
+                                if (err == Error.Ok)
+                                {
+                                    script = gd;
+                                    Log("DLC", $"[{dlc.Name}] script loaded from source OK: {sf}");
+                                }
+                                else
+                                {
+                                    GD.PrintErr($"[DLC] GDScript source has errors (code={err}), fallback to ResourceLoader");
+                                    script = ResourceLoader.Load<Script>(gdPath);
+                                }
+                            }
+                            else
+                            {
+                                Log("DLC", $"[{dlc.Name}] fallback to ResourceLoader for non-extends: {sf}");
+                                script = ResourceLoader.Load<Script>(gdPath);
+                            }
                         }
                         else
                         {
-                            Log("DLC", $"[{dlc.Name}] fallback to ResourceLoader for: {sf}");
+                            Log("DLC", $"[{dlc.Name}] empty source, fallback to ResourceLoader");
                             script = ResourceLoader.Load<Script>(gdPath);
                         }
                         break;
