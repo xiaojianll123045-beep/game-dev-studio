@@ -60,15 +60,17 @@ func OnLoad(_gm, bridge):
 	start_game()
 
 func start_game():
+	game_over = true  # 先阻止 _process 继续执行旧逻辑
 	grid = []
 	for r in range(ROWS):
 		grid.append([])
 		for c in range(COLS):
 			grid[r].append(null)
-	score = 0; lines = 0; level = 1; game_over = false; started = true; paused = false
+	score = 0; lines = 0; level = 1; started = true; paused = false
 	drop_interval = 0.5; drop_timer = 0.0
 	current_piece = null; next_piece = null
 	_build_ui()
+	game_over = false  # 新游戏开始
 	_spawn_piece()
 	_update_ui()
 
@@ -175,6 +177,7 @@ func _draw_grid():
 					var bc = int(piece_pos.x + b.x)
 					if r == br and c == bc:
 						color = current_piece.color
+			if preview_cells[r][c] != null and is_instance_valid(preview_cells[r][c]):
 			preview_cells[r][c].color = color
 
 func _spawn_piece():
