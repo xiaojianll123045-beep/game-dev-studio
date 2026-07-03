@@ -504,7 +504,37 @@ public partial class MenuManager : Node
 			ly += 34;
 		}
 
-		ly += 12;
+		// 特别鸣谢
+		ly += 8;
+		var thanksTitle = new Label { Text = Loc.Tr("about.thanks"), Position = new(pw / 2 - 80, ly), Size = new(160, 20) };
+		thanksTitle.AddThemeFontSizeOverride("font_size", 11);
+		thanksTitle.AddThemeColorOverride("font_color", new Color(0.15f, 0.15f, 0.25f));
+		thanksTitle.HorizontalAlignment = HorizontalAlignment.Center;
+		_aboutPanel.AddChild(thanksTitle);
+		ly += 20;
+		var thanksPerson = new RichTextLabel { Position = new(editX, ly), Size = new(editW, 20), BbcodeEnabled = true };
+		thanksPerson.Text = "[center]" + Loc.Tr("about.thanks_person") + "[/center]";
+		thanksPerson.AddThemeFontSizeOverride("font_size", 12);
+		thanksPerson.AddThemeColorOverride("default_color", new Color(0.3f, 0.3f, 0.4f));
+		thanksPerson.SelectionEnabled = true;
+		thanksPerson.MouseFilter = Control.MouseFilterEnum.Stop;
+		_aboutPanel.AddChild(thanksPerson);
+		ly += 18;
+		var thanksDesc = new Label { Text = Loc.Tr("about.thanks_desc"), Position = new(pw / 2 - 120, ly), Size = new(240, 16) };
+		thanksDesc.AddThemeFontSizeOverride("font_size", 9);
+		thanksDesc.AddThemeColorOverride("font_color", new Color(0.45f, 0.45f, 0.55f));
+		thanksDesc.HorizontalAlignment = HorizontalAlignment.Center;
+		_aboutPanel.AddChild(thanksDesc);
+		ly += 14;
+		var thanksQQ = new RichTextLabel { Position = new(editX, ly), Size = new(editW, 18), BbcodeEnabled = true };
+		thanksQQ.Text = "[center]" + Loc.Tr("about.thanks_qq") + "[/center]";
+		thanksQQ.AddThemeFontSizeOverride("font_size", 10);
+		thanksQQ.AddThemeColorOverride("default_color", new Color(0.4f, 0.4f, 0.5f));
+		thanksQQ.SelectionEnabled = true;
+		thanksQQ.MouseFilter = Control.MouseFilterEnum.Stop;
+		_aboutPanel.AddChild(thanksQQ);
+
+		ly += 6;
 		var tip = new Label { Text = Loc.Tr("about.copy_tip"), Position = new(pw / 2 - 130, ly), Size = new(260, 18) };
 		tip.AddThemeFontSizeOverride("font_size", 10);
 		tip.AddThemeColorOverride("font_color", new Color(0.4f, 0.5f, 0.6f));
