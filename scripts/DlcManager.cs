@@ -114,6 +114,7 @@ public static class DlcManager
     /// <summary>启动一个小游戏 DLC（挂载到 GameManager 下）</summary>
     public static Node LaunchMinigame(GameManager gm, DlcManifest dlc)
     {
+        if (gm == null || dlc == null) return null;
         if (dlc.Type != "minigame") return null;
         if (dlc.LoadedScene != null)
         {
@@ -128,6 +129,7 @@ public static class DlcManager
             gm.AddChild(n);
             return n;
         }
+        Log("DlcManager", $"LaunchMinigame: no valid scene or script for {dlc.Name}");
         return null;
     }
 

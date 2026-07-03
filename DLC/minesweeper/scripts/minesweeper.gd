@@ -35,7 +35,7 @@ func StartGame():
 func StartNew(nr: int, nc: int, nm: int):
 	rows = nr; cols = nc; mine_count = nm
 	game_over = false; first_click = true; started = false; won = false
-	timer = 0.0; mines_remaining = m
+	timer = 0.0; mines_remaining = nm
 	flag_mode = false
 	board = []
 	revealed = []
