@@ -2420,12 +2420,12 @@ public partial class AchievementManager : Node
             && devMgr.CompletedProjects.Last().FinalScore >= 80);
         TryUnlock("easter_remaster_king",
             devMgr.CompletedProjects.Count(p => p.PostRelease == PostReleaseType.Remaster) >= 5);
-        TryUnlock("easter_lucky7",
-            devMgr.CompletedProjects.Any(p => p.FinalScore >= 70 && p.OriginalReleaseMonth == 91));
         TryUnlock("easter_crocodile_tears",
-            devMgr.CompletedProjects.Any(p => p.FinalScore < 30 && p.Sales >= 500000));
+            devMgr.CompletedProjects.Any(p => p.FinalScore < 30 && p.Sales >= 50000));
         TryUnlock("easter_regardless",
-            devMgr.CompletedProjects.Any(p => p.FinalScore < 40 && p.Sales >= 1000000));
+            devMgr.CompletedProjects.Any(p => p.FinalScore < 40 && p.Sales >= 500000));
+        TryUnlock("easter_lucky7",
+            devMgr.CompletedProjects.Any(p => p.FinalScore >= 70 && p.OriginalReleaseMonth % 12 + 1 == 7));
         TryUnlock("easter_god_like",
             devMgr.CompletedProjects.Any(p => p.MonthsOnMarket >= 18));
         TryUnlock("easter_tanking",
