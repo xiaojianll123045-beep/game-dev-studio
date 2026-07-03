@@ -106,7 +106,7 @@ func StartNew(nr: int, nc: int, nm: int):
 	mode_btn.flat = true
 	mode_btn.add_theme_font_size_override("font_size", 12)
 	mode_btn.add_theme_color_override("font_color", Color(0.2, 0.3, 0.6))
-	mode_btn.position = Vector2(pw/2 - 40, 44)
+	mode_btn.position = Vector2(pw/2 - 40, 72)
 	mode_btn.size = Vector2(80, 24)
 	mode_btn.pressed.connect(self._ToggleMode)
 	panel.add_child(mode_btn)
