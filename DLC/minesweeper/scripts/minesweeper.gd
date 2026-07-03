@@ -165,7 +165,9 @@ func _Reset(r: int, c: int, m: int):
 	StartNew(r, c, m)
 
 func _Close():
-	panel.queue_free()
+	if panel != null:
+		panel.queue_free()
+		panel = null
 	queue_free()
 
 func _Process(delta):
