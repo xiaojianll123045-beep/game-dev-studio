@@ -61,6 +61,7 @@
     "menu.dlc":  "DLC 管理",
     "dlc.none":  "暂无已安装的 DLC",
     "dlc.launch":  "启动",
+    "dlc.need_game":  "请先开始游戏（新建或读档），然后通过游戏内底部「小游戏」按钮启动。",
     "mod_risk.low":  "低",
     "mod_risk.medium":  "中",
     "mod_risk.high":  "高",

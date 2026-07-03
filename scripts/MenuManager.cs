@@ -900,7 +900,17 @@ public partial class MenuManager : Node
 					launchBtn.AddThemeStyleboxOverride("normal", new StyleBoxFlat { BgColor = new Color(0.2f, 0.5f, 0.3f), CornerRadiusTopLeft = 4, CornerRadiusTopRight = 4, CornerRadiusBottomLeft = 4, CornerRadiusBottomRight = 4 });
 					launchBtn.AddThemeStyleboxOverride("hover", new StyleBoxFlat { BgColor = new Color(0.15f, 0.4f, 0.25f), CornerRadiusTopLeft = 4, CornerRadiusTopRight = 4, CornerRadiusBottomLeft = 4, CornerRadiusBottomRight = 4 });
 					var captured = d;
-					launchBtn.Pressed += () => { dp.QueueFree(); DlcManager.LaunchMinigame(Services.GameManager, captured); };
+					launchBtn.Pressed += () => {
+						dp.QueueFree();
+						var gm = Services.GameManager;
+						if (gm == null || !GodotObject.IsInstanceValid(gm)) {
+							var vp = GetViewport().GetVisibleRect().Size;
+							var tip = new AcceptDialog { DialogText = Loc.Tr("dlc.need_game"), Title = "", Size = new Vector2I(400, 150) };
+							_ui.AddChild(tip); tip.PopupCentered();
+							return;
+						}
+						DlcManager.LaunchMinigame(gm, captured);
+					};
 					dp.AddChild(launchBtn);
 				}
 
