@@ -4119,12 +4119,14 @@ public partial class GameManager : Node3D
             {
                 var t = teams[idx];
                 foreach (var e in emps) _teamMgr.AddToTeam(t, e);
+                _refreshEmployeeList?.Invoke();
                 ShowToast(Loc.Tr("toast.batch_assign"), Loc.TrF("toast.batch_assign_msg", emps.Count, t.Name), new Color(0.3f, 0.7f, 0.4f));
             }
             else if (idx == teams.Count)
             {
                 var captain = emps.FirstOrDefault(e => e.CanMentor);
                 var newTeam = _teamMgr.CreateTeam(Loc.TrF("ui.team_fmt", _teamMgr.Teams.Count + 1), emps, captain);
+                _refreshEmployeeList?.Invoke();
                 ShowToast(Loc.Tr("toast.team_created"), Loc.TrF("toast.team_created_msg", newTeam.Name, emps.Count), new Color(0.3f, 0.7f, 0.5f));
             }
             _selectedEmployees.Clear();
