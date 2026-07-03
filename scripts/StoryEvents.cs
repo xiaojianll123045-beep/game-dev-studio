@@ -1093,6 +1093,111 @@ public partial class StoryEvents : Node
                 new Color(0.2f, 0.8f, 0.2f));
             return;
         }
+
+        // ── 更多趣味事件 ──
+        if (!_triggeredEvents.Contains($"prank_{_gm.GameMonth}"))
+        {
+            _triggeredEvents.Add($"prank_{_gm.GameMonth}");
+            var emp = _empMgr.Employees[_rng.Next(_empMgr.Employees.Count)];
+            _gm.ShowChoicePopup("🎪 愚人节玩笑", $"{emp.Name}提议在游戏里藏一个只有开发组知道的愚人节彩蛋。",
+                "好主意！", "太危险了",
+                () => { if (fanMgr != null) fanMgr.CasualFans += 300; var p = _teamMgr.Teams.FirstOrDefault(t => t.CurrentProject != null)?.CurrentProject; if (p != null) p.DevLog.Add("愚人节彩蛋获得好评"); },
+                () => {},
+                new Color(0.5f, 0.8f, 0.3f));
+            return;
+        }
+        if (!_triggeredEvents.Contains($"esports_{_gm.GameMonth}") && hasDev)
+        {
+            _triggeredEvents.Add($"esports_{_gm.GameMonth}");
+            var projName = _teamMgr.Teams.FirstOrDefault(t => t.CurrentProject != null)?.CurrentProject?.Name ?? "你的游戏";
+            _gm.ShowChoicePopup("🎮 电竞战队邀请", $"有电竞战队想将《{projName}》列为训练项目！",
+                "提供赞助支持", "婉拒",
+                () => { if (fanMgr != null) fanMgr.CasualFans += 600; if (_res != null) _res.SpendMoney(20000, "esports"); },
+                () => {},
+                new Color(0.3f, 0.6f, 0.9f));
+            return;
+        }
+        if (!_triggeredEvents.Contains($"cafe_collab_{_gm.GameMonth}"))
+        {
+            _triggeredEvents.Add($"cafe_collab_{_gm.GameMonth}");
+            _gm.ShowChoicePopup("☕ 主题咖啡厅合作", "有咖啡厅想合作推出游戏主题饮品！",
+                "授权合作(¥2万)", "免费授权",
+                () => { if (_res != null) _res.EarnMoney(20000, "collab"); if (fanMgr != null) fanMgr.CasualFans += 400; },
+                () => { if (fanMgr != null) fanMgr.CasualFans += 800; },
+                new Color(0.6f, 0.4f, 0.2f));
+            return;
+        }
+        if (!_triggeredEvents.Contains($"game_jam_{_gm.GameMonth}"))
+        {
+            _triggeredEvents.Add($"game_jam_{_gm.GameMonth}");
+            _gm.ShowChoicePopup("🏕️ Game Jam邀请", "有人邀请你团队参加一场48小时Game Jam！",
+                "参加！", "太忙了",
+                () => { if (fanMgr != null) fanMgr.CasualFans += 200; if (_res != null) _res.GainInspiration(15); _gm.ShowPopup("Jam成果", "做了一款小游戏，获得社区好评！", new Color(0.3f, 0.8f, 0.5f)); },
+                () => {},
+                new Color(0.7f, 0.3f, 0.8f));
+            return;
+        }
+        if (!_triggeredEvents.Contains($"podcast_{_gm.GameMonth}"))
+        {
+            _triggeredEvents.Add($"podcast_{_gm.GameMonth}");
+            _gm.ShowChoicePopup("🎙️ 播客邀请", "知名游戏播客邀请你去做一期访谈节目！",
+                "接受邀请", "婉拒",
+                () => { if (fanMgr != null) fanMgr.CasualFans += 500; var p = _teamMgr.Teams.FirstOrDefault(t => t.CurrentProject != null)?.CurrentProject; if (p != null) p.MarketingHype = Mathf.Min(100, p.MarketingHype + 10); },
+                () => {},
+                new Color(0.4f, 0.5f, 0.8f));
+            return;
+        }
+        if (!_triggeredEvents.Contains($"bug_bounty_{_gm.GameMonth}"))
+        {
+            _triggeredEvents.Add($"bug_bounty_{_gm.GameMonth}");
+            _gm.ShowChoicePopup("🐛 悬赏捉虫", "社区发起捉虫活动，每找到一个严重BUG奖励¥100！",
+                "官方赞助(¥5000)", "让社区自发组织",
+                () => { if (_res != null) _res.SpendMoney(5000, "qa"); var p = _teamMgr.Teams.FirstOrDefault(t => t.CurrentProject != null)?.CurrentProject; if (p != null) p.BugCount = Mathf.Max(0, p.BugCount - 15); if (fanMgr != null) fanMgr.DiehardFans += 80; },
+                () => { var p = _teamMgr.Teams.FirstOrDefault(t => t.CurrentProject != null)?.CurrentProject; if (p != null) p.BugCount = Mathf.Max(0, p.BugCount - 5); },
+                new Color(0.9f, 0.6f, 0.1f));
+            return;
+        }
+        if (!_triggeredEvents.Contains($"memorial_{_gm.GameMonth}"))
+        {
+            _triggeredEvents.Add($"memorial_{_gm.GameMonth}");
+            var lastGameName = Services.GameDevManager.CompletedProjects.LastOrDefault()?.Name ?? "已下架";
+            _gm.ShowChoicePopup("🕯️ 游戏停服纪念", $"有玩家提议为《{lastGameName}》举办停服一周年纪念活动。",
+                "官方举办纪念活动", "保持沉默",
+                () => { if (fanMgr != null) fanMgr.DiehardFans += 200; if (_res != null) _res.SpendMoney(10000, "community"); },
+                () => {},
+                new Color(0.5f, 0.5f, 0.6f));
+            return;
+        }
+        if (!_triggeredEvents.Contains($"mod_contest_{_gm.GameMonth}"))
+        {
+            _triggeredEvents.Add($"mod_contest_{_gm.GameMonth}");
+            _gm.ShowChoicePopup("🧩 MOD大赛", "社区提议举办MOD创作大赛！",
+                "赞助奖金(¥2万)", "提供技术支持",
+                () => { if (_res != null) _res.SpendMoney(20000, "community"); if (fanMgr != null) { fanMgr.CasualFans += 600; fanMgr.DiehardFans += 200; } },
+                () => { if (fanMgr != null) fanMgr.DiehardFans += 100; },
+                new Color(0.6f, 0.5f, 0.3f));
+            return;
+        }
+        if (!_triggeredEvents.Contains($"retro_retrospective_{_gm.GameMonth}"))
+        {
+            _triggeredEvents.Add($"retro_retrospective_{_gm.GameMonth}");
+            _gm.ShowChoicePopup("📝 项目复盘会", "团队提议开一次正式的项目复盘会，总结经验教训。",
+                "开！", "太忙了算了",
+                () => { foreach (var e in _empMgr.Employees) e.Satisfaction += 5; var p = _teamMgr.Teams.FirstOrDefault(t => t.CurrentProject != null)?.CurrentProject; if (p != null) p.TechDebt = Mathf.Max(0, p.TechDebt - 5); },
+                () => {},
+                new Color(0.4f, 0.6f, 0.8f));
+            return;
+        }
+        if (!_triggeredEvents.Contains($"game_music_remix_{_gm.GameMonth}"))
+        {
+            _triggeredEvents.Add($"game_music_remix_{_gm.GameMonth}");
+            _gm.ShowChoicePopup("🎵 游戏音乐Remix大赛", "有音乐制作人想为你的游戏音乐做Remix！",
+                "官方授权推广", "授权但不管",
+                () => { if (fanMgr != null) fanMgr.CasualFans += 400; var p = _teamMgr.Teams.FirstOrDefault(t => t.CurrentProject != null)?.CurrentProject; if (p != null) p.AudioScore += 1; },
+                () => { if (fanMgr != null) fanMgr.CasualFans += 100; },
+                new Color(0.5f, 0.3f, 0.9f));
+            return;
+        }
     }
 
     // ══════════════════ 季度审查 ══════════════════
