@@ -32,6 +32,10 @@ var _drag_start: Vector2 = Vector2()
 var _drag_cell_r: int = -1
 var _drag_cell_c: int = -1
 var _modal_overlay = null
+var grid_container: Control
+var _init_pw: float = 0
+var _init_ph: float = 0
+var _init_cs: int = 32
 var title_label: Label
 var diff_row: HBoxContainer
 var close_x_btn: Button
@@ -158,24 +162,33 @@ func StartNew(nr: int, nc: int, nm: int):
 	close_x_btn.pressed.connect(self._Close)
 	panel.add_child(close_x_btn)
 
+	# 雷区容器（裁剪超出部分，保持固定尺寸）
+	_init_pw = pw; _init_ph = ph; _init_cs = cell_size
+	grid_container = Control.new()
+	grid_container.clip_contents = true
+	grid_container.mouse_filter = Control.MOUSE_FILTER_PASS
+	grid_container.position = Vector2(offset_x, offset_y)
+	grid_container.size = Vector2(cols * _init_cs, rows * _init_cs + 38)
+	panel.add_child(grid_container)
+
 	for r in range(rows):
 		cells.append([])
 		for c in range(cols):
 			var cr = ColorRect.new()
 			cr.color = Color(0.7, 0.75, 0.8)
 			cr.size = Vector2(cell_size - 2, cell_size - 2)
-			cr.position = Vector2(offset_x + c * cell_size, offset_y + r * cell_size)
+			cr.position = Vector2(c * cell_size, r * cell_size)
 			var cap_r = r; var cap_c = c
 			var gui = Control.new()
 			gui.mouse_filter = Control.MOUSE_FILTER_STOP
 			gui.gui_input.connect(func(ev): _OnCellInput(ev, cap_r, cap_c))
 			gui.size = cr.size
 			cr.add_child(gui)
-			panel.add_child(cr)
+			grid_container.add_child(cr)
 			cells[r].append(cr)
 
 	bottom_bar = HBoxContainer.new()
-	bottom_bar.position = Vector2(offset_x, offset_y + rows * cell_size + 6)
+	bottom_bar.position = Vector2(0, rows * cell_size + 6)
 	bottom_bar.size = Vector2(cols * cell_size, 32)
 	var close_txt = Button.new()
 	close_txt.text = "✕ 关闭"
@@ -187,7 +200,7 @@ func StartNew(nr: int, nc: int, nm: int):
 	var spacer = Control.new()
 	spacer.size_flags_horizontal = Control.SIZE_EXPAND_FILL
 	bottom_bar.add_child(spacer)
-	panel.add_child(bottom_bar)
+	grid_container.add_child(bottom_bar)
 
 	# 重置平移 & 面板输入
 	_pan_x = 0; _pan_y = 0; _dragging = false
@@ -234,22 +247,18 @@ func _ZoomOut():
 	_RefreshLayout()
 
 func _RefreshLayout():
-	var pw = cols * cell_size + 80
-	var ph = rows * cell_size + 130
-	panel.offset_left = -pw/2; panel.offset_top = -ph/2
-	panel.offset_right = pw/2; panel.offset_bottom = ph/2
-	title_label.position.x = pw/2 - 80
-	mine_counter.position.x = 10
-	timer_label.position.x = pw - 110
-	mode_btn.position.x = pw/2 - 40
-	diff_row.position.x = pw/2 - 140
-	close_x_btn.position.x = pw - 30
+	if _init_pw <= 0: return
+	# 面板和 UI 固定不动
+	panel.offset_left = -_init_pw/2; panel.offset_top = -_init_ph/2
+	panel.offset_right = _init_pw/2; panel.offset_bottom = _init_ph/2
+	# 裁剪容器固定初始尺寸，超出部分自动隐藏
+	grid_container.size = Vector2(cols * _init_cs, rows * _init_cs + 38)
 	for r in range(rows):
 		for c in range(cols):
 			var cr = cells[r][c]
 			var sz = cell_size - 2
 			cr.size = Vector2(sz, sz)
-			cr.position = Vector2(offset_x + c * cell_size + _pan_x, offset_y + r * cell_size + _pan_y)
+			cr.position = Vector2(c * cell_size + _pan_x, r * cell_size + _pan_y)
 			for ch in cr.get_children():
 				if ch is Control:
 					ch.size = cr.size
@@ -257,7 +266,7 @@ func _RefreshLayout():
 					ch.size = cr.size
 					ch.add_theme_font_size_override("font_size", clamp(cell_size - 12, 8, 22))
 	if bottom_bar != null:
-		bottom_bar.position = Vector2(offset_x + _pan_x, offset_y + rows * cell_size + _pan_y + 6)
+		bottom_bar.position = Vector2(_pan_x, rows * cell_size + _pan_y + 6)
 		bottom_bar.size = Vector2(cols * cell_size, 32)
 
 func _Close():
@@ -426,10 +435,10 @@ func _GameOver():
 	msg.text = "💥 踩雷了！点难度重开"
 	msg.add_theme_font_size_override("font_size", 16)
 	msg.add_theme_color_override("font_color", Color(0.9, 0.2, 0.2))
-	msg.position = Vector2(offset_x + _pan_x, offset_y + rows * cell_size + _pan_y + 10)
+	msg.position = Vector2(_pan_x, rows * cell_size + _pan_y + 10)
 	msg.size = Vector2(cols * cell_size, 30)
 	msg.horizontal_alignment = HORIZONTAL_ALIGNMENT_CENTER
-	panel.add_child(msg)
+	grid_container.add_child(msg)
 
 func _CheckWin():
 	var revealed_count = 0
@@ -442,10 +451,10 @@ func _CheckWin():
 		msg.text = "🎉 你赢了！耗时 " + str(int(timer)) + " 秒"
 		msg.add_theme_font_size_override("font_size", 16)
 		msg.add_theme_color_override("font_color", Color(0.2, 0.7, 0.3))
-		msg.position = Vector2(offset_x + _pan_x, offset_y + rows * cell_size + _pan_y + 10)
+		msg.position = Vector2(_pan_x, rows * cell_size + _pan_y + 10)
 		msg.size = Vector2(cols * cell_size, 30)
 		msg.horizontal_alignment = HORIZONTAL_ALIGNMENT_CENTER
-		panel.add_child(msg)
+		grid_container.add_child(msg)
 		for r in range(rows):
 			for c in range(cols):
 				if flagged[r][c] and board[r][c] != -1:
