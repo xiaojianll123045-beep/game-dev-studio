@@ -123,6 +123,7 @@ func StartNew(nr: int, nc: int, nm: int):
 		var dr = diff[1]; var dc = diff[2]; var dm = diff[3]
 		btn.pressed.connect(self._Reset.bind(dr, dc, dm))
 		diff_row.add_child(btn)
+	panel.add_child(diff_row)
 
 	var close_btn = Button.new()
 	close_btn.text = "✕"
