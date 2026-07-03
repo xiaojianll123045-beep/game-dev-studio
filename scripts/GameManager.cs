@@ -4784,7 +4784,12 @@ public partial class GameManager : Node3D
                             PrimarySkill = capTask.RequiredSkill, MinSkillLevel = capTask.RequiredLevel, ExpReward = 5
                         };
                         team.OutsourceMonthsRemaining = capTask.Duration;
-                        // 同时加入 OutsourceTaskPool，让 ProcessOutsourceMonthly 处理结算和通知
+                        // 立即支付预付款（外包收入立刻到账）
+                        float advance = capTask.Reward * 0.5f;
+                        _res.EarnMoney(advance, "outsource");
+                        ShowToast(Loc.Tr("toast.outsource_done"), $"{capTask.Name} 预付款 +¥{advance / 1000f:F0}K", new Color(0.3f, 0.8f, 0.5f));
+                        RebuildHUDTabs();
+                        // 加入 OutsourceTaskPool，让 ProcessOutsourceMonthly 处理尾款
                         capTask.Accepted = true;
                         capTask.AssignedTeam = team;
                         capTask.MonthsSpent = 0;
