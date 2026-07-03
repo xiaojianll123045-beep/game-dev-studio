@@ -7169,9 +7169,14 @@ public partial class GameManager : Node3D
             }
             // employees
             _empMgr.Employees.Clear();
+            var loadedEmpIds = new HashSet<int>();
             if (d.TryGetProperty("employees", out var emps))
                 foreach (var e in emps.EnumerateArray())
-                    _empMgr.Employees.Add(DeserializeEmp(e));
+                {
+                    var emp = DeserializeEmp(e);
+                    if (loadedEmpIds.Add(emp.Id))
+                        _empMgr.Employees.Add(emp);
+                }
 
             // projects & completed
             _devMgr.Projects.Clear();
