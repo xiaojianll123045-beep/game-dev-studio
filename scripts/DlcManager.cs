@@ -92,8 +92,15 @@ public static class DlcManager
         string exeDir = System.IO.Path.GetDirectoryName(OS.GetExecutablePath());
         if (DirAccess.DirExistsAbsolute(exeDir + "/DLC"))
             ScanDlcFrom(exeDir + "/DLC/");
-        // 始终扫 res://DLC（开发环境 / 内置 DLC）
+        // 扫 res://DLC（内置 DLC）
         ScanDlcFrom("res://DLC/");
+        // 按 Id 去重（exe 目录优先）
+        var seen = new HashSet<string>();
+        for (int i = _loaded.Count - 1; i >= 0; i--)
+        {
+            if (!seen.Add(_loaded[i].Id))
+                _loaded.RemoveAt(i);
+        }
         LoadEnabled();
         Log("DlcManager", $"DLC scan done, {_loaded.Count} total, {_activeMinigames.Count} minigames, {_enabledDlcIds.Count} enabled");
     }

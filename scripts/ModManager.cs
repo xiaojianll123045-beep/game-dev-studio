@@ -42,8 +42,15 @@ public static class ModManager
         string exeDir = System.IO.Path.GetDirectoryName(OS.GetExecutablePath());
         if (DirAccess.DirExistsAbsolute(exeDir + "/mods"))
             ScanModsFrom(exeDir + "/mods/");
-        // 始终扫 res://mods/（开发环境 / 内置 mod）
+        // 扫 res://mods/（开发环境 / 内置 mod）
         ScanModsFrom(ModsRoot);
+        // 按 Id 去重（exe 目录优先）
+        var seen = new HashSet<string>();
+        for (int i = LoadedMods.Count - 1; i >= 0; i--)
+        {
+            if (!seen.Add(LoadedMods[i].Id))
+                LoadedMods.RemoveAt(i);
+        }
     }
 
     private static void ScanModsFrom(string root)
