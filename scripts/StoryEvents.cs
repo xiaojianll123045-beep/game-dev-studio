@@ -182,103 +182,79 @@ public partial class StoryEvents : Node
         var rng = new Random();
         var fanMgr = _gm?.GetNodeOrNull<FanManager>("FanManager");
 
-        // 13. 色盲模式社区请愿
+        // 13–25 国际化发售事件
         if (!_triggeredEvents.Contains("colorblind"))
-            pool.Add(("colorblind", "🌈 色盲玩家请愿！", $"社区发起请愿，要求《{proj.Name}》增加色盲模式。",
+            pool.Add(("colorblind", Loc.Tr("evt.colorblind.title"), Loc.TrF("evt.colorblind.desc", proj.Name),
                 () => { proj.DevLog.Add("加入色盲模式+包容性设计"); proj.Sales = (int)(proj.Sales * 1.04f); if (fanMgr != null) fanMgr.CasualFans += 200; },
                 () => { proj.DevLog.Add("承诺后续更新加入"); proj.Sales = (int)(proj.Sales * 1.01f); },
                 () => { proj.DevLog.Add("拒绝色盲模式需求"); proj.Sales = (int)(proj.Sales * 0.96f); },
-                "立即加入(销量+4%)", "承诺后续更新", "拒绝(销量-4%)"));
-
-        // 14. 速通玩家挑战
+                Loc.Tr("evt.colorblind.optA"), Loc.Tr("evt.colorblind.optB"), Loc.Tr("evt.colorblind.optC")));
         if (proj.FinalScore >= 75 && !_triggeredEvents.Contains("speedrun"))
-            pool.Add(("speedrun", "⚡ 速通玩家盯上你了！", $"速通社区发现《{proj.Name}》有严重漏洞可以跳过整个关卡！",
+            pool.Add(("speedrun", Loc.Tr("evt.speedrun.title"), Loc.TrF("evt.speedrun.desc", proj.Name),
                 () => { proj.DevLog.Add("修复漏洞，称赞速通玩家的发现"); proj.BugCount = Mathf.Max(0, proj.BugCount - 5); },
                 () => { proj.DevLog.Add("声明这是合法速通路线，不予修复"); proj.Sales = (int)(proj.Sales * 1.02f); },
                 () => { proj.DevLog.Add("封禁讨论速通的玩家"); proj.Sales = (int)(proj.Sales * 0.93f); },
-                "修复漏洞(BUG-5)", "这是特性！(销量+2%)", "封禁讨论(销量-7%)"));
-
-        // 15. 跨文化争议
+                Loc.Tr("evt.speedrun.optA"), Loc.Tr("evt.speedrun.optB"), Loc.Tr("evt.speedrun.optC")));
         if (proj.FinalScore >= 60 && !_triggeredEvents.Contains("cultural"))
-            pool.Add(("cultural", "🌍 文化敏感性争议！", $"有玩家指责《{proj.Name}》中的某些内容具有文化冒犯性。",
+            pool.Add(("cultural", Loc.Tr("evt.cultural.title"), Loc.TrF("evt.cultural.desc", proj.Name),
                 () => { if (_res != null) _res.SpendMoney(40000, "pr"); proj.DevLog.Add("聘请文化顾问修改内容"); proj.Sales = (int)(proj.Sales * 1.06f); },
                 () => { proj.DevLog.Add("发布道歉声明但保留内容"); },
                 () => { proj.DevLog.Add("无视批评，指责玩家太敏感"); proj.Sales = (int)(proj.Sales * 0.88f); },
-                "聘请顾问(¥4万,销量+6%)", "道歉但保留", "无视(销量-12%)"));
-
-        // 16. 玩家自创关卡
+                Loc.Tr("evt.cultural.optA"), Loc.Tr("evt.cultural.optB"), Loc.Tr("evt.cultural.optC")));
         if (proj.FinalScore >= 70 && !_triggeredEvents.Contains("level_editor"))
-            pool.Add(("level_editor", "🧩 玩家自制关卡火了！", $"玩家用《{proj.Name}》的漏洞做出了超难的社区关卡！",
+            pool.Add(("level_editor", Loc.Tr("evt.level_editor.title"), Loc.TrF("evt.level_editor.desc", proj.Name),
                 () => { proj.DevLog.Add("官方推广该关卡，送作者奖励"); proj.Sales = (int)(proj.Sales * 1.05f); if (fanMgr != null) fanMgr.DiehardFans += 100; },
                 () => { proj.DevLog.Add("默许社区创作，不干预"); proj.Sales = (int)(proj.Sales * 1.02f); },
                 () => { proj.DevLog.Add("封禁该关卡，称其违反用户协议"); proj.Sales = (int)(proj.Sales * 0.90f); },
-                "官方推广(销量+5%)", "默许", "封禁(销量-10%)"));
-
-        // 17. 游戏原声带需求
+                Loc.Tr("evt.level_editor.optA"), Loc.Tr("evt.level_editor.optB"), Loc.Tr("evt.level_editor.optC")));
         if (proj.FinalScore >= 65 && !_triggeredEvents.Contains("ost_req"))
-            pool.Add(("ost_req", "🎵 玩家求原声带！", $"粉丝强烈要求《{proj.Name}》发售原声音乐集。",
+            pool.Add(("ost_req", Loc.Tr("evt.ost_req.title"), Loc.TrF("evt.ost_req.desc", proj.Name),
                 () => { if (_res != null) _res.SpendMoney(15000, "production"); proj.DevLog.Add("制作原声带发售"); if (_res != null) _res.EarnMoney(50000, "ost"); },
                 () => { proj.DevLog.Add("免费公开原声带下载"); if (fanMgr != null) fanMgr.DiehardFans += 150; },
                 () => { proj.DevLog.Add("没空搞这些"); proj.Sales = (int)(proj.Sales * 0.97f); },
-                "制作发售(投入¥1.5万,收入¥5万)", "免费公开(粉丝+150)", "无视(销量-3%)"));
-
-        // 18. 游戏被恶意差评
+                Loc.Tr("evt.ost_req.optA"), Loc.Tr("evt.ost_req.optB"), Loc.Tr("evt.ost_req.optC")));
         if (proj.FinalScore >= 80 && !_triggeredEvents.Contains("review_bomb"))
-            pool.Add(("review_bomb", "💣 遭遇恶意差评轰炸！", $"大量低质量账号涌入给《{proj.Name}》刷差评！",
+            pool.Add(("review_bomb", Loc.Tr("evt.review_bomb.title"), Loc.TrF("evt.review_bomb.desc", proj.Name),
                 () => { if (_res != null) _res.SpendMoney(80000, "pr"); proj.DevLog.Add("聘请法务团队举报恶意行为"); proj.Sales = (int)(proj.Sales * 1.03f); if (fanMgr != null) fanMgr.CasualFans += 300; },
                 () => { proj.DevLog.Add("呼吁社区正面评价对冲"); if (fanMgr != null) fanMgr.DiehardFans += 50; proj.Sales = (int)(proj.Sales * 0.95f); },
                 () => { proj.DevLog.Add("无视差评，相信真正玩家的判断"); proj.Sales = (int)(proj.Sales * 0.90f); },
-                "法务举报(¥8万,粉丝+300)", "呼吁对冲(死忠+50)", "无视(销量-10%)"));
-
-        // 19. 游戏入选慈善包
+                Loc.Tr("evt.review_bomb.optA"), Loc.Tr("evt.review_bomb.optB"), Loc.Tr("evt.review_bomb.optC")));
         if (proj.Sales > 30000 && !_triggeredEvents.Contains("humble_bundle"))
-            pool.Add(("humble_bundle", "🎁 慈善包邀请！", $"知名慈善包平台邀请《{proj.Name}》加入月度慈善包。",
+            pool.Add(("humble_bundle", Loc.Tr("evt.humble_bundle.title"), Loc.TrF("evt.humble_bundle.desc", proj.Name),
                 () => { if (_res != null) _res.EarnMoney(30000, "bundle"); proj.DevLog.Add("加入慈善包+¥3万+曝光"); if (fanMgr != null) fanMgr.CasualFans += 500; },
                 () => { proj.DevLog.Add("拒绝加入，维持定价策略"); },
                 () => { proj.DevLog.Add("加入且提供独家内容"); if (_res != null) _res.EarnMoney(50000, "bundle"); if (fanMgr != null) fanMgr.CasualFans += 800; },
-                "加入(¥3万+粉丝500)", "拒绝", "加独家内容(¥5万+粉丝800)"));
-
-        // 20. 游戏入选年度榜单
+                Loc.Tr("evt.humble_bundle.optA"), Loc.Tr("evt.humble_bundle.optB"), Loc.Tr("evt.humble_bundle.optC")));
         if (proj.FinalScore >= 80 && !_triggeredEvents.Contains("year_end_list"))
-            pool.Add(("year_end_list", "📊 年度榜单提名！", $"《{proj.Name}》被多家媒体提名为年度最佳游戏之一！",
+            pool.Add(("year_end_list", Loc.Tr("evt.year_end_list.title"), Loc.TrF("evt.year_end_list.desc", proj.Name),
                 () => { proj.DevLog.Add("高调庆祝，投放榜单广告"); if (_res != null) _res.SpendMoney(30000, "marketing"); proj.Sales = (int)(proj.Sales * 1.12f); },
                 () => { proj.DevLog.Add("低调感谢玩家支持"); proj.Sales = (int)(proj.Sales * 1.05f); },
                 () => { proj.DevLog.Add("觉得榜单含金量不高"); },
-                "广告庆祝(-¥3万,销量+12%)", "感谢玩家(销量+5%)", "不屑一顾"));
-
-        // 21. 游戏引擎公司找上门
+                Loc.Tr("evt.year_end_list.optA"), Loc.Tr("evt.year_end_list.optB"), Loc.Tr("evt.year_end_list.optC")));
         if (!_triggeredEvents.Contains("engine_license"))
-            pool.Add(("engine_license", "🔧 引擎授权合作！", $"一家竞品公司想付费授权使用你的自研引擎！",
+            pool.Add(("engine_license", Loc.Tr("evt.engine_license.title"), Loc.Tr("evt.engine_license.desc"),
                 () => { if (_res != null) _res.EarnMoney(200000, "engine_license"); proj.DevLog.Add("授权引擎+¥20万"); },
                 () => { proj.DevLog.Add("免费开源引擎，获得社区声望"); if (fanMgr != null) fanMgr.DiehardFans += 200; },
                 () => { proj.DevLog.Add("拒绝授权，保持技术独占"); },
-                "授权(¥20万)", "免费开源(死忠+200)", "独占拒绝"));
-
-        // 22. 发行商收购要约
+                Loc.Tr("evt.engine_license.optA"), Loc.Tr("evt.engine_license.optB"), Loc.Tr("evt.engine_license.optC")));
         if (proj.Sales > 100000 && !_triggeredEvents.Contains("acquisition"))
-            pool.Add(("acquisition", "🏢 收到收购要约！", $"某大型发行商提出收购你的工作室，报价¥500万！",
+            pool.Add(("acquisition", Loc.Tr("evt.acquisition.title"), Loc.TrF("evt.acquisition.desc", proj.Name),
                 () => { if (_res != null) _res.EarnMoney(5000000, "acquisition"); proj.DevLog.Add("接受收购，获得¥500万资金"); },
                 () => { proj.DevLog.Add("拒绝收购，保持独立开发者的尊严"); if (fanMgr != null) fanMgr.DiehardFans += 300; },
                 () => { proj.DevLog.Add("谈判争取更好条件"); if (_res != null) _res.EarnMoney(2000000, "acquisition"); proj.DevLog.Add("谈判后获得¥200万投资，保留控股权"); },
-                "接受(¥500万)", "拒绝(死忠+300)", "谈判(¥200万+保留独立)"));
-
-        // 23. 游戏被用于教育
+                Loc.Tr("evt.acquisition.optA"), Loc.Tr("evt.acquisition.optB"), Loc.Tr("evt.acquisition.optC")));
         if (proj.FinalScore >= 70 && !_triggeredEvents.Contains("education_use"))
-            pool.Add(("education_use", "📚 教育机构找上门！", $"一所大学想用《{proj.Name}》作为游戏设计课程教材。",
+            pool.Add(("education_use", Loc.Tr("evt.education_use.title"), Loc.TrF("evt.education_use.desc", proj.Name),
                 () => { if (_res != null) _res.EarnMoney(20000, "education"); proj.DevLog.Add("提供教育授权+¥2万"); },
                 () => { proj.DevLog.Add("免费提供教学使用"); if (fanMgr != null) fanMgr.CasualFans += 300; },
                 () => { proj.DevLog.Add("拒绝，担心学生批评游戏"); },
-                "授权(¥2万)", "免费(粉丝+300)", "拒绝"));
-
-        // 24. 游戏主播模仿大赛
+                Loc.Tr("evt.education_use.optA"), Loc.Tr("evt.education_use.optB"), Loc.Tr("evt.education_use.optC")));
         if (proj.FinalScore >= 70 && !_triggeredEvents.Contains("streamer_meme"))
-            pool.Add(("streamer_meme", "🎭 主播表情包爆火！", $"游戏中的一个BUG表情被主播做成梗图全网传播！",
+            pool.Add(("streamer_meme", Loc.Tr("evt.streamer_meme.title"), Loc.TrF("evt.streamer_meme.desc", proj.Name),
                 () => { proj.DevLog.Add("官方转发表情包，推波助澜"); proj.Sales = (int)(proj.Sales * 1.08f); if (fanMgr != null) fanMgr.CasualFans += 500; },
                 () => { proj.DevLog.Add("修复BUG，表情包热度自然消退"); proj.BugCount = Mathf.Max(0, proj.BugCount - 3); proj.Sales = (int)(proj.Sales * 1.02f); },
                 () => { proj.DevLog.Add("发律师函要求下架表情包"); proj.Sales = (int)(proj.Sales * 0.85f); },
-                "蹭热度(销量+8%,粉丝+500)", "修复BUG(销量+2%)", "律师函(销量-15%)"));
-
-        // 25. 游戏实体典藏版需求
+                Loc.Tr("evt.streamer_meme.optA"), Loc.Tr("evt.streamer_meme.optB"), Loc.Tr("evt.streamer_meme.optC")));
         if (proj.Sales > 50000 && !_triggeredEvents.Contains("collector_edition"))
             pool.Add(("collector_edition", "📦 典藏版呼声高涨！", "玩家强烈要求《{proj.Name}》推出实体典藏版。",
                 () => { if (_res != null) _res.SpendMoney(100000, "production"); if (_res != null) _res.EarnMoney(300000, "collector"); proj.DevLog.Add("制作典藏版限量发售，净赚¥20万"); if (fanMgr != null) fanMgr.DiehardFans += 200; },
