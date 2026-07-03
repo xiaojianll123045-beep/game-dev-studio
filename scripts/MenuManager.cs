@@ -172,8 +172,8 @@ public partial class MenuManager : Node
 		btnContainer.AddThemeConstantOverride("separation", 10);
 		_ui.AddChild(btnContainer);
 
-		string[] labels = { Loc.Tr("menu.new_game"), Loc.Tr("menu.continue"), Loc.Tr("menu.load_game"), Loc.Tr("menu.settings"), Loc.Tr("menu.about"), Loc.Tr("mod.title"), Loc.Tr("menu.exit") };
-		System.Action[] actions = { OnNewGame, OnContinue, OnLoadGame, OnSettings, OnAbout, ShowModList, () => GetTree().Quit() };
+		string[] labels = { Loc.Tr("menu.new_game"), Loc.Tr("menu.continue"), Loc.Tr("menu.load_game"), Loc.Tr("menu.settings"), Loc.Tr("menu.about"), Loc.Tr("mod.title"), Loc.Tr("menu.dlc"), Loc.Tr("menu.exit") };
+		System.Action[] actions = { OnNewGame, OnContinue, OnLoadGame, OnSettings, OnAbout, ShowModList, ShowDlcList, () => GetTree().Quit() };
 
 		var buttonRefs = new List<Button>();
 		for (int i = 0; i < labels.Length; i++)
@@ -842,6 +842,77 @@ public partial class MenuManager : Node
 		}
 
 		// 关闭按钮底部
+		var botClose = new Button { Text = Loc.Tr("set.cancel"), Flat = true, Position = new(pw / 2 - 50, Mathf.Max(y + 20, ph - 50)), Size = new(100, 32) };
+		botClose.AddThemeFontSizeOverride("font_size", 12);
+		botClose.AddThemeColorOverride("font_color", Colors.Black);
+		botClose.Pressed += () => dp.QueueFree();
+		dp.AddChild(botClose);
+	}
+
+	private void ShowDlcList()
+	{
+		float pw = 480, ph = 500;
+		var vp = GetViewport().GetVisibleRect().Size;
+		var dp = new DragPanel { Position = new((vp.X - pw) / 2, (vp.Y - ph) / 2), Size = new(pw, ph) };
+		dp.AddThemeStyleboxOverride("panel", new StyleBoxFlat { BgColor = Colors.White, CornerRadiusTopLeft = 8, CornerRadiusTopRight = 8, CornerRadiusBottomLeft = 8, CornerRadiusBottomRight = 8 });
+		_ui.AddChild(dp);
+
+		var title = LUI.Label(Loc.Tr("menu.dlc"), 18, new Color(0.10f, 0.14f, 0.22f));
+		title.Position = new(20, 12);
+		dp.AddChild(title);
+
+		var dlcs = DlcManager.Loaded;
+		float y = 50;
+
+		if (dlcs.Count == 0)
+		{
+			var empty = LUI.Label(Loc.Tr("dlc.none"), 12, new Color(0.4f, 0.45f, 0.55f));
+			empty.Position = new(20, y);
+			empty.Size = new(pw - 40, 30);
+			dp.AddChild(empty);
+		}
+		else
+		{
+			foreach (var d in dlcs)
+			{
+				float rowH = 40;
+
+				var nameLbl = LUI.Label($"{d.Name} v{d.Version}", 13, new Color(0.10f, 0.14f, 0.22f));
+				nameLbl.Position = new(20, y + 2);
+				nameLbl.Size = new(pw - 180, rowH);
+				dp.AddChild(nameLbl);
+
+				if (!string.IsNullOrEmpty(d.Author))
+				{
+					var authLbl = LUI.Label(d.Author, 9, new Color(0.5f, 0.5f, 0.55f));
+					authLbl.Position = new(20, y + 18);
+					authLbl.Size = new(pw - 180, 14);
+					dp.AddChild(authLbl);
+				}
+
+				if (d.Type == "minigame" && (d.LoadedScene != null || d.LoadedScript != null))
+				{
+					var launchBtn = new Button { Text = Loc.Tr("dlc.launch"), Position = new(pw - 110, y + 4), Size = new(90, 30) };
+					launchBtn.AddThemeFontSizeOverride("font_size", 12);
+					launchBtn.AddThemeColorOverride("font_color", new Color(0.2f, 0.5f, 0.2f));
+					var captured = d;
+					launchBtn.Pressed += () => { dp.QueueFree(); DlcManager.LaunchMinigame(Services.GameManager, captured); };
+					dp.AddChild(launchBtn);
+				}
+
+				if (!string.IsNullOrEmpty(d.Description))
+				{
+					var desc = LUI.Label(d.Description, 9, new Color(0.4f, 0.45f, 0.55f));
+					desc.Position = new(20, y + (string.IsNullOrEmpty(d.Author) ? 18 : 32));
+					desc.Size = new(pw - 80, 14);
+					dp.AddChild(desc);
+					rowH = Mathf.Max(rowH, 50);
+				}
+
+				y += rowH + 6;
+			}
+		}
+
 		var botClose = new Button { Text = Loc.Tr("set.cancel"), Flat = true, Position = new(pw / 2 - 50, Mathf.Max(y + 20, ph - 50)), Size = new(100, 32) };
 		botClose.AddThemeFontSizeOverride("font_size", 12);
 		botClose.AddThemeColorOverride("font_color", Colors.Black);
