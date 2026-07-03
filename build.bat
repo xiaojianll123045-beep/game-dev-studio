@@ -27,5 +27,5 @@ if errorlevel 1 (
 
 echo.
 echo === Done! build\GameTycoon.exe v%VER% ===
-echo (DLC and mods excluded from PCK â€” use user:// for external content)
+echo (DLC and mods excluded from PCK ¡ª use user:// for external content)
 pause
