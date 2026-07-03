@@ -2569,12 +2569,26 @@ public partial class AchievementManager : Node
         ShowNewUnlocks();
     }
 
-    public void TryUnlock(string id, bool condition)
+    /// <summary>尝试解锁成就，返回是否本次解锁成功</summary>
+    public bool TryUnlock(string id, bool condition)
     {
         if (!Unlocked.Contains(id) && condition)
         {
             Unlocked.Add(id);
             NewUnlocks.Add(id);
+            return true;
+        }
+        return false;
+    }
+
+    /// <summary>立即弹窗显示新解锁的成就（不清除列表，方便链式调用）</summary>
+    public void ShowNewUnlocksImmediate()
+    {
+        foreach (var id in NewUnlocks)
+        {
+            var ach = AllAchievements.Find(a => a.Id == id);
+            if (ach != null)
+                _gm.ShowPopup(Loc.Tr("ach.unlock_title"), $"[{ach.Category}]\n{ach.Name}\n{ach.Desc}", new Color(0.9f, 0.7f, 0.1f));
         }
     }
 

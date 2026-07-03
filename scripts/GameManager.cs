@@ -588,6 +588,13 @@ public partial class GameManager : Node3D
 
     private void ProcessGameInput(InputEvent @event)
     {
+        // ── 弹窗打开时拦截鼠标滚轮，防止穿透到3D世界 ──
+        if (_toastPanel != null && @event is InputEventMouseButton scrollEv
+            && (scrollEv.ButtonIndex == MouseButton.WheelUp || scrollEv.ButtonIndex == MouseButton.WheelDown))
+        {
+            GetViewport().SetInputAsHandled(); return;
+        }
+
         // 全局 UI 点击音效
         if (@event is InputEventMouseButton btnEv && btnEv.Pressed && btnEv.ButtonIndex == MouseButton.Left)
         {
@@ -2888,6 +2895,7 @@ public partial class GameManager : Node3D
     private Panel _toastPanel;
     private Panel _noticePanel;                      // 右下角非阻塞通知
     private bool _wasPausedBeforePopup; // 弹窗前是否已暂停（用户手动暂停）
+    private int _popupDepth;            // 弹窗嵌套深度，深度归零才恢复暂停
 
     /// <summary>右下角非阻塞通知 — 不暂停游戏，自动消失</summary>
     public void ShowToast(string title, string message, Color titleColor, float duration = 6f)
@@ -2955,13 +2963,15 @@ public partial class GameManager : Node3D
         };
     }
 
-    private struct QueuedPopup { public string title, msg; public Color color; public string optA, optB; public Action onA, onB; public bool isChoice; }
+    private struct QueuedPopup { public string title, msg, optA, optB, optC; public Color color; public Action onA, onB, onC; public bool isChoice, isTriChoice; }
     private Queue<QueuedPopup> _popupQueue = new();
     private void ShowNextQueuedPopup()
     {
         if (_popupQueue.Count == 0) return;
         var q = _popupQueue.Dequeue();
-        if (q.isChoice)
+        if (q.isTriChoice)
+            ShowTriChoicePopup(q.title, q.msg, q.optA, q.optB, q.optC, q.onA, q.onB, q.onC, q.color);
+        else if (q.isChoice)
             ShowChoicePopup(q.title, q.msg, q.optA, q.optB, q.onA, q.onB, q.color);
         else
             ShowPopup(q.title, q.msg, q.color);
@@ -2971,7 +2981,8 @@ public partial class GameManager : Node3D
     {
         if (_uiLayer == null) return;
         if (_toastPanel != null) { _popupQueue.Enqueue(new QueuedPopup { title = title, msg = message, color = titleColor, isChoice = false }); return; }
-        _wasPausedBeforePopup = Paused;
+        _popupDepth++;
+        if (_popupDepth == 1) _wasPausedBeforePopup = Paused;
         Paused = true;
         var vp = GetViewport().GetVisibleRect().Size;
         var S = (Func<float, float>)(v => v * UIScale);
@@ -3017,7 +3028,7 @@ public partial class GameManager : Node3D
         float btnY = msgY + msgH + gapM;
         var ok = new Button { Text = Loc.Tr("ui.got_it"), Position = new(pw / 2 - S(50), btnY), Size = new(S(100), btnH) };
         ok.AddThemeFontSizeOverride("font_size", 14);
-        ok.Pressed += () => { _toastPanel?.QueueFree(); _toastPanel = null; Paused = _wasPausedBeforePopup; ShowNextQueuedPopup(); };
+        ok.Pressed += () => { _toastPanel?.QueueFree(); _toastPanel = null; _popupDepth--; if (_popupDepth <= 0) Paused = _wasPausedBeforePopup; ShowNextQueuedPopup(); };
         _toastPanel.AddChild(ok);
 
         _uiLayer.AddChild(_toastPanel);
@@ -3036,7 +3047,8 @@ public partial class GameManager : Node3D
     {
         if (_uiLayer == null) return;
         if (_toastPanel != null) { _popupQueue.Enqueue(new QueuedPopup { title = title, msg = message, color = titleColor, optA = optA, optB = optB, onA = onA, onB = onB, isChoice = true }); return; }
-        _wasPausedBeforePopup = Paused;
+        _popupDepth++;
+        if (_popupDepth == 1) _wasPausedBeforePopup = Paused;
         Paused = true;
         var vp = GetViewport().GetVisibleRect().Size;
         var S = (Func<float, float>)(v => v * UIScale);
@@ -3093,12 +3105,12 @@ public partial class GameManager : Node3D
             // 纵向排列：各占满宽
             var btnA = new Button { Text = optA, Position = new(pad, btnY), Size = new(contentW, btnH) };
             btnA.AddThemeFontSizeOverride("font_size", btnFont);
-            btnA.Pressed += () => { _toastPanel?.QueueFree(); _toastPanel = null; Paused = _wasPausedBeforePopup; ShowNextQueuedPopup(); onA?.Invoke(); };
+            btnA.Pressed += () => { _toastPanel?.QueueFree(); _toastPanel = null; _popupDepth--; if (_popupDepth <= 0) Paused = _wasPausedBeforePopup; ShowNextQueuedPopup(); onA?.Invoke(); };
             _toastPanel.AddChild(btnA);
 
             var btnB = new Button { Text = optB, Position = new(pad, btnY + btnH + btnGap), Size = new(contentW, btnH) };
             btnB.AddThemeFontSizeOverride("font_size", btnFont);
-            btnB.Pressed += () => { _toastPanel?.QueueFree(); _toastPanel = null; Paused = _wasPausedBeforePopup; ShowNextQueuedPopup(); onB?.Invoke(); };
+            btnB.Pressed += () => { _toastPanel?.QueueFree(); _toastPanel = null; _popupDepth--; if (_popupDepth <= 0) Paused = _wasPausedBeforePopup; ShowNextQueuedPopup(); onB?.Invoke(); };
             _toastPanel.AddChild(btnB);
         }
         else
@@ -3107,12 +3119,12 @@ public partial class GameManager : Node3D
             float btnW = halfW;
             var btnA = new Button { Text = optA, Position = new(pad, btnY), Size = new(btnW, btnH) };
             btnA.AddThemeFontSizeOverride("font_size", btnFont);
-            btnA.Pressed += () => { _toastPanel?.QueueFree(); _toastPanel = null; Paused = _wasPausedBeforePopup; ShowNextQueuedPopup(); onA?.Invoke(); };
+            btnA.Pressed += () => { _toastPanel?.QueueFree(); _toastPanel = null; _popupDepth--; if (_popupDepth <= 0) Paused = _wasPausedBeforePopup; ShowNextQueuedPopup(); onA?.Invoke(); };
             _toastPanel.AddChild(btnA);
 
             var btnB = new Button { Text = optB, Position = new(pad + btnW + S(12), btnY), Size = new(btnW, btnH) };
             btnB.AddThemeFontSizeOverride("font_size", btnFont);
-            btnB.Pressed += () => { _toastPanel?.QueueFree(); _toastPanel = null; Paused = _wasPausedBeforePopup; ShowNextQueuedPopup(); onB?.Invoke(); };
+            btnB.Pressed += () => { _toastPanel?.QueueFree(); _toastPanel = null; _popupDepth--; if (_popupDepth <= 0) Paused = _wasPausedBeforePopup; ShowNextQueuedPopup(); onB?.Invoke(); };
             _toastPanel.AddChild(btnB);
         }
 
@@ -3131,7 +3143,8 @@ public partial class GameManager : Node3D
     {
         if (_uiLayer == null) return;
         if (!GodotObject.IsInstanceValid(this)) return;
-        _toastPanel?.QueueFree();
+        if (_toastPanel != null) { _popupQueue.Enqueue(new QueuedPopup { title = title, msg = message, color = titleColor, optA = optA, optB = optB, optC = optC, onA = onA, onB = onB, onC = onC, isChoice = true, isTriChoice = true }); return; }
+        _popupDepth++;
         _wasPausedBeforePopup = Paused;
         Paused = true;
         var vp = GetViewport().GetVisibleRect().Size;
@@ -3176,17 +3189,17 @@ public partial class GameManager : Node3D
         float btnAreaY = msgY + msgH;
         var btnA = new Button { Text = optA, Position = new(pad, btnAreaY), Size = new(contentW, btnH) };
         btnA.AddThemeFontSizeOverride("font_size", 13);
-        btnA.Pressed += () => { _toastPanel?.QueueFree(); _toastPanel = null; Paused = _wasPausedBeforePopup; onA?.Invoke(); ShowNextQueuedPopup(); };
+        btnA.Pressed += () => { _toastPanel?.QueueFree(); _toastPanel = null; _popupDepth--; if (_popupDepth <= 0) Paused = _wasPausedBeforePopup; onA?.Invoke(); ShowNextQueuedPopup(); };
         _toastPanel.AddChild(btnA);
 
         var btnB = new Button { Text = optB, Position = new(pad, btnAreaY + btnH + btnGap), Size = new(contentW, btnH) };
         btnB.AddThemeFontSizeOverride("font_size", 13);
-        btnB.Pressed += () => { _toastPanel?.QueueFree(); _toastPanel = null; Paused = _wasPausedBeforePopup; onB?.Invoke(); ShowNextQueuedPopup(); };
+        btnB.Pressed += () => { _toastPanel?.QueueFree(); _toastPanel = null; _popupDepth--; if (_popupDepth <= 0) Paused = _wasPausedBeforePopup; onB?.Invoke(); ShowNextQueuedPopup(); };
         _toastPanel.AddChild(btnB);
 
         var btnC = new Button { Text = optC, Position = new(pad, btnAreaY + (btnH + btnGap) * 2), Size = new(contentW, btnH) };
         btnC.AddThemeFontSizeOverride("font_size", 13);
-        btnC.Pressed += () => { _toastPanel?.QueueFree(); _toastPanel = null; Paused = _wasPausedBeforePopup; onC?.Invoke(); ShowNextQueuedPopup(); };
+        btnC.Pressed += () => { _toastPanel?.QueueFree(); _toastPanel = null; _popupDepth--; if (_popupDepth <= 0) Paused = _wasPausedBeforePopup; onC?.Invoke(); ShowNextQueuedPopup(); };
         _toastPanel.AddChild(btnC);
 
         _uiLayer.AddChild(_toastPanel);
