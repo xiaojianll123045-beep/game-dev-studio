@@ -123,6 +123,12 @@ func _draw_all():
 		cr.size = Vector2(CELL - 1, CELL - 1)
 		cr.color = Color(0.2, 0.8, 0.2) if i > 0 else Color(0.3, 1, 0.3)
 		panel.add_child(cr)
+	# 右边界线
+	var line = ColorRect.new()
+	line.position = Vector2(20 + COLS * CELL - 1, 10)
+	line.size = Vector2(2, GRID_H)
+	line.color = Color(0.3, 0.3, 0.35)
+	panel.add_child(line)
 	food_label.position = Vector2(20 + food.x * CELL, 10 + food.y * CELL - 2)
 
 func _unhandled_input(ev):
