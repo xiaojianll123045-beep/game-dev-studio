@@ -46,7 +46,6 @@ var shoot_timer = 0.0
 var shoot_cooldown = 0.25
 var move_timer = 0.0
 var move_interval = 0.12
-var space_pressed = false
 
 var dirs = {0: Vector2(0,-1), 1: Vector2(1,0), 2: Vector2(0,1), 3: Vector2(-1,0)}
 var dir_chars = {0: "▲", 1: "▶", 2: "▼", 3: "◀"}
@@ -64,6 +63,13 @@ func OnLoad(_gm, bridge):
 			_modal_overlay.set_anchors_and_offsets_preset(15)
 			uilayer.add_child(_modal_overlay)
 		gm.set("IsAnyModalOpen", true)
+	# 用 Timer 检测空格射击（_process 的 Input.is_key_pressed 可能被暂停影响）
+	var st = Timer.new()
+	st.wait_time = 0.05; st.one_shot = false
+	st.timeout.connect(func(): if not game_over and not won and Input.is_key_pressed(KEY_SPACE):
+		_player_shoot())
+	add_child(st)
+	st.start()
 	start_game()
 
 func start_game():
@@ -235,13 +241,6 @@ func _process(delta):
 					player.x = nx; player.y = ny
 					move_timer = move_interval
 			_draw_player()
-	# 空格射击（ProcessGameInput 截走了 space，用 is_key_pressed 绕过）
-	if Input.is_key_pressed(KEY_SPACE):
-		if not space_pressed:
-			space_pressed = true
-			_player_shoot()
-	else:
-		space_pressed = false
 	# 生成敌人
 	spawn_timer -= delta
 	if spawn_timer <= 0 and enemies_spawned < enemies_per_wave:
