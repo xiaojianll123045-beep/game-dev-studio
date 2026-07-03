@@ -2291,7 +2291,7 @@ public partial class GameManager : Node3D
                 // 描述文本（自动换行）
                 var descLbl = new Label { Text = Loc.Tr("tutorial.welcome_desc"), Position = new(pad, S(48)), Size = new(pw - pad * 2, S(120)) };
                 descLbl.AddThemeFontSizeOverride("font_size", 13); descLbl.AddThemeColorOverride("font_color", new Color(0.10f, 0.14f, 0.22f));
-                descLbl.AutowrapMode = TextServer.AutowrapMode.WordSmart;
+                descLbl.AutowrapMode = TextServer.AutowrapMode.Arbitrary;
                 panel.AddChild(descLbl);
                 // 确定按钮
                 var okBtn = new Button { Text = Loc.Tr("ui.got_it"), Position = new(pw / 2 - S(50), S(170)), Size = new(S(100), S(34)) };
