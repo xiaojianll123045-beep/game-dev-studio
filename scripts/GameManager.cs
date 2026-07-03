@@ -4204,7 +4204,7 @@ public partial class GameManager : Node3D
             DlcManager.Log("Refresh", "queuing AllEmployeesPanel rebuild via timer");
             var t = new Timer { WaitTime = 0.01f, OneShot = true };
             AddChild(t);
-            t.Timeout += () => { DlcManager.Log("Refresh", "timer fired, rebuilding AllEmployeesPanel"); CloseAll(); ShowAllEmployeesPanel(); t.QueueFree(); };
+            t.Timeout += () => { DlcManager.Log("Refresh", "timer fired, rebuilding AllEmployeesPanel"); _lastEmpClickIndex = -1; CloseAll(); ShowAllEmployeesPanel(); t.QueueFree(); };
             t.Start();
         };
 
@@ -4736,7 +4736,7 @@ public partial class GameManager : Node3D
             lst.AddChild(pc);
         };
         for (int ei = 0; ei < sorted.Count; ei++) simpleBuilder(list, sorted[ei], ei, sorted);
-        _refreshEmployeeList = () => RebuildEmpListInPlace(list, _empMgr.Employees.OrderByDescending(e => e.GetHighestLevel()).ToList(), simpleBuilder);
+        _refreshEmployeeList = () => { _lastEmpClickIndex = -1; RebuildEmpListInPlace(list, _empMgr.Employees.OrderByDescending(e => e.GetHighestLevel()).ToList(), simpleBuilder); };
 
         float botY = p.Size.Y - UIScale * 55;
         var backBtn = new Button { Text = "← 返回", Flat = true };
