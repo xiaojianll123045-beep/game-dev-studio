@@ -1277,7 +1277,7 @@ public partial class GameManager : Node3D
         // 处理旧系统外包（Team.CurrentContract + OutsourceMonthsRemaining）
         var tm = GetNode<TeamManager>("TeamManager");
         if (tm == null) return;
-        foreach (var team in tm.Teams.Where(t => t.Task == TeamTask.Outsource && t.CurrentContract.HasValue))
+        foreach (var team in tm.Teams.Where(t => t.Task == TeamTask.Outsource && t.CurrentContract.HasValue).ToList())
         {
             team.OutsourceMonthsRemaining--;
             if (team.OutsourceMonthsRemaining <= 0)
@@ -1288,6 +1288,9 @@ public partial class GameManager : Node3D
                 team.Task = TeamTask.None;
                 team.CurrentContract = null;
                 team.OutsourceMonthsRemaining = 0;
+                // 图表立刻体现收益 + 弹窗通知
+                RebuildHUDTabs();
+                ShowToast(Loc.Tr("toast.outsource_done"), $"{c.Name} +¥{c.Payment / 1000f:F0}K", new Color(0.3f, 0.8f, 0.5f));
             }
         }
     }
