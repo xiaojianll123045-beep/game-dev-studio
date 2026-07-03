@@ -38,10 +38,10 @@ public class ModManifest
             {
                 Id = id,
                 Folder = folderPath,
-                Name = GetStr(r, "name", id),
+                Name = id,   // fallback: 文件夹名
                 Version = GetStr(r, "version", "1.0"),
                 Author = GetStr(r, "author", ""),
-                Description = GetStr(r, "description", ""),
+                Description = "",
                 Type = GetStr(r, "type", "data"),
                 MinGameVersion = GetStr(r, "min_game_version", "0.1"),
                 IconPath = GetStr(r, "icon", ""),
@@ -54,6 +54,32 @@ public class ModManifest
                 foreach (var d in optDeps.EnumerateArray()) m.OptionalDependencies.Add(d.GetString());
             if (r.TryGetProperty("conflicts", out var confs))
                 foreach (var c in confs.EnumerateArray()) m.Conflicts.Add(c.GetString());
+
+            // 从 mod_{lang}.json 读取显示名称/描述
+            string langCode = Loc.LangNames[Loc.CurrentLang];
+            string locPath = folderPath + "/mod_" + langCode + ".json";
+            if (FileAccess.FileExists(locPath))
+            {
+                try
+                {
+                    using var fl = FileAccess.Open(locPath, FileAccess.ModeFlags.Read);
+                    if (fl != null)
+                    {
+                        var locDoc = System.Text.Json.JsonDocument.Parse(fl.GetAsText());
+                        var lr = locDoc.RootElement;
+                        if (lr.TryGetProperty("name", out var ln)) m.Name = ln.GetString() ?? m.Name;
+                        if (lr.TryGetProperty("description", out var ld)) m.Description = ld.GetString() ?? "";
+                    }
+                }
+                catch { }
+            }
+            // 兼容旧版：未找到语言文件时从 mod.json 读取
+            else
+            {
+                if (r.TryGetProperty("name", out var on)) m.Name = on.GetString() ?? m.Name;
+                if (r.TryGetProperty("description", out var od)) m.Description = od.GetString() ?? "";
+            }
+
             return m;
         }
         catch { return null; }

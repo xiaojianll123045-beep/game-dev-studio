@@ -2,17 +2,16 @@
 
 `mod.json` 是每个模组的配置文件，必须放置在模组文件夹的根目录。
 
+**只包含配置信息**（版本、作者、类型等），**不包含显示名称和描述**。显示名称和描述放在 `mod_{语言代码}.json` 中。
+
 ## 字段说明
 
 ### 基础字段
 
 | 字段 | 类型 | 必填 | 描述 |
 |------|------|------|------|
-| `id` | String | 是 | 模组唯一标识符，使用小写字母和下划线 |
-| `name` | String | 是 | 模组显示名称 |
 | `version` | String | 是 | 版本号，遵循 semver 格式 |
 | `author` | String | 是 | 作者名称 |
-| `description` | String | 否 | 模组描述 |
 | `type` | String | 是 | 模组类型：`data`、`script` 或 `language` |
 
 ### 脚本模组字段
@@ -27,7 +26,7 @@
 
 | 字段 | 类型 | 描述 |
 |------|------|------|
-| `compatibility.game_version` | String | 兼容的游戏版本范围 |
+| `min_game_version` | String | 兼容的最低游戏版本 |
 | `compatibility.platform` | Array | 支持的平台 |
 
 ### 元数据字段
@@ -40,31 +39,57 @@
 | `license` | String | 开源协议 |
 | `repository` | String | 源码仓库地址 |
 
-## 完整示例
+---
+
+## 多语言显示名称（必须）
+
+在 `mod.json` 同级目录下创建 `mod_{语言代码}.json` 文件来提供不同语言的显示名称和描述：
+
+| 文件名 | 语言 |
+|--------|------|
+| `mod_zh.json` | 中文 |
+| `mod_en.json` | English |
+
+格式如下：
 
 ```json
 {
-  "id": "advanced_balance_mod",
-  "name": "高级平衡调整",
+    "name": "模组显示名称",
+    "description": "模组的详细描述"
+}
+```
+
+游戏会根据当前系统语言自动加载对应的 `mod_{lang}.json`。如果找不到对应语言的文件，会加载 `mod_zh.json`（或兼容旧版从 `mod.json` 读取）。
+
+## 完整示例
+
+### mod.json（配置）
+```json
+{
   "version": "2.1.0",
   "author": "ModMaster",
-  "description": "全面调整游戏经济与战斗平衡",
   "type": "data",
   "icon": "icon.png",
   "entry_point": "scripts/main.gd",
-  "dependencies": [
-    "core_lib"
-  ],
-  "compatibility": {
-    "game_version": ">=1.0.0 <2.0.0",
-    "platform": ["windows", "linux"]
-  },
-  "hooks": {
-    "on_game_start": "scripts/main.gd"
-  },
-  "tags": ["balance", "economy", "combat"],
-  "license": "MIT",
-  "repository": "https://github.com/example/my_mod"
+  "dependencies": ["core_lib"],
+  "min_game_version": "0.1",
+  "tags": ["balance", "economy"]
+}
+```
+
+### mod_zh.json（中文显示）
+```json
+{
+  "name": "高级平衡调整",
+  "description": "全面调整游戏经济与战斗平衡"
+}
+```
+
+### mod_en.json（英文显示）
+```json
+{
+  "name": "Advanced Balance Tweak",
+  "description": "Comprehensive adjustments to game economy and combat balance"
 }
 ```
 
@@ -78,6 +103,7 @@
 
 ## 注意事项
 
-- `id` 一旦发布不应更改，否则会导致存档兼容性问题
+- `name` 和 `description` **不要写在 `mod.json` 中**，请使用 `mod_zh.json` / `mod_en.json`
+- `id` 由文件夹名自动确定，**无需在 json 中指定**
 - `dependencies` 中指定的模组会在当前模组之前加载
-- `compatibility.game_version` 支持语义化版本范围，如 `>=1.0.0`、`>=1.0.0 <2.0.0`、`~1.2.0`、`^1.0.0`
+- `min_game_version` 支持语义化版本范围

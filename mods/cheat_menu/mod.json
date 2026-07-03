@@ -1,8 +1,6 @@
-{
-  "name": "Cheat Menu",
+﻿{
   "version": "1.0",
   "author": "Dev",
-  "description": "All-in-one cheat menu — money, skills, tech, employees, projects, time, and more.",
   "type": "script",
   "min_game_version": "0.1"
 }

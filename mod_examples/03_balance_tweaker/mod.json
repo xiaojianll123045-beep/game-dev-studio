@@ -1,8 +1,6 @@
-{
-  "name": "⚖️ Balance Tweaker",
+﻿{
   "version": "1.0",
   "author": "Mod Example",
-  "description": "A data-only mod that adjusts game balance. No scripts needed — just override balance values.",
   "type": "data",
   "min_game_version": "0.1"
 }

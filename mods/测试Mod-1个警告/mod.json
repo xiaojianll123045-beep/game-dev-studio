@@ -1,7 +1,5 @@
-{
-    "name": "测试Mod-1个警告",
+﻿{
     "version": "1.0",
     "author": "测试",
-    "description": "1种风险：GDScript危险代码",
     "type": "script"
 }

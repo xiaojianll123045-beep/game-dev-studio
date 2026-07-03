@@ -1,8 +1,6 @@
 {
-    "name": "扫雷小游戏",
     "version": "1.0",
     "author": "官方",
-    "description": "在开发游戏之余玩一局经典扫雷放松一下吧！支持初级/中级/高级三种难度。",
     "type": "minigame",
     "scene": "",
     "scripts": ["scripts/minesweeper.gd"]

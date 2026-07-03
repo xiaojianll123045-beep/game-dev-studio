@@ -98,16 +98,16 @@ public static class DlcManager
                 var m = new DlcManifest
                 {
                     Id = name,
-                    Name = GetStr(r, "name", name),
+                    Name = name,   // fallback: 先用文件夹名
                     Version = GetStr(r, "version", "1.0"),
                     Author = GetStr(r, "author", ""),
-                    Description = GetStr(r, "description", ""),
+                    Description = "",
                     Folder = folder,
                     Type = GetStr(r, "type", "data"),
                     Scene = GetStr(r, "scene", ""),
                 };
 
-                // 多语言覆盖：加载 dlc_{lang}.json
+                // 从 dlc_{lang}.json 读取显示名称/描述
                 string langCode = Loc.LangNames[Loc.CurrentLang];
                 string locPath = folder + "/dlc_" + langCode + ".json";
                 if (FileAccess.FileExists(locPath))
@@ -120,10 +120,16 @@ public static class DlcManager
                             var locDoc = JsonDocument.Parse(fl.GetAsText());
                             var lr = locDoc.RootElement;
                             if (lr.TryGetProperty("name", out var ln)) m.Name = ln.GetString() ?? m.Name;
-                            if (lr.TryGetProperty("description", out var ld)) m.Description = ld.GetString() ?? m.Description;
+                            if (lr.TryGetProperty("description", out var ld)) m.Description = ld.GetString() ?? "";
                         }
                     }
                     catch { }
+                }
+                // 兼容旧版：未找到语言文件时从 dlc.json 读取
+                else
+                {
+                    if (r.TryGetProperty("name", out var on)) m.Name = on.GetString() ?? m.Name;
+                    if (r.TryGetProperty("description", out var od)) m.Description = od.GetString() ?? "";
                 }
 
                 // 预加载入口场景/脚本
