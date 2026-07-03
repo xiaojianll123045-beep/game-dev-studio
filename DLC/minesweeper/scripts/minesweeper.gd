@@ -25,6 +25,15 @@ var mine_counter: Label
 var panel: Panel
 var mode_btn: Button
 
+var _pan_x: float = 0.0
+var _pan_y: float = 0.0
+var _dragging: bool = false
+var _drag_start: Vector2 = Vector2()
+var title_label: Label
+var diff_row: HBoxContainer
+var close_x_btn: Button
+var bottom_bar: HBoxContainer
+
 func OnLoad(_gm, bridge):
 	gm = _gm
 	StartGame()
@@ -75,14 +84,14 @@ func StartNew(nr: int, nc: int, nm: int):
 	bg.corner_radius_bottom_left = 8; bg.corner_radius_bottom_right = 8
 	panel.add_theme_stylebox_override("panel", bg)
 
-	var title = Label.new()
-	title.text = "💣 扫雷"
-	title.add_theme_font_size_override("font_size", 22)
-	title.add_theme_color_override("font_color", Color(0.12, 0.14, 0.18))
-	title.position = Vector2(pw/2 - 80, 8)
-	title.size = Vector2(160, 30)
-	title.horizontal_alignment = HORIZONTAL_ALIGNMENT_CENTER
-	panel.add_child(title)
+	title_label = Label.new()
+	title_label.text = "💣 扫雷"
+	title_label.add_theme_font_size_override("font_size", 22)
+	title_label.add_theme_color_override("font_color", Color(0.12, 0.14, 0.18))
+	title_label.position = Vector2(pw/2 - 80, 8)
+	title_label.size = Vector2(160, 30)
+	title_label.horizontal_alignment = HORIZONTAL_ALIGNMENT_CENTER
+	panel.add_child(title_label)
 
 	mine_counter = Label.new()
 	mine_counter.text = "💣 " + str(mines_remaining)
@@ -111,7 +120,7 @@ func StartNew(nr: int, nc: int, nm: int):
 	mode_btn.pressed.connect(self._ToggleMode)
 	panel.add_child(mode_btn)
 
-	var diff_row = HBoxContainer.new()
+	var 	diff_row = HBoxContainer.new()
 	diff_row.position = Vector2(pw/2 - 140, 44)
 	diff_row.size = Vector2(280, 24)
 
@@ -125,15 +134,15 @@ func StartNew(nr: int, nc: int, nm: int):
 		diff_row.add_child(btn)
 	panel.add_child(diff_row)
 
-	var close_btn = Button.new()
-	close_btn.text = "✕"
-	close_btn.flat = true
-	close_btn.add_theme_font_size_override("font_size", 14)
-	close_btn.add_theme_color_override("font_color", Color(0.8, 0.3, 0.3))
-	close_btn.position = Vector2(pw - 30, 6)
-	close_btn.size = Vector2(24, 24)
-	close_btn.pressed.connect(self._Close)
-	panel.add_child(close_btn)
+	close_x_btn = Button.new()
+	close_x_btn.text = "✕"
+	close_x_btn.flat = true
+	close_x_btn.add_theme_font_size_override("font_size", 14)
+	close_x_btn.add_theme_color_override("font_color", Color(0.8, 0.3, 0.3))
+	close_x_btn.position = Vector2(pw - 30, 6)
+	close_x_btn.size = Vector2(24, 24)
+	close_x_btn.pressed.connect(self._Close)
+	panel.add_child(close_x_btn)
 
 	for r in range(rows):
 		cells.append([])
@@ -151,7 +160,7 @@ func StartNew(nr: int, nc: int, nm: int):
 			panel.add_child(cr)
 			cells[r].append(cr)
 
-	var bottom_bar = HBoxContainer.new()
+	bottom_bar = HBoxContainer.new()
 	bottom_bar.position = Vector2(offset_x, offset_y + rows * cell_size + 6)
 	bottom_bar.size = Vector2(cols * cell_size, 32)
 	var close_txt = Button.new()
@@ -166,6 +175,10 @@ func StartNew(nr: int, nc: int, nm: int):
 	bottom_bar.add_child(spacer)
 	panel.add_child(bottom_bar)
 
+	# 重置平移 & 面板输入
+	_pan_x = 0; _pan_y = 0; _dragging = false
+	panel.gui_input.connect(_OnPanelInput)
+
 func _ToggleMode():
 	flag_mode = not flag_mode
 	mode_btn.text = "🚩 标记" if flag_mode else "⛏ 挖掘"
@@ -173,6 +186,58 @@ func _ToggleMode():
 
 func _Reset(r: int, c: int, m: int):
 	StartNew(r, c, m)
+
+func _OnPanelInput(ev: InputEvent):
+	if game_over or won: return
+	if ev is InputEventMouseButton and ev.pressed:
+		if ev.button_index == MOUSE_BUTTON_WHEEL_UP:
+			_ZoomIn()
+		elif ev.button_index == MOUSE_BUTTON_WHEEL_DOWN:
+			_ZoomOut()
+		elif ev.button_index == MOUSE_BUTTON_RIGHT:
+			_dragging = true; _drag_start = get_viewport().get_mouse_position()
+	elif ev is InputEventMouseButton and not ev.pressed:
+		if ev.button_index == MOUSE_BUTTON_RIGHT:
+			_dragging = false
+	elif ev is InputEventMouseMotion and _dragging:
+		var mp = get_viewport().get_mouse_position()
+		_pan_x += mp.x - _drag_start.x; _pan_y += mp.y - _drag_start.y
+		_drag_start = mp; _RefreshLayout()
+
+func _ZoomIn():
+	cell_size = min(cell_size + 4, 64)
+	_RefreshLayout()
+
+func _ZoomOut():
+	cell_size = max(cell_size - 4, 16)
+	_RefreshLayout()
+
+func _RefreshLayout():
+	var pw = cols * cell_size + 80
+	var ph = rows * cell_size + 130
+	panel.offset_left = -pw/2; panel.offset_top = -ph/2
+	panel.offset_right = pw/2; panel.offset_bottom = ph/2
+	title_label.position.x = pw/2 - 80
+	mine_counter.position.x = 10
+	timer_label.position.x = pw - 110
+	mode_btn.position.x = pw/2 - 40
+	diff_row.position.x = pw/2 - 140
+	close_x_btn.position.x = pw - 30
+	for r in range(rows):
+		for c in range(cols):
+			var cr = cells[r][c]
+			var sz = cell_size - 2
+			cr.size = Vector2(sz, sz)
+			cr.position = Vector2(offset_x + c * cell_size + _pan_x, offset_y + r * cell_size + _pan_y)
+			for ch in cr.get_children():
+				if ch is Control:
+					ch.size = cr.size
+				if ch is Label:
+					ch.size = cr.size
+					ch.add_theme_font_size_override("font_size", clamp(cell_size - 12, 8, 22))
+	if bottom_bar != null:
+		bottom_bar.position = Vector2(offset_x + _pan_x, offset_y + rows * cell_size + _pan_y + 6)
+		bottom_bar.size = Vector2(cols * cell_size, 32)
 
 func _Close():
 	if panel != null:
@@ -184,15 +249,18 @@ func _Close():
 
 func _OnCellInput(ev: InputEvent, r: int, c: int):
 	if game_over or won: return
-	if not (ev is InputEventMouseButton and ev.pressed): return
-
-	if ev.button_index == MOUSE_BUTTON_LEFT:
-		if flag_mode:
+	if ev is InputEventMouseButton and ev.pressed:
+		if ev.button_index == MOUSE_BUTTON_WHEEL_UP:
+			_ZoomIn(); return
+		elif ev.button_index == MOUSE_BUTTON_WHEEL_DOWN:
+			_ZoomOut(); return
+		if ev.button_index == MOUSE_BUTTON_LEFT:
+			if flag_mode:
+				_ToggleFlag(r, c)
+			else:
+				_RevealCell(r, c)
+		elif ev.button_index == MOUSE_BUTTON_RIGHT:
 			_ToggleFlag(r, c)
-		else:
-			_RevealCell(r, c)
-	elif ev.button_index == MOUSE_BUTTON_RIGHT:
-		_ToggleFlag(r, c)
 
 func _ToggleFlag(r: int, c: int):
 	if r < 0 or r >= rows or c < 0 or c >= cols: return
@@ -319,7 +387,7 @@ func _GameOver():
 	msg.text = "💥 踩雷了！点难度重开"
 	msg.add_theme_font_size_override("font_size", 16)
 	msg.add_theme_color_override("font_color", Color(0.9, 0.2, 0.2))
-	msg.position = Vector2(offset_x, offset_y + rows * cell_size + 10)
+	msg.position = Vector2(offset_x + _pan_x, offset_y + rows * cell_size + _pan_y + 10)
 	msg.size = Vector2(cols * cell_size, 30)
 	msg.horizontal_alignment = HORIZONTAL_ALIGNMENT_CENTER
 	panel.add_child(msg)
@@ -335,7 +403,7 @@ func _CheckWin():
 		msg.text = "🎉 你赢了！耗时 " + str(int(timer)) + " 秒"
 		msg.add_theme_font_size_override("font_size", 16)
 		msg.add_theme_color_override("font_color", Color(0.2, 0.7, 0.3))
-		msg.position = Vector2(offset_x, offset_y + rows * cell_size + 10)
+		msg.position = Vector2(offset_x + _pan_x, offset_y + rows * cell_size + _pan_y + 10)
 		msg.size = Vector2(cols * cell_size, 30)
 		msg.horizontal_alignment = HORIZONTAL_ALIGNMENT_CENTER
 		panel.add_child(msg)
