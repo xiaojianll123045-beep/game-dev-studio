@@ -116,18 +116,21 @@ public static class DlcManager
     {
         if (gm == null || dlc == null) return null;
         if (dlc.Type != "minigame") return null;
-        if (dlc.LoadedScene != null)
-        {
-            var inst = dlc.LoadedScene.Instantiate();
-            gm.AddChild(inst);
-            return inst;
-        }
         if (dlc.LoadedScript != null)
         {
             var n = new Node { Name = "DLC_" + dlc.Id };
             n.SetScript(dlc.LoadedScript);
             gm.AddChild(n);
+            // 调用 OnLoad 初始化（同 Mod 系统行为）
+            var bridge = gm.GetNodeOrNull<ModBridge>("ModBridge");
+            try { n.Call("OnLoad", gm, bridge); } catch (Exception ex) { GD.PrintErr($"[DLC] OnLoad error: {ex.Message}"); }
             return n;
+        }
+        if (dlc.LoadedScene != null)
+        {
+            var inst = dlc.LoadedScene.Instantiate();
+            gm.AddChild(inst);
+            return inst;
         }
         Log("DlcManager", $"LaunchMinigame: no valid scene or script for {dlc.Name}");
         return null;
