@@ -55,8 +55,8 @@ func StartNew(nr: int, nc: int, nm: int):
 	var vp = get_viewport().get_visible_rect().size
 	panel = Panel.new()
 	panel.anchor_left = 0.5; panel.anchor_top = 0.5
-	panel.margin_left = -pw/2; panel.margin_top = -ph/2
-	panel.margin_right = pw/2; panel.margin_bottom = ph/2
+	panel.offset_left = -pw/2; panel.offset_top = -ph/2
+	panel.offset_right = pw/2; panel.offset_bottom = ph/2
 	add_child(panel)
 
 	var bg = StyleBoxFlat.new()
