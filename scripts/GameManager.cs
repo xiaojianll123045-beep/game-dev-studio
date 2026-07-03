@@ -4130,7 +4130,7 @@ public partial class GameManager : Node3D
     private void ShowAllEmployeesPanel()
     {
         var p = MakePanel(Loc.Tr("panel.all_employees_title"));
-        _refreshEmployeeList = () => { CloseAll(); ShowAllEmployeesPanel(); };
+        _refreshEmployeeList = () => Callable.From(() => { CloseAll(); ShowAllEmployeesPanel(); }).CallDeferred();
 
         // 右键提示
         var hintLabel = MkPLabel(Loc.Tr("panel.all_emp_hint"), 10, new Color(0.55f, 0.58f, 0.6f));
@@ -4674,7 +4674,7 @@ public partial class GameManager : Node3D
         p.AddChild(scroll);
 
         SetupEmpSelectAllKeys(p, _empMgr.Employees);
-        _refreshEmployeeList = () => { CloseAll(); ShowEmployeePanel(); };
+        _refreshEmployeeList = () => Callable.From(() => { CloseAll(); ShowEmployeePanel(); }).CallDeferred();
 
         var sorted = _empMgr.Employees.OrderByDescending(e => e.GetHighestLevel()).ToList();
         RegisterEmpList(list, sorted);
