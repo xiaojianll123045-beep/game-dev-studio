@@ -770,8 +770,8 @@ public partial class StoryEvents : Node
             {
                 _triggeredEvents.Add($"pay_raise_petition_{_gm.GameMonth}");
                 var rep = lowSat[0];
-                _gm.ShowChoicePopup("📋 加薪联名信", $"以{rep.Name}为首的{lowSat.Count}名员工提交了联名加薪申请！",
-                    "统一加薪(花费¥10万,满意度+15)", "个别谈话",
+                _gm.ShowChoicePopup(Loc.Tr("evt.pay_raise.title"), Loc.TrF("evt.pay_raise.desc", rep.Name, lowSat.Count),
+                    Loc.Tr("evt.pay_raise.optA"), Loc.Tr("evt.pay_raise.optB"),
                     () => { if (_res != null) _res.SpendMoney(100000, "salary"); foreach (var e in lowSat) e.Satisfaction += 15; },
                     () => { foreach (var e in lowSat) e.Satisfaction += 3; },
                     new Color(0.9f, 0.6f, 0.1f));
@@ -781,8 +781,8 @@ public partial class StoryEvents : Node
         if (!_triggeredEvents.Contains($"founder_speech_{_gm.GameMonth}"))
         {
             _triggeredEvents.Add($"founder_speech_{_gm.GameMonth}");
-            _gm.ShowChoicePopup("🎤 创始人演讲", "公司创始人受邀参加游戏开发者大会并发表演讲！",
-                "去！（灵感+10,粉丝+300）", "让总监代劳",
+            _gm.ShowChoicePopup(Loc.Tr("evt.founder_speech.title"), Loc.Tr("evt.founder_speech.desc"),
+                Loc.Tr("evt.founder_speech.optA"), Loc.Tr("evt.founder_speech.optB"),
                 () => { if (_res != null) _res.GainInspiration(10); var fm = Services.FanManager; if (fm != null) fm.CasualFans += 300; },
                 () => {},
                 new Color(0.4f, 0.3f, 0.8f));
@@ -1391,9 +1391,9 @@ public partial class StoryEvents : Node
         if (!_triggeredEvents.Contains($"dev_vlog_{_gm.GameMonth}") && hasDev)
         {
             _triggeredEvents.Add($"dev_vlog_{_gm.GameMonth}");
-            var projN = devTeams[0].CurrentProject?.Name ?? "项目";
-            _gm.ShowChoicePopup("🎬 开发者日志爆火", $"团队制作的《{projN}》开发日志视频在B站播放量破百万！",
-                "趁热打铁出新视频", "低调继续开发",
+            var projN = devTeams[0].CurrentProject?.Name ?? "";
+            _gm.ShowChoicePopup(Loc.Tr("evt.dev_vlog.title"), Loc.TrF("evt.dev_vlog.desc", projN),
+                Loc.Tr("evt.dev_vlog.optA"), Loc.Tr("evt.dev_vlog.optB"),
                 () => { if (fanMgr != null) fanMgr.CasualFans += 600; var p = devTeams[0].CurrentProject; if (p != null) p.MarketingHype = Mathf.Min(100, p.MarketingHype + 10); },
                 () => {},
                 new Color(0.8f, 0.3f, 0.5f));
@@ -1402,8 +1402,8 @@ public partial class StoryEvents : Node
         if (!_triggeredEvents.Contains($"press_interview_{_gm.GameMonth}"))
         {
             _triggeredEvents.Add($"press_interview_{_gm.GameMonth}");
-            _gm.ShowChoicePopup("📰 游戏媒体专访", "一家知名游戏媒体想对你的工作室进行专访！",
-                "接受专访(声誉+10)", "婉拒",
+            _gm.ShowChoicePopup(Loc.Tr("evt.press_interview.title"), Loc.Tr("evt.press_interview.desc"),
+                Loc.Tr("evt.press_interview.optA"), Loc.Tr("evt.press_interview.optB"),
                 () => { _gm.Engines.ForEach(e => e.Reputation += 10); if (fanMgr != null) fanMgr.CasualFans += 300; },
                 () => {},
                 new Color(0.3f, 0.4f, 0.8f));
@@ -1412,8 +1412,8 @@ public partial class StoryEvents : Node
         if (!_triggeredEvents.Contains($"collab_project_{_gm.GameMonth}") && hasDev)
         {
             _triggeredEvents.Add($"collab_project_{_gm.GameMonth}");
-            _gm.ShowChoicePopup("🤝 联动合作邀请", "另一家工作室想和你搞一波梦幻联动！",
-                "合作(工时+3月, 粉丝+800)", "各做各的",
+            _gm.ShowChoicePopup(Loc.Tr("evt.collab_project.title"), Loc.Tr("evt.collab_project.desc"),
+                Loc.Tr("evt.collab_project.optA"), Loc.Tr("evt.collab_project.optB"),
                 () => { var p = devTeams[0].CurrentProject; if (p != null) p.EstimatedMonths += 3; if (fanMgr != null) { fanMgr.CasualFans += 800; fanMgr.DiehardFans += 150; } },
                 () => {},
                 new Color(0.6f, 0.3f, 0.9f));
