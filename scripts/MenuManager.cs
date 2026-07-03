@@ -577,67 +577,53 @@ public partial class MenuManager : Node
 		if (_thanksPanel != null) { _thanksPanel.QueueFree(); _thanksPanel = null; }
 		var list = _LoadThanksList();
 		if (list.Count == 0) return;
-		float pw = 500, ph = 80 + list.Count * 70;
-		if (ph > 540) ph = 540;
+		float pw = 460, ph = 60 + list.Count * 52;
+		if (ph > 500) ph = 500;
 		_thanksPanel = new Panel { Position = new(cx - pw / 2, cy - ph / 2), Size = new(pw, ph) };
-		var pnlStyle = new StyleBoxFlat { BgColor = new Color(0.97f, 0.96f, 0.94f), CornerRadiusTopLeft = 10, CornerRadiusTopRight = 10, CornerRadiusBottomLeft = 10, CornerRadiusBottomRight = 10 };
-		pnlStyle.SetCornerRadiusAll(10);
-		pnlStyle.ShadowColor = new Color(0, 0, 0, 0.25f);
-		pnlStyle.ShadowSize = 12;
-		pnlStyle.ShadowOffset = new(0, 4);
-		_thanksPanel.AddThemeStyleboxOverride("panel", pnlStyle);
+		var ps = new StyleBoxFlat { BgColor = new Color(0.98f, 0.975f, 0.97f) };
+		ps.SetCornerRadiusAll(8);
+		ps.ShadowColor = new Color(0, 0, 0, 0.18f);
+		ps.ShadowSize = 8;
+		ps.ShadowOffset = new(0, 2);
+		_thanksPanel.AddThemeStyleboxOverride("panel", ps);
 		_thanksPanel.Visible = true;
 		_ui.AddChild(_thanksPanel);
-		// 顶栏
-		var topBar = new ColorRect { Position = new(0, 0), Size = new(pw, 40), Color = new Color(0.12f, 0.16f, 0.29f) };
-		topBar.MouseFilter = Control.MouseFilterEnum.Ignore;
-		_thanksPanel.AddChild(topBar);
-		_thanksPanel.AddChild(MkLabel(Loc.Tr("about.thanks"), pw / 2 - 70, 8, 140, 26, 15, new Color(0.95f, 0.95f, 0.98f), HorizontalAlignment.Center));
-		float editW = pw - 80, editX = (pw - editW) / 2;
-		float ly = 54;
+		_thanksPanel.AddChild(MkLabel(Loc.Tr("about.thanks"), pw / 2 - 60, 12, 120, 22, 14, new Color(0.12f, 0.15f, 0.22f), HorizontalAlignment.Center));
+		var sep = new ColorRect { Position = new(30, 38), Size = new(pw - 60, 1), Color = new Color(0.50f, 0.55f, 0.65f, 0.2f), MouseFilter = Control.MouseFilterEnum.Ignore };
+		_thanksPanel.AddChild(sep);
+		float ew = pw - 80, ex = (pw - ew) / 2;
+		float ly = 50;
+		int idx = 0;
 		foreach (var t in list)
 		{
-			// 卡片背景
-			var card = new ColorRect { Position = new(editX - 8, ly - 4), Size = new(editW + 16, 62), Color = new Color(1, 1, 1, 0.6f) };
-			card.MouseFilter = Control.MouseFilterEnum.Ignore;
-			_thanksPanel.AddChild(card);
-			var cardBorder = new ColorRect { Position = new(editX - 8, ly - 4), Size = new(3, 62), Color = new Color(0.12f, 0.16f, 0.29f, 0.3f) };
-			cardBorder.MouseFilter = Control.MouseFilterEnum.Ignore;
-			_thanksPanel.AddChild(cardBorder);
-			// 名字
-			var tn = new RichTextLabel { Position = new(editX + 4, ly), Size = new(editW - 8, 22), BbcodeEnabled = true };
-			tn.Text = "[b]" + t.name + "[/b]";
-			tn.AddThemeFontSizeOverride("font_size", 14);
-			tn.AddThemeColorOverride("default_color", new Color(0.12f, 0.16f, 0.29f));
+			var rowBg = new ColorRect { Position = new(ex - 4, ly), Size = new(ew + 8, 44), Color = idx % 2 == 0 ? new Color(1, 1, 1, 0.5f) : new Color(0, 0, 0, 0.02f), MouseFilter = Control.MouseFilterEnum.Ignore };
+			_thanksPanel.AddChild(rowBg);
+			var tn = new RichTextLabel { Position = new(ex, ly + 2), Size = new(ew, 20), BbcodeEnabled = true };
+			tn.Text = t.name;
+			tn.AddThemeFontSizeOverride("font_size", 13);
+			tn.AddThemeColorOverride("default_color", new Color(0.12f, 0.15f, 0.22f));
 			tn.SelectionEnabled = true; tn.MouseFilter = Control.MouseFilterEnum.Stop;
 			_thanksPanel.AddChild(tn);
-			ly += 20;
-			if (!string.IsNullOrEmpty(t.role))
+			ly += 18;
+			bool hasExtra = !string.IsNullOrEmpty(t.role) || !string.IsNullOrEmpty(t.contact);
+			if (hasExtra)
 			{
-				var tr = new Label { Text = t.role, Position = new(editX + 6, ly), Size = new(editW - 12, 16) };
-				tr.AddThemeFontSizeOverride("font_size", 10);
-				tr.AddThemeColorOverride("font_color", new Color(0.45f, 0.50f, 0.60f));
-				tr.MouseFilter = Control.MouseFilterEnum.Ignore;
-				_thanksPanel.AddChild(tr);
-				ly += 16;
+				var extra = "";
+				if (!string.IsNullOrEmpty(t.role)) extra += t.role;
+				if (!string.IsNullOrEmpty(t.contact)) extra += (extra.Length > 0 ? "  ·  " : "") + t.contact;
+				var te = new Label { Text = extra, Position = new(ex, ly), Size = new(ew, 16) };
+				te.AddThemeFontSizeOverride("font_size", 9);
+				te.AddThemeColorOverride("font_color", new Color(0.55f, 0.58f, 0.68f));
+				te.MouseFilter = Control.MouseFilterEnum.Ignore;
+				_thanksPanel.AddChild(te);
+				ly += 18;
 			}
-			if (!string.IsNullOrEmpty(t.contact))
-			{
-				var tc = new RichTextLabel { Position = new(editX + 6, ly), Size = new(editW - 12, 16), BbcodeEnabled = true };
-				tc.Text = t.contact;
-				tc.AddThemeFontSizeOverride("font_size", 10);
-				tc.AddThemeColorOverride("default_color", new Color(0.55f, 0.55f, 0.65f));
-				tc.SelectionEnabled = true; tc.MouseFilter = Control.MouseFilterEnum.Stop;
-				_thanksPanel.AddChild(tc);
-				ly += 22;
-			}
-			ly += 6;
+			ly += 8; idx++;
 		}
-		// 关闭按钮（右上角 X）
-		var closeX = new Button { Text = "×", Position = new(pw - 36, 6), Size = new(28, 28), Flat = true };
-		closeX.AddThemeFontSizeOverride("font_size", 18);
-		closeX.AddThemeColorOverride("font_color", new Color(0.80f, 0.82f, 0.88f));
-		closeX.AddThemeColorOverride("font_hover_color", new Color(1, 1, 1));
+		var closeX = new Button { Text = "×", Position = new(pw - 30, 6), Size = new(24, 24), Flat = true };
+		closeX.AddThemeFontSizeOverride("font_size", 16);
+		closeX.AddThemeColorOverride("font_color", new Color(0.45f, 0.50f, 0.60f));
+		closeX.AddThemeColorOverride("font_hover_color", new Color(0.12f, 0.15f, 0.22f));
 		closeX.AddThemeStyleboxOverride("normal", new StyleBoxEmpty());
 		closeX.AddThemeStyleboxOverride("hover", new StyleBoxEmpty());
 		closeX.Pressed += () => { _thanksPanel.QueueFree(); _thanksPanel = null; };
