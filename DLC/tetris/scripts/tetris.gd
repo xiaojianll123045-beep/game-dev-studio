@@ -178,7 +178,7 @@ func _draw_grid():
 					if r == br and c == bc:
 						color = current_piece.color
 			if preview_cells[r][c] != null and is_instance_valid(preview_cells[r][c]):
-			preview_cells[r][c].color = color
+				preview_cells[r][c].color = color
 
 func _spawn_piece():
 	if next_piece == null:

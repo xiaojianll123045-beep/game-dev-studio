@@ -502,12 +502,6 @@ public partial class GameManager : Node3D
                     tp.Visible = true;
         }
 
-        if (GlobalSettings.NewGame && Founder.HasCreated)
-        {
-            ShowPopup(Loc.Tr("tutorial.welcome_title"),
-                Loc.Tr("tutorial.welcome_desc"),
-                new Color(0.3f, 0.8f, 0.5f));
-        }
     }
 
     private void StartTutorialDeferred()
@@ -2280,6 +2274,8 @@ public partial class GameManager : Node3D
             Founder.HasCreated = true;
             _founderOverlay.QueueFree(); _founderOverlay = null;
             _soundMgr?.PlayGameBgm();
+            // 开局欢迎弹窗
+            Callable.From(() => ShowPopup(Loc.Tr("tutorial.welcome_title"), Loc.Tr("tutorial.welcome_desc"), new Color(0.3f, 0.8f, 0.5f))).CallDeferred();
             // 启动教程
             if (!_tutorialMgr.TutorialCompleted)
                 CallDeferred(nameof(StartTutorialDeferred));
