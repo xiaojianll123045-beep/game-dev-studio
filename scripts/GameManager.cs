@@ -3395,6 +3395,17 @@ public partial class GameManager : Node3D
         }
     }
 
+    private void RefreshEmpListHighlights(Control row)
+    {
+        var parent = row.GetParent();
+        if (parent is VBoxContainer list)
+        {
+            foreach (var ch in list.GetChildren())
+                if (ch is Control ctrl && ctrl.HasMeta("_empId"))
+                    ApplyEmpRowHighlight(ctrl, (int)ctrl.GetMeta("_empId"));
+        }
+    }
+
     private void ApplyAllEmpHighlights()
     {
         _empLists.RemoveAll(l => !GodotObject.IsInstanceValid(l) || !l.IsInsideTree());
@@ -3425,13 +3436,13 @@ public partial class GameManager : Node3D
         {
             if (!GodotObject.IsInstanceValid(pc)) return;
             _hoveredEmpId = emp.Id;
-            ApplyAllEmpHighlights();
+            RefreshEmpListHighlights(pc);
         };
         pc.MouseExited += () =>
         {
             if (!GodotObject.IsInstanceValid(pc)) return;
             _hoveredEmpId = -1;
-            ApplyAllEmpHighlights();
+            RefreshEmpListHighlights(pc);
         };
 
         return (pc, hb);
@@ -3451,7 +3462,7 @@ public partial class GameManager : Node3D
             if (mb.ButtonIndex == MouseButton.Right)
             {
                 ProcessSelect(ctrl, shift);
-                ApplyAllEmpHighlights();
+                RefreshEmpListHighlights(row);
                 if (_selectedEmployees.Count > 1) ShowBatchEmployeeMenu();
                 else ShowEmployeeContextMenu(emp, teamContext);
                 return;
@@ -3459,7 +3470,7 @@ public partial class GameManager : Node3D
 
             if (mb.ButtonIndex != MouseButton.Left) return;
             ProcessSelect(ctrl, shift);
-            ApplyAllEmpHighlights();
+            RefreshEmpListHighlights(row);
 
             void ProcessSelect(bool c, bool s)
             {
