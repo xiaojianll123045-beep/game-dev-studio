@@ -177,7 +177,10 @@ public partial class UISystemEx : Node
                     ("office", mech.office_room_system.title, mech.office_room_system),
                     ("sprint", mech.sprint_system.title, mech.sprint_system),
                     ("stock", mech.stock_system.title, mech.stock_system),
-                    ("card", mech.card_system.title, mech.card_system)
+                    ("card", mech.card_system.title, mech.card_system),
+                    ("localization", mech.localization_system.title, mech.localization_system),
+                    ("qa_testing", mech.qa_testing_system.title, mech.qa_testing_system),
+                    ("mod_support", mech.mod_support_system.title, mech.mod_support_system)
                 };
                 foreach (var mc in mechCategories)
                 {
@@ -266,7 +269,10 @@ public partial class UISystemEx : Node
                 ("office", mech.office_room_system),
                 ("sprint", mech.sprint_system),
                 ("stock", mech.stock_system),
-                ("card", mech.card_system)
+                ("card", mech.card_system),
+                ("localization", mech.localization_system),
+                ("qa_testing", mech.qa_testing_system),
+                ("mod_support", mech.mod_support_system)
             };
             foreach (var c in cats)
             {
