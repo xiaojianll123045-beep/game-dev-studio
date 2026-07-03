@@ -47,7 +47,7 @@ func OnLoad(_gm, bridge):
 			_modal_overlay = ColorRect.new()
 			_modal_overlay.color = Color(0, 0, 0, 0.35)
 			_modal_overlay.mouse_filter = Control.MOUSE_FILTER_STOP
-			_modal_overlay.set_anchors_and_offsets_preset(Control.LAYOUT_PRESET_FULL_RECT)
+			_modal_overlay.set_anchors_and_offsets_preset(15)
 			uilayer.add_child(_modal_overlay)
 		gm.set("IsAnyModalOpen", true)
 	# 用 Timer 代替 _Process，避免暂停影响
