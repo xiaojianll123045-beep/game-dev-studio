@@ -3236,7 +3236,7 @@ public partial class GameManager : Node3D
     private int _hoveredEmpId = -1;
     private string _hoveredTeamName;
     private bool _teamListNeedRebuild = true;
-    private List<VBoxContainer> _empLists = new();  // 所有员工列表（自动高亮刷新）
+    private Dictionary<VBoxContainer, List<Employee>> _empListSources = new();
     private List<Employee> _activePanelEmpSource;     // 当前面板的员工来源（Ctrl+A用）
     private Action _activePanelOnSelectChanged;        // 选择变化回调（如更新雇佣按钮）
     private Action _activePanelEnterAction;            // 当前面板的回车操作
@@ -3386,25 +3386,47 @@ public partial class GameManager : Node3D
     private void RefreshEmpListHighlights(Control row)
     {
         var parent = row.GetParent();
-        if (parent is VBoxContainer list)
+        if (parent is VBoxContainer list && _empListSources.TryGetValue(list, out var sourceList))
         {
+            int idx = 0;
             foreach (var ch in list.GetChildren())
-                if (ch is Control ctrl && ctrl.HasMeta("_empId"))
-                    ApplyEmpRowHighlight(ctrl, (int)ctrl.GetMeta("_empId"));
+            {
+                if (ch is Control ctrl)
+                {
+                    if (idx < sourceList.Count)
+                        ApplyEmpRowHighlight(ctrl, sourceList[idx].Id);
+                    idx++;
+                }
+            }
         }
     }
 
     private void ApplyAllEmpHighlights()
     {
-        _empLists.RemoveAll(l => !GodotObject.IsInstanceValid(l) || !l.IsInsideTree());
-        foreach (var list in _empLists)
+        foreach (var kv in _empListSources)
+        {
+            var list = kv.Key;
+            var sourceList = kv.Value;
+            if (!GodotObject.IsInstanceValid(list) || !list.IsInsideTree()) continue;
+            int idx = 0;
             foreach (var ch in list.GetChildren())
-                if (ch is Control ctrl && ctrl.HasMeta("_empId"))
-                    ApplyEmpRowHighlight(ctrl, (int)ctrl.GetMeta("_empId"));
+            {
+                if (ch is Control ctrl)
+                {
+                    if (idx < sourceList.Count)
+                        ApplyEmpRowHighlight(ctrl, sourceList[idx].Id);
+                    idx++;
+                }
+            }
+        }
     }
 
-    /// <summary>注册一个员工列表容器，用于全局高亮刷新</summary>
-    private void RegisterEmpList(VBoxContainer list) { _empLists.Add(list); list.TreeExited += () => _empLists.Remove(list); }
+    /// <summary>注册员工列表 + 对应的数据源（用于索引匹配高亮）</summary>
+    private void RegisterEmpList(VBoxContainer list, List<Employee> source)
+    {
+        _empListSources[list] = source;
+        list.TreeExited += () => { if (_empListSources.ContainsKey(list)) _empListSources.Remove(list); };
+    }
 
     /// <summary>创建标准的可多选员工行容器（PanelContainer + HBoxContainer，类似团队列表样式）</summary>
     private (PanelContainer pc, HBoxContainer hb) MakeEmpRowContainer(Employee emp)
@@ -3643,7 +3665,7 @@ public partial class GameManager : Node3D
         var scroll = new ScrollContainer { Position = new(S(20), y0 + S(20)), Size = new(p.Size.X - S(40), scrollH) };
         scroll.HorizontalScrollMode = ScrollContainer.ScrollMode.Disabled;
         var list = new VBoxContainer { SizeFlagsHorizontal = Control.SizeFlags.ExpandFill };
-        RegisterEmpList(list);
+        RegisterEmpList(list, team.Members);
         list.AddThemeConstantOverride("separation", (int)(S(2)));
         scroll.AddChild(list);
         p.AddChild(scroll);
@@ -4119,7 +4141,7 @@ public partial class GameManager : Node3D
         var scroll = new ScrollContainer { Position = new(UIScale * 20, y0 + UIScale * 20), Size = new(p.Size.X - UIScale * 40, p.Size.Y - y0 - UIScale * 90) };
         scroll.HorizontalScrollMode = ScrollContainer.ScrollMode.Disabled;
         var list = new VBoxContainer();
-        RegisterEmpList(list);
+        RegisterEmpList(list, _empMgr.Employees);
         list.AddThemeConstantOverride("separation", (int)(UIScale * 2));
         scroll.AddChild(list);
         p.AddChild(scroll);
@@ -4276,7 +4298,7 @@ public partial class GameManager : Node3D
         var scroll = new ScrollContainer { Position = new(UIScale * 20, y0 + UIScale * 20), Size = new(p.Size.X - UIScale * 40, p.Size.Y - y0 - UIScale * 95) };
         scroll.HorizontalScrollMode = ScrollContainer.ScrollMode.Disabled;
         var list = new VBoxContainer { SizeFlagsHorizontal = Control.SizeFlags.ExpandFill };
-        RegisterEmpList(list);
+        RegisterEmpList(list, _recruitCandidates);
         list.AddThemeConstantOverride("separation", (int)(UIScale * 2));
         scroll.AddChild(list);
         p.AddChild(scroll);
@@ -4630,7 +4652,6 @@ public partial class GameManager : Node3D
         var scroll = new ScrollContainer { Position = new(UIScale * 20, y0 + UIScale * 20), Size = new(p.Size.X - UIScale * 40, p.Size.Y - y0 - UIScale * 90) };
         scroll.HorizontalScrollMode = ScrollContainer.ScrollMode.Disabled;
         var list = new VBoxContainer();
-        RegisterEmpList(list);
         list.AddThemeConstantOverride("separation", (int)(UIScale * 2));
         scroll.AddChild(list);
         p.AddChild(scroll);
@@ -4638,6 +4659,7 @@ public partial class GameManager : Node3D
         SetupEmpSelectAllKeys(p, _empMgr.Employees);
 
         var sorted = _empMgr.Employees.OrderByDescending(e => e.GetHighestLevel()).ToList();
+        RegisterEmpList(list, sorted);
         for (int ei = 0; ei < sorted.Count; ei++)
         {
             var emp = sorted[ei];
