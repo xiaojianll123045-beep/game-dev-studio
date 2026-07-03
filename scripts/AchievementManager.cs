@@ -2361,20 +2361,27 @@ public partial class AchievementManager : Node
         }
     }
 
+    /// <summary>获取原始游戏（非后发内容）列表</summary>
+    private List<GameProject> OriginalReleases(GameDevManager devMgr) =>
+        devMgr.CompletedProjects.Where(p => p.PostRelease == PostReleaseType.None || p.BaseProject == null).ToList();
+
     /// <summary>游戏发售时立即检查评分/销量/数量相关成就</summary>
     public void OnGameReleased()
     {
-        var devMgr = _gm.GetNode<GameDevManager>("GameDevManager");
-        var fanMgr = _gm.GetNode<FanManager>("FanManager");
-        var techMgr = _gm.GetNode<TechManager>("TechManager");
+        var devMgr = _gm.GetNodeOrNull<GameDevManager>("GameDevManager");
+        var fanMgr = _gm.GetNodeOrNull<FanManager>("FanManager");
+        var techMgr = _gm.GetNodeOrNull<TechManager>("TechManager");
+        if (devMgr == null) return;
 
         NewUnlocks.Clear();
 
-        int releasedCount = devMgr.CompletedProjects.Count;
+        var originals = OriginalReleases(devMgr);
+        int releasedCount = originals.Count;
+        int totalCompleted = devMgr.CompletedProjects.Count;
         float maxScore = devMgr.CompletedProjects.Max(p => p.FinalScore);
         float maxSales = devMgr.CompletedProjects.Max(p => p.Sales);
 
-        TryUnlock("first_game", releasedCount >= 1);
+        TryUnlock("first_game", totalCompleted >= 1);
         TryUnlock("first_hit", maxScore >= 85);
         TryUnlock("million_seller", maxSales >= 1_000_000);
         TryUnlock("ten_million", maxSales >= 10_000_000);
@@ -2384,40 +2391,37 @@ public partial class AchievementManager : Node
         TryUnlock("fifty_games", releasedCount >= 50);
 
         // 挑战成就（游戏相关）
+        var teamMgr = _gm.GetNodeOrNull<TeamManager>("TeamManager");
+        var debtMgr = _gm.GetNodeOrNull<TechDebtManager>("TechDebtManager");
         TryUnlock("challenge_no_engine", devMgr.CompletedProjects.All(p => string.IsNullOrEmpty(p.EngineName) || p.EngineName == "无"));
-        TryUnlock("challenge_solo", _gm.GetNode<TeamManager>("TeamManager").Teams.Count == 1 && releasedCount >= 3);
+        TryUnlock("challenge_solo", teamMgr != null && teamMgr.Teams.Count == 1 && releasedCount >= 3);
         TryUnlock("challenge_10in10", releasedCount >= 10 && _gm.GameYear <= 10);
-        TryUnlock("challenge_three_aaa",
-            _gm.GetNode<TeamManager>("TeamManager").Teams.Count(t => t.CurrentProject != null && t.CurrentProject.Scale > 0.7f) >= 3);
-        TryUnlock("challenge_debt_zero", _gm.GetNode<TechDebtManager>("TechDebtManager").ComputeTotalDebt() == 0 && releasedCount >= 1);
+        TryUnlock("challenge_three_aaa", teamMgr != null
+            && teamMgr.Teams.Count(t => t.CurrentProject != null && t.CurrentProject.Scale > 0.7f) >= 3);
+        TryUnlock("challenge_debt_zero", debtMgr != null && debtMgr.ComputeTotalDebt() == 0 && totalCompleted >= 1);
         TryUnlock("challenge_no_marketing", devMgr.CompletedProjects.Any(p =>
             p.Sales >= 1_000_000 && p.Marketing == MarketingStrategy.LowKey));
         TryUnlock("challenge_all_genres", releasedCount >= 6
-            && devMgr.CompletedProjects.Select(p => p.Genre).Distinct().Count() >= 5);
+            && originals.Select(p => p.Genre).Distinct().Count() >= 5);
 
         // 彩蛋
         TryUnlock("easter_trash", devMgr.CompletedProjects.Any(p => p.FinalScore < 30));
         TryUnlock("easter_cease_desist",
-            devMgr.CompletedProjects.Count > 0 && _knownBigGames.Contains(devMgr.CompletedProjects.Last().Name));
+            totalCompleted > 0 && _knownBigGames.Contains(devMgr.CompletedProjects.Last().Name));
         TryUnlock("easter_man",
-            devMgr.CompletedProjects.Count > 0 && "复活牢大".Equals(devMgr.CompletedProjects.Last().Name, StringComparison.OrdinalIgnoreCase));
+            totalCompleted > 0 && "复活牢大".Equals(devMgr.CompletedProjects.Last().Name, StringComparison.OrdinalIgnoreCase));
         TryUnlock("easter_bug_feature",
             devMgr.CompletedProjects.Any(p => p.BugCount > 50 && p.FinalScore >= 80));
         TryUnlock("easter_free_game",
             devMgr.CompletedProjects.Any(p => p.PriceModel == PriceModel.Free && p.Sales >= 500000));
         TryUnlock("easter_trust_code",
-            devMgr.CompletedProjects.Count > 0
+            totalCompleted > 0
             && string.IsNullOrEmpty(devMgr.CompletedProjects.Last().QATestReport)
             && devMgr.CompletedProjects.Last().FinalScore >= 80);
         TryUnlock("easter_remaster_king",
             devMgr.CompletedProjects.Count(p => p.PostRelease == PostReleaseType.Remaster) >= 5);
         TryUnlock("easter_lucky7",
-            devMgr.CompletedProjects.Any(p => p.FinalScore >= 70
-                && p.OriginalReleaseMonth == 91));
-        TryUnlock("easter_company_name",
-            _gm.Founder != null && _knownGameStudios.Contains(_gm.Founder.CompanyName));
-        TryUnlock("easter_founder_name",
-            _gm.Founder != null && _knownGameDirectors.Contains(_gm.Founder.Name));
+            devMgr.CompletedProjects.Any(p => p.FinalScore >= 70 && p.OriginalReleaseMonth == 91));
         TryUnlock("easter_crocodile_tears",
             devMgr.CompletedProjects.Any(p => p.FinalScore < 30 && p.Sales >= 500000));
         TryUnlock("easter_regardless",
@@ -2425,13 +2429,13 @@ public partial class AchievementManager : Node
         TryUnlock("easter_god_like",
             devMgr.CompletedProjects.Any(p => p.MonthsOnMarket >= 18));
         TryUnlock("easter_tanking",
-            devMgr.CompletedProjects.Where(p => p.IsReleased).TakeLast(3).All(p => p.FinalScore < 40)
-            && devMgr.CompletedProjects.Count(p => p.IsReleased) >= 3);
+            originals.Count >= 3 && originals.OrderByDescending(p => p.OriginalReleaseMonth).Take(3).All(p => p.FinalScore < 40));
 
         // 科技相关
         TryUnlock("engine_v5", _gm.Engines.Any(e => e.Generation >= 5));
-        TryUnlock("all_tech", TechTreeData.AllTech.Count > 0 && TechTreeData.AllTech.Keys.All(id => techMgr.ResearchedTech.ContainsKey(id) && techMgr.ResearchedTech[id]));
-        TryUnlock("fan_1m", fanMgr.TotalFans >= 1_000_000);
+        TryUnlock("all_tech", techMgr != null && TechTreeData.AllTech.Count > 0
+            && TechTreeData.AllTech.Keys.All(id => techMgr.ResearchedTech.ContainsKey(id) && techMgr.ResearchedTech[id]));
+        TryUnlock("fan_1m", fanMgr != null && fanMgr.TotalFans >= 1_000_000);
 
         ShowNewUnlocks();
     }
@@ -2440,7 +2444,6 @@ public partial class AchievementManager : Node
     public void OnMoneyChanged(float currentMoney)
     {
         TryUnlock("money_100m", currentMoney >= 100_000_000);
-        // bankrupt 在 MonthlyCheck 中检查（月结后有上下文）
     }
 
     /// <summary>员工数量变化时检查</summary>
@@ -2469,15 +2472,16 @@ public partial class AchievementManager : Node
     /// <summary>每月检查成就（仅检查非游戏发售触发的成就：时间、金钱、彩蛋）</summary>
     public void MonthlyCheck()
     {
-        var res = _gm.GetNode<ResourceManager>("ResourceManager");
-        var empMgr = _gm.GetNode<EmployeeManager>("EmployeeManager");
-        var devMgr = _gm.GetNode<GameDevManager>("GameDevManager");
-        var fanMgr = _gm.GetNode<FanManager>("FanManager");
-        var techMgr = _gm.GetNode<TechManager>("TechManager");
+        var res = _gm.GetNodeOrNull<ResourceManager>("ResourceManager");
+        var empMgr = _gm.GetNodeOrNull<EmployeeManager>("EmployeeManager");
+        var devMgr = _gm.GetNodeOrNull<GameDevManager>("GameDevManager");
+        var techMgr = _gm.GetNodeOrNull<TechManager>("TechManager");
+        if (res == null || devMgr == null) return;
 
         NewUnlocks.Clear();
 
-        int releasedCount = devMgr.CompletedProjects.Count;
+        int totalCompleted = devMgr.CompletedProjects.Count;
+        var originals = OriginalReleases(devMgr);
         int totalYears = _gm.GameYear;
 
         // 时间相关
@@ -2486,17 +2490,19 @@ public partial class AchievementManager : Node
 
         // 状态快照（每月兜底）
         TryUnlock("money_100m", res.Money >= 100_000_000);
-        TryUnlock("team_50", empMgr.Employees.Count >= 50);
+        if (empMgr != null) TryUnlock("team_50", empMgr.Employees.Count >= 50);
         TryUnlock("engine_v5", _gm.Engines.Any(e => e.Generation >= 5));
-        TryUnlock("all_tech", TechTreeData.AllTech.Count > 0 && TechTreeData.AllTech.Keys.All(id => techMgr.ResearchedTech.ContainsKey(id) && techMgr.ResearchedTech[id]));
-        TryUnlock("fan_1m", fanMgr.TotalFans >= 1_000_000);
+        TryUnlock("all_tech", techMgr != null && TechTreeData.AllTech.Count > 0
+            && TechTreeData.AllTech.Keys.All(id => techMgr.ResearchedTech.ContainsKey(id) && techMgr.ResearchedTech[id]));
+        var fanMgr = _gm.GetNodeOrNull<FanManager>("FanManager");
+        if (fanMgr != null) TryUnlock("fan_1m", fanMgr.TotalFans >= 1_000_000);
 
         // 挑战（长期积累型）
         TryUnlock("challenge_open_source",
             _gm.Engines.Any(e => e.BizModel == EngineBizModel.OpenSource && e.LicenseCount >= 100));
 
         // 彩蛋成就（月检）
-        TryUnlock("easter_bankrupt", res.Money <= 0 && releasedCount > 0);
+        TryUnlock("easter_bankrupt", res.Money <= 0 && totalCompleted > 0);
         TryUnlock("easter_reject_100", _rejectedTaskCount >= 100);
         TryUnlock("easter_name_clash", _hasNameClash);
         TryUnlock("easter_fired_ceo", _hasFiredCEO);
@@ -2504,14 +2510,18 @@ public partial class AchievementManager : Node
         TryUnlock("easter_996", debtMgr != null && debtMgr.ActiveCrunchMonths >= 6);
         TryUnlock("easter_company_name", _gm.Founder != null && _knownGameStudios.Contains(_gm.Founder.CompanyName));
         TryUnlock("easter_founder_name", _gm.Founder != null && _knownGameDirectors.Contains(_gm.Founder.Name));
-        TryUnlock("easter_all_in", devMgr.Projects.Count(p => p.Phase == DevPhase.Developing) >= 3);
+        TryUnlock("easter_all_in", devMgr.Projects.Count(p => !p.IsReleased && p.Phase == DevPhase.Developing) >= 3);
         TryUnlock("easter_next_time", devMgr.CompletedProjects.Any(p => p.DelayCount >= 3));
         TryUnlock("easter_rival_hater", _gm.CorpActions.ActionLogs.Count >= 10);
-        TryUnlock("easter_broken", empMgr.Employees.Count > 0 && empMgr.Employees.All(e => e.Satisfaction < 20));
+        if (empMgr != null)
+            TryUnlock("easter_broken", empMgr.Employees.Count > 0 && empMgr.Employees.All(e => e.Satisfaction < 20));
         TryUnlock("easter_god_like", devMgr.CompletedProjects.Any(p => p.MonthsOnMarket >= 18));
-        // 躺平计数器
-        if (devMgr.Projects.All(p => p.Phase != DevPhase.Developing)) _idleMonths++;
-        else _idleMonths = 0;
+        // 躺平计数器（仅当有未发布项目时才检查）
+        if (devMgr.Projects.Any(p => !p.IsReleased))
+        {
+            if (devMgr.Projects.All(p => p.IsReleased || p.Phase != DevPhase.Developing)) _idleMonths++;
+            else _idleMonths = 0;
+        }
         TryUnlock("easter_lay_flat", _idleMonths >= 6);
 
         ShowNewUnlocks();
