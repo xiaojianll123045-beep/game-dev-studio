@@ -3241,6 +3241,7 @@ public partial class GameManager : Node3D
     private Action _activePanelOnSelectChanged;        // 选择变化回调（如更新雇佣按钮）
     private Action _activePanelEnterAction;            // 当前面板的回车操作
     private Action _activePanelSelectAllAction;        // 当前面板的 Ctrl+A 全选操作
+    private Action _refreshEmployeeList;               // 当前员工面板的刷新回调
 
     private void ShowTeamPanel()
     {
@@ -3837,6 +3838,7 @@ public partial class GameManager : Node3D
                     if (fromTeam != null)
                     {
                         _teamMgr.RemoveFromTeam(fromTeam, emp);
+                        _refreshEmployeeList?.Invoke();
                         ShowToast("已移除", $"{Loc.DisplayName(emp.Name)} 已离开{fromTeam.Name}", new Color(0.7f, 0.5f, 0.2f));
                     }
                     break;
@@ -3849,6 +3851,7 @@ public partial class GameManager : Node3D
                         if (fromTeam.Captain != null) fromTeam.Captain.IsCaptain = false;
                         emp.IsCaptain = true;
                         fromTeam.Captain = emp;
+                        _refreshEmployeeList?.Invoke();
                         ShowToast(Loc.Tr("toast.captain_set"), Loc.TrF("toast.captain_msg", Loc.DisplayName(emp.Name), fromTeam.Name), new Color(0.3f, 0.7f, 0.4f));
                     }
                     break;
@@ -3859,6 +3862,7 @@ public partial class GameManager : Node3D
                         emp.LastTrainAbsoluteMonth = GameMonth + GameYear * 12;
                         foreach (var sk in emp.Skills.Keys.ToList())
                             emp.AddExp(sk, 30, true);
+                        _refreshEmployeeList?.Invoke();
                         ShowToast(Loc.Tr("toast.training_start"), Loc.TrF("toast.training_msg", Loc.DisplayName(emp.Name)), new Color(0.3f, 0.7f, 0.5f));
                     }
                     else ShowToast(Loc.Tr("toast.funds_low"), Loc.TrF("toast.funds_need", 30000), new Color(0.9f, 0.3f, 0.2f));
@@ -3866,6 +3870,7 @@ public partial class GameManager : Node3D
                 case 5: // 解雇
                     _empMgr.FireEmployee(emp);
                     _roomMgr.RefreshEmployees();
+                    _refreshEmployeeList?.Invoke();
                     ShowToast("已解雇", $"{Loc.DisplayName(emp.Name)} 已离开公司", new Color(0.8f, 0.2f, 0.2f));
                     break;
             }
@@ -3909,6 +3914,7 @@ public partial class GameManager : Node3D
             {
                 var targetTeam = teams[idx];
                 _teamMgr.AddToTeam(targetTeam, emp);
+                _refreshEmployeeList?.Invoke();
                 ShowToast(Loc.Tr("toast.assign_ok"), Loc.TrF("toast.assign_msg", Loc.DisplayName(emp.Name), targetTeam.Name), new Color(0.3f, 0.7f, 0.4f));
             }
             else if (idx == teams.Count)
@@ -4124,6 +4130,7 @@ public partial class GameManager : Node3D
     private void ShowAllEmployeesPanel()
     {
         var p = MakePanel(Loc.Tr("panel.all_employees_title"));
+        _refreshEmployeeList = () => { CloseAll(); ShowAllEmployeesPanel(); };
 
         // 右键提示
         var hintLabel = MkPLabel(Loc.Tr("panel.all_emp_hint"), 10, new Color(0.55f, 0.58f, 0.6f));
@@ -4667,6 +4674,7 @@ public partial class GameManager : Node3D
         p.AddChild(scroll);
 
         SetupEmpSelectAllKeys(p, _empMgr.Employees);
+        _refreshEmployeeList = () => { CloseAll(); ShowEmployeePanel(); };
 
         var sorted = _empMgr.Employees.OrderByDescending(e => e.GetHighestLevel()).ToList();
         RegisterEmpList(list, sorted);
