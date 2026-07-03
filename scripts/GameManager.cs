@@ -3483,7 +3483,12 @@ public partial class GameManager : Node3D
 
             if (mb.ButtonIndex == MouseButton.Right)
             {
-                ProcessSelect(ctrl, shift);
+                if (!_selectedEmployees.Contains(emp.Id))
+                {
+                    _selectedEmployees.Clear();
+                    _selectedEmployees.Add(emp.Id);
+                    _lastEmpClickIndex = empIdx;
+                }
                 RefreshEmpListHighlights(row);
                 if (_selectedEmployees.Count > 1) ShowBatchEmployeeMenu();
                 else ShowEmployeeContextMenu(emp, teamContext);
