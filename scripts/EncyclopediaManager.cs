@@ -1,4 +1,5 @@
 using Godot;
+using System;
 using System.Collections.Generic;
 using System.Linq;
 using System.Text.Json;
@@ -130,23 +131,23 @@ public partial class EncyclopediaManager : Node
     {
         var results = new List<object>();
         if (string.IsNullOrWhiteSpace(query)) return results;
-        string q = query.ToLowerInvariant();
         var data = GetData();
         if (data == null) return results;
+        var comp = StringComparison.OrdinalIgnoreCase;
 
         foreach (var g in data.genre_guide)
         {
-            if (g.id.ToLowerInvariant().Contains(q) || g.name.ToLowerInvariant().Contains(q))
+            if (g.id.Contains(query, comp) || g.name.Contains(query, comp))
                 results.Add(new { type = "genre", id = g.id, name = g.name });
         }
         foreach (var t in data.theme_guide)
         {
-            if (t.id.ToLowerInvariant().Contains(q) || t.name.ToLowerInvariant().Contains(q))
+            if (t.id.Contains(query, comp) || t.name.Contains(query, comp))
                 results.Add(new { type = "theme", id = t.id, name = t.name });
         }
         foreach (var t in data.tech_tree)
         {
-            if (t.id.ToLowerInvariant().Contains(q) || t.name.ToLowerInvariant().Contains(q))
+            if (t.id.Contains(query, comp) || t.name.Contains(query, comp))
                 results.Add(new { type = "tech", id = t.id, name = t.name });
         }
 

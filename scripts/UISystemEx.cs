@@ -9,6 +9,7 @@ public partial class UISystemEx : Node
     private Control _uiLayer;
     private Panel _tooltipPanel;
     private Label _tooltipLabel;
+    private ColorRect _encyOverlay; // 百科缓存，避免每次重建
 
     public void InitUI(Control uiLayer)
     {
@@ -18,14 +19,20 @@ public partial class UISystemEx : Node
 
     public void ShowEncyclopedia()
     {
+        if (_encyOverlay != null && GodotObject.IsInstanceValid(_encyOverlay))
+        {
+            _encyOverlay.Visible = !_encyOverlay.Visible;
+            _gm.IsAnyModalOpen = _encyOverlay.Visible;
+            return;
+        }
         var encyMgr = Services.GameManager?.GetNodeOrNull<EncyclopediaManager>("EncyclopediaManager");
         if (encyMgr == null) { _gm.ShowPopup("提示", "百科数据未加载，请先构建项目", Colors.Gray); return; }
 
         _gm.IsAnyModalOpen = true;
-        var overlay = new ColorRect { Color = new Color(0, 0, 0, 0.6f) };
-        overlay.SetAnchorsAndOffsetsPreset(Control.LayoutPreset.FullRect);
-        overlay.MouseFilter = Control.MouseFilterEnum.Stop;
-        overlay.TreeExiting += () => _gm.IsAnyModalOpen = false;
+        _encyOverlay = new ColorRect { Color = new Color(0, 0, 0, 0.6f) };
+        _encyOverlay.SetAnchorsAndOffsetsPreset(Control.LayoutPreset.FullRect);
+        _encyOverlay.MouseFilter = Control.MouseFilterEnum.Stop;
+        _encyOverlay.TreeExiting += () => { _gm.IsAnyModalOpen = false; _encyOverlay = null; };
 
         var panel = new Panel();
         panel.SetAnchorsAndOffsetsPreset(Control.LayoutPreset.Center);
@@ -37,7 +44,7 @@ public partial class UISystemEx : Node
         panel.AddChild(title);
 
         var closeBtn = new Button { Text = "\u2715", Position = new Vector2(770, 4), Size = new Vector2(24, 24) };
-        closeBtn.Pressed += () => overlay.QueueFree();
+        closeBtn.Pressed += () => { _encyOverlay.Visible = false; _gm.IsAnyModalOpen = false; };
         panel.AddChild(closeBtn);
 
         var searchBox = new LineEdit { PlaceholderText = Loc.Tr("encyclopedia.search"), Position = new Vector2(440, 10), Size = new Vector2(330, 28) };
@@ -389,8 +396,8 @@ public partial class UISystemEx : Node
             leftList.AddItem(cat.label);
         ShowMainCategories();
 
-        overlay.AddChild(panel);
-        _uiLayer.AddChild(overlay);
+        _encyOverlay.AddChild(panel);
+        _uiLayer.AddChild(_encyOverlay);
     }
 
     private string GetCategoryDesc(string key)
