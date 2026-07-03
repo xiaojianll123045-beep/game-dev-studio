@@ -933,10 +933,15 @@ public partial class MenuManager : Node
 					launchBtn.Pressed += () => {
 						if (DlcManager.IsDlcRunning(captured.Id))
 						{
-							// 关闭 DLC：查找并移除对应节点
+							// 关闭 DLC：查找并移除对应节点（菜单 _ui 或游戏内 gm）
 							foreach (var ch in _ui.GetChildren())
-								if (ch is Node node && node.Name == "MG_" + captured.Id)
+								if (ch is Node node && (node.Name == "MG_" + captured.Id || node.Name == "DLC_" + captured.Id))
 									{ node.QueueFree(); break; }
+							var gm2 = Services.GameManager;
+							if (gm2 != null)
+								foreach (var ch in gm2.GetChildren())
+									if (ch is Node node && (node.Name == "MG_" + captured.Id || node.Name == "DLC_" + captured.Id))
+										{ node.QueueFree(); break; }
 							btnRef.Text = Loc.Tr("dlc.launch");
 							btnRef.AddThemeStyleboxOverride("normal", new StyleBoxFlat { BgColor = new Color(0.2f, 0.5f, 0.3f), CornerRadiusTopLeft = 4, CornerRadiusTopRight = 4, CornerRadiusBottomLeft = 4, CornerRadiusBottomRight = 4 });
 							btnRef.AddThemeStyleboxOverride("hover", new StyleBoxFlat { BgColor = new Color(0.15f, 0.4f, 0.25f), CornerRadiusTopLeft = 4, CornerRadiusTopRight = 4, CornerRadiusBottomLeft = 4, CornerRadiusBottomRight = 4 });
