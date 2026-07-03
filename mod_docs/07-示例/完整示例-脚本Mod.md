@@ -222,3 +222,127 @@ func show_report(report: Dictionary):
 | F7 | 切换分析界面 |
 
 所有按键处理均使用 `Input.is_key_pressed()` + 去抖标志模式实现。
+
+---
+
+## 注册自定义小游戏
+
+使用 `bridge.register_minigame()` 让你的 Mod 出现在游戏的小游戏菜单中。
+
+### mod.json
+```json
+{
+  "version": "1.0",
+  "author": "示例",
+  "type": "script"
+}
+```
+
+### mod_zh.json
+```json
+{
+  "name": "猜数字",
+  "description": "一个简单的猜数字小游戏"
+}
+```
+
+### scripts/main.gd
+```gdscript
+extends Node
+
+var b = null
+var panel = null
+
+func OnLoad(gm, bridge):
+	b = bridge
+	b.register_minigame("🔢 猜数字", self._launch)
+
+func _launch():
+	if panel != null: return
+	var vp = get_viewport().get_visible_rect().size
+	panel = Panel.new()
+	panel.anchor_left = 0.3; panel.anchor_top = 0.2
+	panel.anchor_right = 0.7; panel.anchor_bottom = 0.8
+	panel.mouse_filter = Control.MOUSE_FILTER_STOP
+	var bg = StyleBoxFlat.new()
+	bg.bg_color = Color(0.1, 0.1, 0.12)
+	bg.corner_radius_top_left = 8; bg.corner_radius_top_right = 8
+	bg.corner_radius_bottom_left = 8; bg.corner_radius_bottom_right = 8
+	panel.add_theme_stylebox_override("panel", bg)
+	get_node("/root/GameManager").UiLayer.add_child(panel)
+
+	var lbl = Label.new()
+	lbl.text = "🔢 猜数字 (1-100)"
+	lbl.add_theme_font_size_override("font_size", 20)
+	lbl.add_theme_color_override("font_color", Color(0.9, 0.9, 0.95))
+	lbl.anchor_left = 0.1; lbl.anchor_top = 0.1
+	lbl.anchor_right = 0.9; lbl.anchor_bottom = 0.25
+	panel.add_child(lbl)
+
+	var target = randi() % 100 + 1
+	var input = LineEdit.new()
+	input.anchor_left = 0.1; input.anchor_top = 0.3
+	input.anchor_right = 0.9; input.anchor_bottom = 0.4
+	panel.add_child(input)
+
+	var feedback = Label.new()
+	feedback.add_theme_font_size_override("font_size", 16)
+	feedback.add_theme_color_override("font_color", Color(1, 1, 1))
+	feedback.anchor_left = 0.1; feedback.anchor_top = 0.45
+	feedback.anchor_right = 0.9; feedback.anchor_bottom = 0.55
+	panel.add_child(feedback)
+
+	var guess_btn = Button.new()
+	guess_btn.text = "猜！"
+	guess_btn.anchor_left = 0.1; guess_btn.anchor_top = 0.6
+	guess_btn.anchor_right = 0.5; guess_btn.anchor_bottom = 0.7
+	guess_btn.pressed.connect(func():
+		var val = int(input.text)
+		if val == target:
+			feedback.text = "🎉 猜对了！"
+			guess_btn.disabled = true
+		elif val < target:
+			feedback.text = "太小了！"
+		else:
+			feedback.text = "太大了！"
+	)
+	panel.add_child(guess_btn)
+
+	var close_btn = Button.new()
+	close_btn.text = "✕ 关闭"
+	close_btn.anchor_left = 0.6; close_btn.anchor_top = 0.6
+	close_btn.anchor_right = 0.9; close_btn.anchor_bottom = 0.7
+	close_btn.pressed.connect(func(): panel.queue_free(); panel = null)
+	panel.add_child(close_btn)
+
+func OnUnload():
+	b.unregister_minigame("🔢 猜数字")
+	if panel != null: panel.queue_free()
+```
+
+---
+
+## 注册自定义按键
+
+使用 `bridge.register_key()` 拦截指定按键，在游戏处理之前触发。
+
+### scripts/main.gd
+```gdscript
+extends Node
+
+var b = null
+
+func OnLoad(gm, bridge):
+	b = bridge
+	# 按 F10 给钱，F11 全科技
+	b.register_key(KEY_F10, func(): b.add_money(1000000); b.toast("💰", "+¥1,000,000"))
+	b.register_key(KEY_F11, func():
+		for tid in b.all_tech_ids():
+			b.unlock_tech(tid)
+		b.toast("🔬", "所有科技已解锁")
+	)
+
+func OnUnload():
+	b.unregister_key(KEY_F10)
+	b.unregister_key(KEY_F11)
+```

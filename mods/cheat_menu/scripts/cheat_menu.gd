@@ -4,19 +4,13 @@ var gm = null
 var b = null   # bridge
 var panel = null
 var ui = null
-var _f3_down = false
-
 func OnLoad(game_manager, bridge):
 	gm = game_manager; b = bridge
-	print("[CheatMenu] loaded")
-
-func _process(delta):
-	var f3 = Input.is_key_pressed(KEY_F3)
-	if f3 and not _f3_down:
-		_f3_down = true
+	b.register_key(KEY_F3, func():
 		if panel == null or not is_instance_valid(panel): _open()
 		else: _close()
-	elif not f3: _f3_down = false
+	)
+	print("[CheatMenu] loaded")
 
 func _open():
 	var vp = get_viewport().get_visible_rect().size
