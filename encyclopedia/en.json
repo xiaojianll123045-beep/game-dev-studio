@@ -549,6 +549,33 @@
         {"heading": "Stock Price Factors", "content": "Key factors affecting stock prices: quarterly profit (strongest driver, profit growth directly boosts EPS), profit acceleration (triggers 1.2x growth premium), market sentiment (bull/bear environment), trading volume (large orders create price impact), dividends (post-dividend price boost), company reputation (higher reputation raises PE multiples). Sustained losses cause severe price declines and potential delisting."},
         {"heading": "Bankruptcy & Delisting", "content": "When a company's funds remain negative, it suffers sustained losses, or debts exceed assets, it may trigger bankruptcy and delisting. Delisted stock becomes worthless, and the company loses access to public market financing. AI competitors can also go bankrupt, be acquired, or be liquidated due to poor management."}
       ]
+    },
+    "localization_system": {
+      "title": "Localization & Multi-language",
+      "sections": [
+        {"heading": "Language Support", "content": "The game supports Simplified Chinese and English interface languages, switchable from the main menu settings. Language changes require a scene reload to take full effect. All game text (UI, events, encyclopedia, etc.) uses the Loc.Tr/TrF key-value system. Mod developers can extend language support via language mods."},
+        {"heading": "Mod Language Packs", "content": "Mods can create custom language packs under mods/your_mod/locale/. Language packs use JSON key-value pairs and can override any game text. They support zh.json and en.json files, dynamically merged into the game dictionary via Loc.MergeDictionary."},
+        {"heading": "DLC Multi-language", "content": "DLC display names and descriptions support multi-language. Place dlc_zh.json and dlc_en.json files in the DLC directory for Chinese/English names and descriptions. The game auto-loads the matching language file based on current system language, falling back to dlc.json defaults."},
+        {"heading": "Mod Display Name Multi-language", "content": "Mod display names also support multi-language. Place mod_zh.json and mod_en.json alongside mod.json. The game reads mod_{lang}.json first, falling back to name/description in mod.json."}
+      ]
+    },
+    "qa_testing_system": {
+      "title": "QA Testing & Quality Assurance",
+      "sections": [
+        {"heading": "Testing Process", "content": "During the testing phase, you can run the QA testing process. QA scans the current project and generates a test report containing quality scores, bug counts, tech debt levels, and performance analysis. The test report is essential for determining if the project meets release standards."},
+        {"heading": "Bug Management", "content": "Bugs accumulate during development. Bug count is affected by tech debt, project complexity, and team experience. Too many bugs severely impact the final score. QA testing can find and fix bugs; code reviews can reduce bug generation. Zero bugs is a necessary pre-release target."},
+        {"heading": "Quality Score", "content": "The QA test report's Composite Score is the core quality metric. It's influenced by six module qualities, bug count, tech debt level, and memory usage. A score of 80+ is excellent, 90+ is outstanding, and 100 is perfect. Scores below 60 are not recommended for release."}
+      ]
+    },
+    "mod_support_system": {
+      "title": "Mod Support System",
+      "sections": [
+        {"heading": "Mod Types", "content": "Three mod types are supported: data mods modify game values, configurations, and content definitions without code; script mods add custom logic and features via GDScript; language mods provide translation and localization. A single mod can contain multiple content types."},
+        {"heading": "Mod Installation", "content": "Mod folders go in the mods/ directory next to the game executable. Each mod has its own subfolder with a mod.json manifest and optional mod_zh.json/mod_en.json display names. Mods are loaded in dependency-sorted topological order."},
+        {"heading": "ModBridge API", "content": "Script mods receive a ModBridge object in OnLoad(gm, bridge) and access the game API via bridge.* methods. Available APIs include: money management, inspiration, tech operations, employee operations, UI notifications, key registration, custom minigames, and inter-mod communication. All methods use snake_case naming."},
+        {"heading": "Mod Security Scan", "content": "Mods are security-scanned before loading. The scanner detects dangerous GDScript patterns (OS.execute, FileAccess, etc.), DLL files, and script files (.bat/.ps1). Risks are classified by severity; high-risk mods require multi-level user confirmation."},
+        {"heading": "Inter-Mod Communication", "content": "Mods can communicate via ModCommAPI. Use register_endpoint to register communication endpoints, send_message to message a specific mod, and broadcast_message to broadcast to all mods. Endpoint names are case-insensitive. Supports both C# delegates and GDScript Callables."}
+      ]
     }
   }
 }

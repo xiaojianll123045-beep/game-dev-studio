@@ -549,6 +549,33 @@
         {"heading": "股价影响因素", "content": "影响股价的核心因素包括：季度利润（最强驱动因素，利润增长直接提升EPS）、利润增速（加速增长触发增长溢价1.2×）、市场情绪（牛市/熊市环境）、交易量（大额买卖产生价格冲击）、分红（分红后股价提升）、公司声誉（高声誉提升PE倍数）。连续亏损会导致股价大幅下跌甚至退市。"},
         {"heading": "退出与退市", "content": "当公司资金持续为负、连续亏损或资不抵债时，可能触发破产退市。退市后股票价值归零，公司将无法再通过公开市场融资。AI对手也可能因经营不善而退市，被其他公司收购或直接破产清算。"}
       ]
+    },
+    "localization_system": {
+      "title": "本地化与多语言系统",
+      "sections": [
+        {"heading": "多语言支持", "content": "游戏内置简体中文和英文两种界面语言，可在主菜单设置中切换。语言切换后需要重新加载场景才能完全生效。所有游戏文本（UI、事件、百科等）均通过Loc.Tr/TrF键值系统实现，Mod开发者可以通过语言Mod扩展更多语言支持。"},
+        {"heading": "Mod语言包", "content": "Mod可以创建自己的语言包，放在mods/你的Mod/locale/目录下。语言包使用JSON格式的键值对，支持覆盖游戏原文的任意文本。Mod语言包支持zh.json和en.json两种语言，通过Loc.MergeDictionary动态合并到游戏词典中。"},
+        {"heading": "DLC多语言", "content": "DLC的显示名称和描述支持多语言。在DLC目录中放置dlc_zh.json和dlc_en.json文件分别提供中英文名称/描述。游戏会根据当前系统语言自动加载对应的语言文件，找不到则回退到dlc.json中的默认值。"},
+        {"heading": "Mod显示名称多语言", "content": "Mod的显示名称同样支持多语言，在mod.json同级目录放置mod_zh.json和mod_en.json。游戏加载Mod时优先读取mod_{lang}.json，找不到则fallback到mod.json中的name/description字段。"}
+      ]
+    },
+    "qa_testing_system": {
+      "title": "QA测试与质量保障系统",
+      "sections": [
+        {"heading": "测试流程", "content": "游戏开发到测试阶段后，可以启动QA测试流程。QA测试会扫描当前项目生成测试报告，包含各项品质评分、BUG数量、技术债务等级、性能分析等数据。测试报告是判断项目是否达到发售标准的重要依据。"},
+        {"heading": "BUG管理", "content": "项目开发过程中会积累BUG。BUG数量受技术债务、项目复杂度、团队经验等因素影响。BUG过多会严重影响最终评分。可以通过QA测试发现BUG并修复，也可以通过代码审查减少BUG产生。BUG归零是发售前的必要目标。"},
+        {"heading": "品质评分", "content": "QA测试报告的综合评分(Composite Score)是衡量项目质量的核心指标。评分受六大模块品质、BUG数量、技术债务水平、内存占用等多维度影响。综合评分达到80+为优秀，90+为卓越，100为完美。评分低于60不建议发售。"}
+      ]
+    },
+    "mod_support_system": {
+      "title": "Mod支持系统",
+      "sections": [
+        {"heading": "Mod类型", "content": "游戏支持三种Mod类型：数据Mod(data)修改游戏数值、配置和内容定义，无需编写代码；脚本Mod(script)通过GDScript添加自定义逻辑和功能；语言Mod(language)提供翻译和本地化。一个Mod包可以同时包含多种类型的内容。"},
+        {"heading": "Mod安装", "content": "Mod文件夹放置在游戏exe同目录的mods/文件夹中。每个Mod拥有独立的子文件夹，根目录包含mod.json清单文件和mod_zh.json/mod_en.json多语言显示名称。Mod加载时按依赖关系拓扑排序自动处理。"},
+        {"heading": "ModBridge API", "content": "脚本Mod在OnLoad(gm, bridge)中接收ModBridge对象，通过bridge.*方法访问游戏API。可用的API包括：资金管理、灵感管理、科技操作、员工操作、界面通知、按键注册、自定义小游戏注册、Mod间通信等。所有方法采用snake_case命名。"},
+        {"heading": "Mod安全扫描", "content": "Mod加载前会经过安全扫描器安全检查。扫描器检测GDScript中的危险模式(OS.execute、FileAccess等)、DLL文件和脚本文件(.bat/.ps1)。按风险等级分类警告，高风险Mod需要用户多级确认才能加载。"},
+        {"heading": "Mod间通信", "content": "Mod可以通过ModCommAPI进行通信。使用register_endpoint注册通信端点，send_message向指定Mod发送消息，broadcast_message向所有Mod广播。端点名称大小写不敏感。通信API支持C#委托和GDScript Callable两种模式。"}
+      ]
     }
   }
 }
