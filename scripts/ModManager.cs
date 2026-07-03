@@ -272,6 +272,7 @@ public static class ModManager
 
     private static void ShowFinalConfirm(GameManager gm, ModManifest mod, ScanResult scan, Action onConfirm)
     {
+        int warningCount = scan.Patterns.Count + scan.DllFiles.Count + scan.ScriptFiles.Count;
         int riskTypes = (scan.Patterns.Count > 0 ? 1 : 0) + (scan.DllFiles.Count > 0 ? 1 : 0) + (scan.ScriptFiles.Count > 0 ? 1 : 0);
         bool hasRisk = riskTypes > 0;
 
@@ -279,7 +280,7 @@ public static class ModManager
             ? Loc.TrF("mod_risk.final_title", riskTypes)
             : Loc.Tr("mod_risk.final_title_safe");
         string msg = hasRisk
-            ? Loc.TrF("mod_risk.final_msg_fmt", riskTypes)
+            ? Loc.TrF("mod_risk.final_msg_fmt", warningCount)
             : Loc.Tr("mod_risk.final_msg_safe");
 
         // 第一层最终确认
@@ -344,12 +345,12 @@ public static class ModManager
         if (idx >= queue.Count) { onAllDone?.Invoke(); return; }
         var (mod, scan) = queue[idx];
 
-        int riskTypes = (scan.Patterns.Count > 0 ? 1 : 0) + (scan.DllFiles.Count > 0 ? 1 : 0) + (scan.ScriptFiles.Count > 0 ? 1 : 0);
+        int warningCount = scan.Patterns.Count + scan.DllFiles.Count + scan.ScriptFiles.Count;
         string summary;
 
-        if (riskTypes >= 3) summary = Loc.Tr("mod_risk.summary_3");
-        else if (riskTypes == 2) summary = Loc.Tr("mod_risk.summary_2");
-        else if (riskTypes == 1) summary = Loc.Tr("mod_risk.summary_1");
+        if (warningCount >= 3) summary = Loc.Tr("mod_risk.summary_3");
+        else if (warningCount == 2) summary = Loc.Tr("mod_risk.summary_2");
+        else if (warningCount == 1) summary = Loc.Tr("mod_risk.summary_1");
         else summary = "";
 
         var parts = new List<string>();
