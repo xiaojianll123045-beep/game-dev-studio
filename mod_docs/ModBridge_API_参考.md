@@ -16,6 +16,11 @@ var b = get_node("/root/GameManager/ModBridge")
 
 ## 全部 Bridge 方法
 
+### 🌐 语言
+| GDScript 调用 | 说明 |
+|----------|------|
+| `b.get_lang()` | 返回当前语言代码 (如 `"zh"`、`"en"`) |
+
 ### 💰 资金
 | GDScript 调用 | 说明 |
 |----------|------|

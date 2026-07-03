@@ -107,6 +107,25 @@ public static class DlcManager
                     Scene = GetStr(r, "scene", ""),
                 };
 
+                // 多语言覆盖：加载 dlc_{lang}.json
+                string langCode = Loc.LangNames[Loc.CurrentLang];
+                string locPath = folder + "/dlc_" + langCode + ".json";
+                if (FileAccess.FileExists(locPath))
+                {
+                    try
+                    {
+                        using var fl = FileAccess.Open(locPath, FileAccess.ModeFlags.Read);
+                        if (fl != null)
+                        {
+                            var locDoc = JsonDocument.Parse(fl.GetAsText());
+                            var lr = locDoc.RootElement;
+                            if (lr.TryGetProperty("name", out var ln)) m.Name = ln.GetString() ?? m.Name;
+                            if (lr.TryGetProperty("description", out var ld)) m.Description = ld.GetString() ?? m.Description;
+                        }
+                    }
+                    catch { }
+                }
+
                 // 预加载入口场景/脚本
                 if (!string.IsNullOrEmpty(m.Scene) && FileAccess.FileExists(m.Scene))
                 {

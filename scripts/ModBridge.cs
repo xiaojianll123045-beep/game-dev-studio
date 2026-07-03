@@ -26,6 +26,9 @@ public partial class ModBridge : Node
         _room = gm.GetNodeOrNull<RoomManager>("RoomManager");
     }
 
+    // ═══════════════ 语言 ═══════════════
+    public string get_lang() => Loc.LangNames[Loc.CurrentLang];
+
     // ═══════════════ 资金 ═══════════════
     public float get_money() => _res?.Money ?? 0;
     public void set_money(float v) { if (_res != null) _res.Money = v; }

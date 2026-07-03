@@ -16,6 +16,11 @@ var b = get_node("/root/GameManager/ModBridge")
 
 ## All Bridge Methods
 
+### 🌐 Language
+| GDScript | Description |
+|----------|-------------|
+| `b.get_lang()` | Returns current language code (e.g. `"en"`, `"zh"`) |
+
 ### 💰 Money
 | GDScript | Description |
 |----------|-------------|
