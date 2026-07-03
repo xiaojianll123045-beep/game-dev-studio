@@ -504,35 +504,71 @@ public partial class MenuManager : Node
 			ly += 34;
 		}
 
-		// 特别鸣谢
-		ly += 8;
-		var thanksTitle = new Label { Text = Loc.Tr("about.thanks"), Position = new(pw / 2 - 80, ly), Size = new(160, 20) };
-		thanksTitle.AddThemeFontSizeOverride("font_size", 11);
-		thanksTitle.AddThemeColorOverride("font_color", new Color(0.15f, 0.15f, 0.25f));
-		thanksTitle.HorizontalAlignment = HorizontalAlignment.Center;
-		_aboutPanel.AddChild(thanksTitle);
-		ly += 20;
-		var thanksPerson = new RichTextLabel { Position = new(editX, ly), Size = new(editW, 20), BbcodeEnabled = true };
-		thanksPerson.Text = "[center]" + Loc.Tr("about.thanks_person") + "[/center]";
-		thanksPerson.AddThemeFontSizeOverride("font_size", 12);
-		thanksPerson.AddThemeColorOverride("default_color", new Color(0.3f, 0.3f, 0.4f));
-		thanksPerson.SelectionEnabled = true;
-		thanksPerson.MouseFilter = Control.MouseFilterEnum.Stop;
-		_aboutPanel.AddChild(thanksPerson);
-		ly += 18;
-		var thanksDesc = new Label { Text = Loc.Tr("about.thanks_desc"), Position = new(pw / 2 - 120, ly), Size = new(240, 16) };
-		thanksDesc.AddThemeFontSizeOverride("font_size", 9);
-		thanksDesc.AddThemeColorOverride("font_color", new Color(0.45f, 0.45f, 0.55f));
-		thanksDesc.HorizontalAlignment = HorizontalAlignment.Center;
-		_aboutPanel.AddChild(thanksDesc);
-		ly += 14;
-		var thanksQQ = new RichTextLabel { Position = new(editX, ly), Size = new(editW, 18), BbcodeEnabled = true };
-		thanksQQ.Text = "[center]" + Loc.Tr("about.thanks_qq") + "[/center]";
-		thanksQQ.AddThemeFontSizeOverride("font_size", 10);
-		thanksQQ.AddThemeColorOverride("default_color", new Color(0.4f, 0.4f, 0.5f));
-		thanksQQ.SelectionEnabled = true;
-		thanksQQ.MouseFilter = Control.MouseFilterEnum.Stop;
-		_aboutPanel.AddChild(thanksQQ);
+		// 特别鸣谢（从 JSON 加载）
+		var thanksList = new System.Collections.Generic.List<(string name, string role, string contact)>();
+		try
+		{
+			string lang = Loc.CurrentLang == 0 ? "zh" : "en";
+			if (FileAccess.FileExists("res://locales/thanks.json"))
+			{
+				using var tf = FileAccess.Open("res://locales/thanks.json", FileAccess.ModeFlags.Read);
+				if (tf != null)
+				{
+					var raw = tf.GetAsText();
+					var doc = System.Text.Json.JsonDocument.Parse(raw);
+					if (doc.RootElement.TryGetProperty(lang, out var arr))
+					{
+						foreach (var item in arr.EnumerateArray())
+						{
+							string n = item.TryGetProperty("name", out var nn) ? nn.GetString() ?? "" : "";
+							string r = item.TryGetProperty("role", out var rr) ? rr.GetString() ?? "" : "";
+							string c = item.TryGetProperty("contact", out var cc) ? cc.GetString() ?? "" : "";
+							if (!string.IsNullOrEmpty(n)) thanksList.Add((n, r, c));
+						}
+					}
+				}
+			}
+		}
+		catch { }
+		if (thanksList.Count > 0)
+		{
+			ly += 8;
+			var thTitle = new Label { Text = Loc.Tr("about.thanks"), Position = new(pw / 2 - 80, ly), Size = new(160, 20) };
+			thTitle.AddThemeFontSizeOverride("font_size", 11);
+			thTitle.AddThemeColorOverride("font_color", new Color(0.15f, 0.15f, 0.25f));
+			thTitle.HorizontalAlignment = HorizontalAlignment.Center;
+			_aboutPanel.AddChild(thTitle);
+			ly += 20;
+			foreach (var t in thanksList)
+			{
+				var tn = new RichTextLabel { Position = new(editX, ly), Size = new(editW, 20), BbcodeEnabled = true };
+				tn.Text = "[center]" + t.name + "[/center]";
+				tn.AddThemeFontSizeOverride("font_size", 12);
+				tn.AddThemeColorOverride("default_color", new Color(0.3f, 0.3f, 0.4f));
+				tn.SelectionEnabled = true; tn.MouseFilter = Control.MouseFilterEnum.Stop;
+				_aboutPanel.AddChild(tn);
+				ly += 18;
+				if (!string.IsNullOrEmpty(t.role))
+				{
+					var tr = new Label { Text = t.role, Position = new(pw / 2 - 120, ly), Size = new(240, 16) };
+					tr.AddThemeFontSizeOverride("font_size", 9);
+					tr.AddThemeColorOverride("font_color", new Color(0.45f, 0.45f, 0.55f));
+					tr.HorizontalAlignment = HorizontalAlignment.Center;
+					_aboutPanel.AddChild(tr);
+					ly += 14;
+				}
+				if (!string.IsNullOrEmpty(t.contact))
+				{
+					var tc = new RichTextLabel { Position = new(editX, ly), Size = new(editW, 18), BbcodeEnabled = true };
+					tc.Text = "[center]" + t.contact + "[/center]";
+					tc.AddThemeFontSizeOverride("font_size", 10);
+					tc.AddThemeColorOverride("default_color", new Color(0.4f, 0.4f, 0.5f));
+					tc.SelectionEnabled = true; tc.MouseFilter = Control.MouseFilterEnum.Stop;
+					_aboutPanel.AddChild(tc);
+					ly += 20;
+				}
+			}
+		}
 
 		ly += 6;
 		var tip = new Label { Text = Loc.Tr("about.copy_tip"), Position = new(pw / 2 - 130, ly), Size = new(260, 18) };
