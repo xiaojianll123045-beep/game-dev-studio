@@ -174,6 +174,13 @@ public partial class ModBridge : Node
     public void log(string msg) => GD.Print($"[Mod] {msg}");
     public void log_err(string msg) => GD.PrintErr($"[Mod] {msg}");
 
+    // ═══════════════ 小游戏 ═══════════════
+    /// <summary>注册自定义小游戏（出现在小游戏菜单中）</summary>
+    public void register_minigame(string name, Callable launch_func)
+        => DlcManager.RegisterModMinigame(name, launch_func);
+    public void unregister_minigame(string name)
+        => DlcManager.UnregisterModMinigame(name);
+
     // ═══════════════ 按键注册 ═══════════════
     /// <summary>注册自定义按键回调（按键名参考 Godot Key enum，如 KEY_F1）</summary>
     public void register_key(int key, Callable handler)

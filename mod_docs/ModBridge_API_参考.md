@@ -90,6 +90,20 @@ var b = get_node("/root/GameManager/ModBridge")
 | `b.get_employee_manager()` | EmployeeManager 节点 |
 | `b.get_tech_manager()` | TechManager 节点 |
 
+### 🎮 自定义小游戏
+| GDScript 调用 | 说明 |
+|----------|------|
+| `b.register_minigame("名称", Callable)` | 注册一个小游戏，出现在小游戏菜单中 |
+| `b.unregister_minigame("名称")` | 取消注册小游戏 |
+在 `OnLoad` 中注册，`Callable` 会在用户点击启动时调用。示例：
+```gdscript
+func OnLoad(gm, bridge):
+	bridge.register_minigame("我的小游戏", self._my_minigame)
+func _my_minigame():
+	print("小游戏启动！")
+	# 在这里创建你的游戏 UI
+```
+
 ### ⌨ 自定义按键
 | GDScript 调用 | 说明 |
 |----------|------|

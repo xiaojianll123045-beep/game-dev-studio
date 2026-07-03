@@ -1,5 +1,6 @@
 ﻿using System;
 using System.Collections.Generic;
+using System.Linq;
 using Godot;
 
 public partial class MenuManager : Node
@@ -1081,6 +1082,7 @@ public partial class MenuManager : Node
 
 	private void ShowMinigamePicker(IReadOnlyList<DlcManifest> games)
 	{
+		var modGames = DlcManager.ModMinigames.ToList();
 		var menu = new PopupMenu();
 		int i = 0;
 		foreach (var g in games)
@@ -1089,8 +1091,24 @@ public partial class MenuManager : Node
 			menu.SetItemTooltip(i, g.Description);
 			i++;
 		}
+		int dlcCount = i;
+		foreach (var m in modGames)
+		{
+			menu.AddItem(m.Name, i);
+			i++;
+		}
 		menu.Position = (Vector2I)(GetViewport().GetMousePosition());
-		menu.IdPressed += (long id) => { if (id >= 0 && id < games.Count) { LaunchMinigameFromMenu(games[(int)id]); menu.QueueFree(); } };
+		menu.IdPressed += (long id) =>
+		{
+			if (id >= 0 && id < dlcCount)
+				LaunchMinigameFromMenu(games[(int)id]);
+			else if (id >= dlcCount && id < dlcCount + modGames.Count)
+			{
+				var cb = modGames[(int)id - dlcCount].LaunchFunc;
+				cb.Call();
+			}
+			menu.QueueFree();
+		};
 		_ui.AddChild(menu);
 		menu.Popup();
 	}

@@ -90,6 +90,20 @@ var b = get_node("/root/GameManager/ModBridge")
 | `b.get_employee_manager()` | EmployeeManager node |
 | `b.get_tech_manager()` | TechManager node |
 
+### 🎮 Custom Minigame
+| GDScript | Description |
+|----------|-------------|
+| `b.register_minigame("name", Callable)` | Register a minigame that appears in the minigame menu |
+| `b.unregister_minigame("name")` | Unregister a minigame |
+Register in `OnLoad`. The `Callable` is called when the user launches it. Example:
+```gdscript
+func OnLoad(gm, bridge):
+	bridge.register_minigame("My Minigame", self._my_minigame)
+func _my_minigame():
+	print("Minigame launched!")
+	# Create your game UI here
+```
+
 ### ⌨ Custom Key Binding
 | GDScript | Description |
 |----------|-------------|

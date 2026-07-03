@@ -2297,7 +2297,7 @@ public partial class GameManager : Node3D
         _tabButtons.Clear();
 
         // 10个 SVG 图标按钮（Feather Icons 风格一致）
-        bool hasDlc = DlcManager.EnabledDlcCount > 0 && DlcManager.ActiveMinigames.Any(d => DlcManager.IsDlcEnabled(d.Id));
+        bool hasDlc = (DlcManager.EnabledDlcCount > 0 && DlcManager.ActiveMinigames.Any(d => DlcManager.IsDlcEnabled(d.Id))) || DlcManager.ModMinigames.Count > 0;
         string[] svgPaths = {
             "res://assets/icons/play.svg", "res://assets/icons/file-text.svg", "res://assets/icons/file.svg",
             "res://assets/icons/users.svg", "res://assets/icons/user.svg", "res://assets/icons/zap.svg",
@@ -2436,13 +2436,14 @@ public partial class GameManager : Node3D
     private void LaunchDlcMinigame()
     {
         var games = DlcManager.ActiveMinigames.Where(d => DlcManager.IsDlcEnabled(d.Id)).ToList();
-        if (games.Count == 0) return;
-        if (games.Count == 1)
+        var modGames = DlcManager.ModMinigames.ToList();
+        if (games.Count == 0 && modGames.Count == 0) return;
+        // 只有一个 DLC 小游戏且没有 mod 小游戏 → 直接启动
+        if (games.Count == 1 && modGames.Count == 0)
         {
             DlcManager.LaunchMinigame(this, games[0]);
             return;
         }
-        // 多个小游戏时弹出选择
         var menu = new PopupMenu();
         int i = 0;
         foreach (var g in games)
@@ -2451,11 +2452,22 @@ public partial class GameManager : Node3D
             menu.SetItemTooltip(i, g.Description);
             i++;
         }
+        foreach (var m in modGames)
+        {
+            menu.AddItem(m.Name, i);
+            i++;
+        }
+        int dlcCount = games.Count;
         menu.Position = (Vector2I)GetViewport().GetMousePosition();
         menu.IdPressed += (long id) =>
         {
-            if (id >= 0 && id < games.Count)
+            if (id >= 0 && id < dlcCount)
                 DlcManager.LaunchMinigame(this, games[(int)id]);
+            else if (id >= dlcCount && id < dlcCount + modGames.Count)
+            {
+                var cb = modGames[(int)id - dlcCount].LaunchFunc;
+                cb.Call();
+            }
             menu.QueueFree();
         };
         _uiLayer.AddChild(menu);
