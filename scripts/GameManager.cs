@@ -4130,7 +4130,13 @@ public partial class GameManager : Node3D
     private void ShowAllEmployeesPanel()
     {
         var p = MakePanel(Loc.Tr("panel.all_employees_title"));
-        _refreshEmployeeList = () => Callable.From(() => { CloseAll(); ShowAllEmployeesPanel(); }).CallDeferred();
+        _refreshEmployeeList = () =>
+        {
+            var t = new Timer { WaitTime = 0, OneShot = true };
+            AddChild(t);
+            t.Timeout += () => { CloseAll(); ShowAllEmployeesPanel(); t.QueueFree(); };
+            t.Start();
+        };
 
         // 右键提示
         var hintLabel = MkPLabel(Loc.Tr("panel.all_emp_hint"), 10, new Color(0.55f, 0.58f, 0.6f));
@@ -4674,7 +4680,6 @@ public partial class GameManager : Node3D
         p.AddChild(scroll);
 
         SetupEmpSelectAllKeys(p, _empMgr.Employees);
-        _refreshEmployeeList = () => Callable.From(() => { CloseAll(); ShowEmployeePanel(); }).CallDeferred();
 
         var sorted = _empMgr.Employees.OrderByDescending(e => e.GetHighestLevel()).ToList();
         RegisterEmpList(list, sorted);
@@ -4685,25 +4690,22 @@ public partial class GameManager : Node3D
             string tags = emp.IsCaptain ? "👤" : emp.IsChiefArchitect ? "★" : "";
             string traitText = emp.Trait != EmployeeTrait.None ? $" {GetTraitName(emp.Trait)}" : "";
             Color satColor = emp.Satisfaction > 70 ? new Color(0.3f, 0.9f, 0.3f) : emp.Satisfaction > 40 ? new Color(0.9f, 0.8f, 0.3f) : new Color(0.9f, 0.3f, 0.3f);
-
             var (pc, hb) = MakeEmpRowContainer(emp);
-            void AddL(string text, float w, int r, int g, int b)
-            {
-                var l = new Label { Text = text, CustomMinimumSize = new(w, UIScale * 30) };
-                l.AutowrapMode = TextServer.AutowrapMode.Word;
-                l.AddThemeFontSizeOverride("font_size", 12);
-                l.AddThemeColorOverride("font_color", new Color(r / 255f, g / 255f, b / 255f));
-                l.MouseFilter = Control.MouseFilterEnum.Ignore;
-                hb.AddChild(l);
-            }
+            void AddL(string text, float w, int r, int g, int b) { var l = new Label { Text = text, CustomMinimumSize = new(w, UIScale * 30) }; l.AutowrapMode = TextServer.AutowrapMode.Word; l.AddThemeFontSizeOverride("font_size", 12); l.AddThemeColorOverride("font_color", new Color(r / 255f, g / 255f, b / 255f)); l.MouseFilter = Control.MouseFilterEnum.Ignore; hb.AddChild(l); }
             AddL($" {tags} {Loc.DisplayName(emp.Name)}{traitText}", UIScale * 180, 8, 17, 28);
             AddL(Loc.TrF("ui.lv", avgLv), UIScale * 50, 30, 50, 35);
             AddL(emp.TeamName ?? "-", UIScale * 100, 18, 22, 30);
             AddL($"{emp.Satisfaction:F0}%", UIScale * 80, (int)(satColor.R * 255), (int)(satColor.G * 255), (int)(satColor.B * 255));
-
             AttachEmpClickHandler(pc, emp, ei, sorted);
             list.AddChild(pc);
         }
+        _refreshEmployeeList = () =>
+        {
+            var t = new Timer { WaitTime = 0, OneShot = true };
+            AddChild(t);
+            t.Timeout += () => { CloseAll(); ShowEmployeePanel(); t.QueueFree(); };
+            t.Start();
+        };
 
         float botY = p.Size.Y - UIScale * 55;
         var backBtn = new Button { Text = "← 返回", Flat = true };
