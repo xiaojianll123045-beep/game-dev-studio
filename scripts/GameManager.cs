@@ -3656,6 +3656,18 @@ public partial class GameManager : Node3D
                 _selectedEmployees.Clear();
                 foreach (var e in source) _selectedEmployees.Add(e.Id);
                 _activePanelOnSelectChanged?.Invoke();
+                // 刷新所有打开的员工列表的选中高亮
+                foreach (var kv in _empListSources)
+                {
+                    if (!GodotObject.IsInstanceValid(kv.Key)) continue;
+                    int idx = 0;
+                    foreach (var ch in kv.Key.GetChildren())
+                    {
+                        if (ch is Control ctrl && idx < kv.Value.Count)
+                            ApplyEmpRowHighlight(ctrl, kv.Value[idx].Id);
+                        idx++;
+                    }
+                }
             }
             : null;
     }
