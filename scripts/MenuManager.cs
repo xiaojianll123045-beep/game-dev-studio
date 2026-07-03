@@ -222,7 +222,8 @@ public partial class MenuManager : Node
 		// 小游戏入口（从 DLC 加载，可多个）
 		if (DlcManager.Loaded.Count == 0) DlcManager.ScanAll();
 		var mgs = new System.Collections.Generic.List<DlcManifest>();
-		foreach (var d in DlcManager.ActiveMinigames) if (DlcManager.IsDlcEnabled(d.Id)) mgs.Add(d);
+		if (DlcManager.EnabledDlcCount > 0)
+			foreach (var d in DlcManager.ActiveMinigames) if (DlcManager.IsDlcEnabled(d.Id)) mgs.Add(d);
 		if (mgs.Count > 0)
 		{
 			var mgBtn = new Button { Text = "🎮 " + Loc.Tr("menu.minigames"), Flat = true };

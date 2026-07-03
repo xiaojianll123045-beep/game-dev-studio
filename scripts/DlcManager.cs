@@ -29,6 +29,7 @@ public static class DlcManager
     public static IReadOnlyList<DlcManifest> ActiveMinigames => _activeMinigames;
     public static bool IsDlcRunning(string id) => _runningDlcIds.Contains(id);
     public static bool IsDlcEnabled(string id) => _enabledDlcIds.Contains(id);
+    public static int EnabledDlcCount => _enabledDlcIds.Count;
     public static void EnableDlc(string id) { _enabledDlcIds.Add(id); }
     public static void DisableDlc(string id) { _enabledDlcIds.Remove(id); _runningDlcIds.Remove(id); }
     public static void MarkRunning(string id, Node trackNode) { _runningDlcIds.Add(id); if (trackNode != null) trackNode.TreeExited += () => _runningDlcIds.Remove(id); }
