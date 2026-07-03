@@ -4,6 +4,7 @@ using System.Collections.Generic;
 using System.IO;
 using System.Text;
 using System.Text.Json;
+using System.Linq;
 
 public class DlcManifest
 {
@@ -30,9 +31,43 @@ public static class DlcManager
     public static bool IsDlcRunning(string id) => _runningDlcIds.Contains(id);
     public static bool IsDlcEnabled(string id) => _enabledDlcIds.Contains(id);
     public static int EnabledDlcCount => _enabledDlcIds.Count;
-    public static void EnableDlc(string id) { _enabledDlcIds.Add(id); }
-    public static void DisableDlc(string id) { _enabledDlcIds.Remove(id); _runningDlcIds.Remove(id); }
+    public static void EnableDlc(string id) { _enabledDlcIds.Add(id); SaveEnabled(); }
+    public static void DisableDlc(string id) { _enabledDlcIds.Remove(id); _runningDlcIds.Remove(id); SaveEnabled(); }
     public static void MarkRunning(string id, Node trackNode) { _runningDlcIds.Add(id); if (trackNode != null) trackNode.TreeExited += () => _runningDlcIds.Remove(id); }
+
+    private static string SavePath => ProjectSettings.GlobalizePath("user://dlc_enabled.json");
+
+    public static void SaveEnabled()
+    {
+        try
+        {
+            var arr = new System.Text.Json.Nodes.JsonArray();
+            foreach (var id in _enabledDlcIds) arr.Add(id);
+            var json = arr.ToJsonString();
+            using var f = FileAccess.Open("user://dlc_enabled.json", FileAccess.ModeFlags.Write);
+            if (f != null) { f.StoreString(json); Log("DlcManager", $"saved {_enabledDlcIds.Count} enabled DLCs"); }
+        }
+        catch (Exception ex) { GD.PrintErr($"[DLC] save failed: {ex.Message}"); }
+    }
+
+    public static void LoadEnabled()
+    {
+        try
+        {
+            if (!FileAccess.FileExists("user://dlc_enabled.json")) return;
+            using var f = FileAccess.Open("user://dlc_enabled.json", FileAccess.ModeFlags.Read);
+            if (f == null) return;
+            var raw = f.GetAsText();
+            var doc = JsonDocument.Parse(raw);
+            foreach (var el in doc.RootElement.EnumerateArray())
+            {
+                var id = el.GetString();
+                if (!string.IsNullOrEmpty(id)) _enabledDlcIds.Add(id);
+            }
+            Log("DlcManager", $"loaded {_enabledDlcIds.Count} enabled DLCs");
+        }
+        catch (Exception ex) { GD.PrintErr($"[DLC] load failed: {ex.Message}"); }
+    }
 
     public static void ScanAll()
     {
@@ -116,7 +151,8 @@ public static class DlcManager
             }
         }
         dir.ListDirEnd();
-        Log("DlcManager", $"DLC scan done, {_loaded.Count} total, {_activeMinigames.Count} minigames");
+        LoadEnabled();
+        Log("DlcManager", $"DLC scan done, {_loaded.Count} total, {_activeMinigames.Count} minigames, {_enabledDlcIds.Count} enabled");
     }
 
     /// <summary>启动一个小游戏 DLC（挂载到 GameManager 下）</summary>
