@@ -286,11 +286,6 @@ func _CleanupOverlay():
 	if gm != null:
 		gm.set("IsAnyModalOpen", false)
 
-func OnUnload():
-	_CleanupOverlay()
-	if panel != null:
-		panel.queue_free()
-
 func _OnCellInput(ev: InputEvent, r: int, c: int):
 	if game_over or won: return
 	if ev is InputEventMouseButton:
@@ -470,5 +465,6 @@ func _CheckWin():
 					_ToggleFlag(r, c)
 
 func OnUnload():
+	_CleanupOverlay()
 	if panel != null:
 		panel.queue_free()
