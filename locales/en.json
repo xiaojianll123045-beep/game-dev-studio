@@ -1025,6 +1025,8 @@
   "dlc.none": "No DLC installed",
   "dlc.launch": "Launch",
   "dlc.close": "Close",
+  "dlc.enable": "Enable",
+  "dlc.disable": "Disable",
   "dlc.need_game": "Please start a new game or load a save first, then use the in-game 'Minigames' button.",
   "hud.dlc": "Minigames",
   "mod_risk.low": "Low",

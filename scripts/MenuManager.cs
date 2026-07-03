@@ -221,10 +221,11 @@ public partial class MenuManager : Node
 
 		// 小游戏入口（从 DLC 加载，可多个）
 		if (DlcManager.Loaded.Count == 0) DlcManager.ScanAll();
-		var mgs = DlcManager.ActiveMinigames;
+		var mgs = new System.Collections.Generic.List<DlcManifest>();
+		foreach (var d in DlcManager.ActiveMinigames) if (DlcManager.IsDlcEnabled(d.Id)) mgs.Add(d);
 		if (mgs.Count > 0)
 		{
-			var mgBtn = new Button { Text = "🎮 " + (mgs.Count == 1 ? mgs[0].Name : Loc.Tr("menu.minigames")), Flat = true };
+			var mgBtn = new Button { Text = "🎮 " + Loc.Tr("menu.minigames"), Flat = true };
 			mgBtn.AddThemeFontSizeOverride("font_size", 11);
 			mgBtn.AddThemeColorOverride("font_color", new Color(0.4f, 0.45f, 0.55f));
 			mgBtn.AddThemeColorOverride("font_hover_color", new Color(0.25f, 0.30f, 0.35f));
@@ -913,55 +914,35 @@ public partial class MenuManager : Node
 
 				if (d.Type == "minigame" && (d.LoadedScene != null || d.LoadedScript != null))
 				{
-					bool isRunning = DlcManager.IsDlcRunning(d.Id);
-					var launchBtn = new Button { Text = isRunning ? Loc.Tr("dlc.close") : Loc.Tr("dlc.launch"), Position = new(pw - 110, y + 4), Size = new(90, 30) };
-					launchBtn.AddThemeFontSizeOverride("font_size", 12);
-					launchBtn.AddThemeColorOverride("font_color", Colors.White);
-					launchBtn.AddThemeColorOverride("font_hover_color", new Color(0.8f, 0.8f, 0.8f));
-					if (isRunning)
+					bool enabled = DlcManager.IsDlcEnabled(d.Id);
+					var toggleBtn = new Button { Text = enabled ? Loc.Tr("dlc.disable") : Loc.Tr("dlc.enable"), Position = new(pw - 110, y + 4), Size = new(90, 30) };
+					toggleBtn.AddThemeFontSizeOverride("font_size", 12);
+					toggleBtn.AddThemeColorOverride("font_color", Colors.White);
+					toggleBtn.AddThemeColorOverride("font_hover_color", new Color(0.8f, 0.8f, 0.8f));
+					if (enabled)
 					{
-						launchBtn.AddThemeStyleboxOverride("normal", new StyleBoxFlat { BgColor = new Color(0.6f, 0.2f, 0.2f), CornerRadiusTopLeft = 4, CornerRadiusTopRight = 4, CornerRadiusBottomLeft = 4, CornerRadiusBottomRight = 4 });
-						launchBtn.AddThemeStyleboxOverride("hover", new StyleBoxFlat { BgColor = new Color(0.5f, 0.15f, 0.15f), CornerRadiusTopLeft = 4, CornerRadiusTopRight = 4, CornerRadiusBottomLeft = 4, CornerRadiusBottomRight = 4 });
+						toggleBtn.AddThemeStyleboxOverride("normal", new StyleBoxFlat { BgColor = new Color(0.6f, 0.2f, 0.2f), CornerRadiusTopLeft = 4, CornerRadiusTopRight = 4, CornerRadiusBottomLeft = 4, CornerRadiusBottomRight = 4 });
+						toggleBtn.AddThemeStyleboxOverride("hover", new StyleBoxFlat { BgColor = new Color(0.5f, 0.15f, 0.15f), CornerRadiusTopLeft = 4, CornerRadiusTopRight = 4, CornerRadiusBottomLeft = 4, CornerRadiusBottomRight = 4 });
 					}
 					else
 					{
-						launchBtn.AddThemeStyleboxOverride("normal", new StyleBoxFlat { BgColor = new Color(0.2f, 0.5f, 0.3f), CornerRadiusTopLeft = 4, CornerRadiusTopRight = 4, CornerRadiusBottomLeft = 4, CornerRadiusBottomRight = 4 });
-						launchBtn.AddThemeStyleboxOverride("hover", new StyleBoxFlat { BgColor = new Color(0.15f, 0.4f, 0.25f), CornerRadiusTopLeft = 4, CornerRadiusTopRight = 4, CornerRadiusBottomLeft = 4, CornerRadiusBottomRight = 4 });
+						toggleBtn.AddThemeStyleboxOverride("normal", new StyleBoxFlat { BgColor = new Color(0.2f, 0.5f, 0.3f), CornerRadiusTopLeft = 4, CornerRadiusTopRight = 4, CornerRadiusBottomLeft = 4, CornerRadiusBottomRight = 4 });
+						toggleBtn.AddThemeStyleboxOverride("hover", new StyleBoxFlat { BgColor = new Color(0.15f, 0.4f, 0.25f), CornerRadiusTopLeft = 4, CornerRadiusTopRight = 4, CornerRadiusBottomLeft = 4, CornerRadiusBottomRight = 4 });
 					}
 					var captured = d;
-					Button btnRef = launchBtn;
-					launchBtn.Pressed += () => {
-						if (DlcManager.IsDlcRunning(captured.Id))
-						{
-							// 关闭 DLC：查找并移除对应节点（菜单 _ui 或游戏内 gm）
-							foreach (var ch in _ui.GetChildren())
-								if (ch is Node node && (node.Name == "MG_" + captured.Id || node.Name == "DLC_" + captured.Id))
-									{ node.QueueFree(); break; }
-							var gm2 = Services.GameManager;
-							if (gm2 != null)
-								foreach (var ch in gm2.GetChildren())
-									if (ch is Node node && (node.Name == "MG_" + captured.Id || node.Name == "DLC_" + captured.Id))
-										{ node.QueueFree(); break; }
-							btnRef.Text = Loc.Tr("dlc.launch");
-							btnRef.AddThemeStyleboxOverride("normal", new StyleBoxFlat { BgColor = new Color(0.2f, 0.5f, 0.3f), CornerRadiusTopLeft = 4, CornerRadiusTopRight = 4, CornerRadiusBottomLeft = 4, CornerRadiusBottomRight = 4 });
-							btnRef.AddThemeStyleboxOverride("hover", new StyleBoxFlat { BgColor = new Color(0.15f, 0.4f, 0.25f), CornerRadiusTopLeft = 4, CornerRadiusTopRight = 4, CornerRadiusBottomLeft = 4, CornerRadiusBottomRight = 4 });
-							return;
-						}
-						// 启动
-						var gm = Services.GameManager;
-						if (gm != null && GodotObject.IsInstanceValid(gm))
-						{
-							DlcManager.LaunchMinigame(gm, captured);
-						}
-						else
-						{
-							LaunchMinigameFromMenu(captured);
-						}
-						btnRef.Text = Loc.Tr("dlc.close");
-						btnRef.AddThemeStyleboxOverride("normal", new StyleBoxFlat { BgColor = new Color(0.6f, 0.2f, 0.2f), CornerRadiusTopLeft = 4, CornerRadiusTopRight = 4, CornerRadiusBottomLeft = 4, CornerRadiusBottomRight = 4 });
-						btnRef.AddThemeStyleboxOverride("hover", new StyleBoxFlat { BgColor = new Color(0.5f, 0.15f, 0.15f), CornerRadiusTopLeft = 4, CornerRadiusTopRight = 4, CornerRadiusBottomLeft = 4, CornerRadiusBottomRight = 4 });
+					Button btnRef = toggleBtn;
+					toggleBtn.Pressed += () => {
+						bool now = !DlcManager.IsDlcEnabled(captured.Id);
+						if (now) DlcManager.EnableDlc(captured.Id);
+						else DlcManager.DisableDlc(captured.Id);
+						btnRef.Text = now ? Loc.Tr("dlc.disable") : Loc.Tr("dlc.enable");
+						var style = now
+							? new StyleBoxFlat { BgColor = new Color(0.6f, 0.2f, 0.2f), CornerRadiusTopLeft = 4, CornerRadiusTopRight = 4, CornerRadiusBottomLeft = 4, CornerRadiusBottomRight = 4 }
+							: new StyleBoxFlat { BgColor = new Color(0.2f, 0.5f, 0.3f), CornerRadiusTopLeft = 4, CornerRadiusTopRight = 4, CornerRadiusBottomLeft = 4, CornerRadiusBottomRight = 4 };
+						btnRef.AddThemeStyleboxOverride("normal", style);
+						btnRef.AddThemeStyleboxOverride("hover", style);
 					};
-					dp.AddChild(launchBtn);
+					dp.AddChild(toggleBtn);
 				}
 
 				if (!string.IsNullOrEmpty(d.Description))

@@ -2437,7 +2437,7 @@ public partial class GameManager : Node3D
 
     private void LaunchDlcMinigame()
     {
-        var games = DlcManager.ActiveMinigames;
+        var games = DlcManager.ActiveMinigames.Where(d => DlcManager.IsDlcEnabled(d.Id)).ToList();
         if (games.Count == 0) return;
         if (games.Count == 1)
         {
