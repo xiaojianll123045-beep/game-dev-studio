@@ -3361,6 +3361,8 @@ public partial class GameManager : Node3D
         bool hovered = _hoveredEmpId == empId;
         const int BW = 1, BL = 3;
 
+        pc.RemoveThemeStyleboxOverride("panel");
+
         if (selected)
         {
             pc.AddThemeStyleboxOverride("panel", new StyleBoxFlat
@@ -3398,8 +3400,8 @@ public partial class GameManager : Node3D
         _empLists.RemoveAll(l => !GodotObject.IsInstanceValid(l) || !l.IsInsideTree());
         foreach (var list in _empLists)
             foreach (var ch in list.GetChildren())
-                    if (ch is Control ctrl && ctrl.HasMeta("_empId"))
-                        ApplyEmpRowHighlight(ctrl, (int)ctrl.GetMeta("_empId"));
+                if (ch is Control ctrl && ctrl.HasMeta("_empId"))
+                    ApplyEmpRowHighlight(ctrl, (int)ctrl.GetMeta("_empId"));
     }
 
     /// <summary>注册一个员工列表容器，用于全局高亮刷新</summary>
