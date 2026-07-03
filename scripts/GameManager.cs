@@ -1274,10 +1274,9 @@ public partial class GameManager : Node3D
         if (!ModAPI.IsFeatureEnabled(ModAPI.Features.OutsourceSystem)) return;
         RefreshOutsourcePool();
         ProcessOutsourceMonthly();
-        // 兜底：处理所有 Task=Outsource 的团队（确保收入一定到账）
+        // 处理 Task=Outsource 的团队（保障尾款结算）
         var tm = GetNodeOrNull<TeamManager>("TeamManager");
         if (tm == null) return;
-        bool anyDone = false;
         foreach (var t in tm.Teams.Where(x => x.Task == TeamTask.Outsource).ToList())
         {
             if (t.CurrentContract.HasValue)
@@ -1286,19 +1285,15 @@ public partial class GameManager : Node3D
                 if (t.OutsourceMonthsRemaining <= 0)
                 {
                     var c = t.CurrentContract.Value;
-                    _res?.EarnMoney(c.Payment, "outsource");
+                    float finalPay = c.Payment * 0.5f;
+                    _res?.EarnMoney(finalPay, "outsource");
                     _res?.GainInspiration(c.ExpReward);
-                    ShowToast(Loc.Tr("toast.outsource_done"), $"{c.Name} +¥{c.Payment / 1000f:F0}K", new Color(0.3f, 0.8f, 0.5f));
+                    ShowToast(Loc.Tr("toast.outsource_done"), $"{c.Name} 尾款 +¥{finalPay / 1000f:F0}K", new Color(0.3f, 0.8f, 0.5f));
                     t.Task = TeamTask.None; t.CurrentContract = null; t.OutsourceMonthsRemaining = 0;
-                    anyDone = true;
+                    RebuildHUDTabs();
                 }
             }
-            else
-            {
-                t.Task = TeamTask.None;
-            }
         }
-        if (anyDone) RebuildHUDTabs();
     }
 
     private void MonthEndPhase_PublishingMonthly()
@@ -4784,15 +4779,11 @@ public partial class GameManager : Node3D
                             PrimarySkill = capTask.RequiredSkill, MinSkillLevel = capTask.RequiredLevel, ExpReward = 5
                         };
                         team.OutsourceMonthsRemaining = capTask.Duration;
-                        // 立即支付预付款（外包收入立刻到账）
-                        float advance = capTask.Reward * 0.5f;
-                        _res.EarnMoney(advance, "outsource");
-                        ShowToast(Loc.Tr("toast.outsource_done"), $"{capTask.Name} 预付款 +¥{advance / 1000f:F0}K", new Color(0.3f, 0.8f, 0.5f));
+                        // 立即支付定金（外包收入立刻到账）
+                        float deposit = capTask.Reward * 0.5f;
+                        _res.EarnMoney(deposit, "outsource");
+                        ShowToast(Loc.Tr("toast.outsource_done"), $"{capTask.Name} 定金 +¥{deposit / 1000f:F0}K", new Color(0.3f, 0.8f, 0.5f));
                         RebuildHUDTabs();
-                        // 加入 OutsourceTaskPool，让 ProcessOutsourceMonthly 处理尾款
-                        capTask.Accepted = true;
-                        capTask.AssignedTeam = team;
-                        capTask.MonthsSpent = 0;
                         assigned++;
                     }
                     if (assigned > 0) { RebuildHUDTabs(); }
