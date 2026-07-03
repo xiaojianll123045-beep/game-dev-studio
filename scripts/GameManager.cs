@@ -1274,7 +1274,29 @@ public partial class GameManager : Node3D
         if (!ModAPI.IsFeatureEnabled(ModAPI.Features.OutsourceSystem)) return;
         RefreshOutsourcePool();
         ProcessOutsourceMonthly();
-    }
+        // 兜底：处理所有 Task=Outsource 的团队（确保收入一定到账）
+        var tm = GetNodeOrNull<TeamManager>("TeamManager");
+        if (tm == null) return;
+        foreach (var t in tm.Teams.Where(x => x.Task == TeamTask.Outsource).ToList())
+        {
+            if (t.CurrentContract.HasValue)
+            {
+                t.OutsourceMonthsRemaining--;
+                if (t.OutsourceMonthsRemaining <= 0)
+                {
+                    var c = t.CurrentContract.Value;
+                    _res?.EarnMoney(c.Payment, "outsource");
+                    _res?.GainInspiration(c.ExpReward);
+                    ShowToast(Loc.Tr("toast.outsource_done"), $"{c.Name} +¥{c.Payment / 1000f:F0}K", new Color(0.3f, 0.8f, 0.5f));
+                    t.Task = TeamTask.None; t.CurrentContract = null; t.OutsourceMonthsRemaining = 0;
+                    RebuildHUDTabs();
+                }
+            }
+            else
+            {
+                // 没有合同数据但任务标记为外包 → 清除
+                t.Task = TeamTask.None;
+            }
         }
     }
 
