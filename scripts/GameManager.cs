@@ -1246,7 +1246,9 @@ public partial class GameManager : Node3D
     {
         long thisMonthRev = _devMgr.MonthlyRevenueLog.Where(l => l.month == GameMonth).Sum(l => l.revenue);
         long thisMonthExp = (long)_res.MonthlyExpense;
-        _devMgr.MonthlyProfitLog.Add((GameMonth, thisMonthRev, thisMonthExp));
+        // 外包收入也计入当月图表
+        long outsourceInc = (long)_res.MonthlyIncome;
+        _devMgr.MonthlyProfitLog.Add((GameMonth, thisMonthRev + outsourceInc, thisMonthExp));
         while (_devMgr.MonthlyProfitLog.Count > 36)
             _devMgr.MonthlyProfitLog.RemoveAt(0);
     }
