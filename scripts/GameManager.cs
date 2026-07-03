@@ -6963,7 +6963,7 @@ public partial class GameManager : Node3D
             autoBtn.Pressed += () =>
             {
                 if (isSave) SaveGame(GlobalSettings.GetAutoSavePath());
-                else { FounderOverlayCleanup(); ClosePauseMenu(); CloseSaveLoad(); LoadGame(GlobalSettings.GetAutoSavePath()); ClearHUD(); BuildHUD(); Paused = false; }
+                else { FounderOverlayCleanup(); ClosePauseMenu(); CloseSaveLoad(); LoadGame(GlobalSettings.GetAutoSavePath()); ClearHUD(); Callable.From(() => { BuildHUD(); Paused = false; }).CallDeferred(); }
                 if (isSave) CloseSaveLoad();
             };
             card.AddChild(autoBtn);
@@ -7018,7 +7018,7 @@ public partial class GameManager : Node3D
                 int oldSlot = GlobalSettings.SaveSlot;
                 GlobalSettings.SaveSlot = captured;
                 if (isSave) SaveGame();
-                else { FounderOverlayCleanup(); ClosePauseMenu(); CloseSaveLoad(); LoadGame(); ClearHUD(); BuildHUD(); Paused = false; }
+                else { FounderOverlayCleanup(); ClosePauseMenu(); CloseSaveLoad(); LoadGame(); ClearHUD(); Callable.From(() => { BuildHUD(); Paused = false; }).CallDeferred(); }
                 GlobalSettings.SaveSlot = oldSlot;
                 if (isSave) CloseSaveLoad();
             };
