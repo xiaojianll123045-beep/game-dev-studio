@@ -3419,26 +3419,28 @@ public partial class GameManager : Node3D
     private void RebuildEmpListInPlace(VBoxContainer list, List<Employee> source, EmpRowBuilder builder)
     {
         if (!_empListSources.ContainsKey(list)) return;
+        // 隐藏列表避免重建闪烁，保存滚动位置
+        var scroll = list.GetParent() as ScrollContainer;
+        int oldPos = scroll?.ScrollVertical ?? 0;
+        list.Visible = false;
+
         var children = list.GetChildren();
-        // 保留最后一个子节点（汇总行）
         PanelContainer summaryPc = null;
-        if (children.Count > 0)
-        {
-            var last = children[children.Count - 1];
-            if (last is PanelContainer lastPc) summaryPc = lastPc;
-        }
-        // 删除所有非汇总行
+        if (children.Count > 0 && children[children.Count - 1] is PanelContainer lastPc)
+            summaryPc = lastPc;
+
         var toRemove = new System.Collections.Generic.List<Node>();
         foreach (var ch in children)
             if (ch != summaryPc) toRemove.Add(ch);
         foreach (var ch in toRemove) { list.RemoveChild(ch); ch.QueueFree(); }
-        // 重建员工行
         for (int i = 0; i < source.Count; i++)
             builder(list, source[i], i, source);
-        // 重新添加汇总行
         if (summaryPc != null) list.AddChild(summaryPc);
-        // 更新注册表中的 sumber list 引用（原 list 不变，子节点已替换）
         _empListSources[list] = source;
+
+        // 恢复可见和滚动位置
+        list.Visible = true;
+        if (scroll != null) scroll.ScrollVertical = oldPos;
     }
 
     private void ApplyAllEmpHighlights()
