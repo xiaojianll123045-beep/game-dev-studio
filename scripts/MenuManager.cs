@@ -929,16 +929,32 @@ public partial class MenuManager : Node
 						launchBtn.AddThemeStyleboxOverride("hover", new StyleBoxFlat { BgColor = new Color(0.15f, 0.4f, 0.25f), CornerRadiusTopLeft = 4, CornerRadiusTopRight = 4, CornerRadiusBottomLeft = 4, CornerRadiusBottomRight = 4 });
 					}
 					var captured = d;
+					Button btnRef = launchBtn;
 					launchBtn.Pressed += () => {
-						if (DlcManager.IsDlcRunning(captured.Id)) return; // 关闭由 DLC 内部处理
-						var gm = Services.GameManager;
-						if (gm == null || !GodotObject.IsInstanceValid(gm)) {
-							var tip = new AcceptDialog { DialogText = Loc.Tr("dlc.need_game"), Title = "", Size = new Vector2I(400, 150) };
-							_ui.AddChild(tip); tip.PopupCentered();
+						if (DlcManager.IsDlcRunning(captured.Id))
+						{
+							// 关闭 DLC：查找并移除对应节点
+							foreach (var ch in _ui.GetChildren())
+								if (ch is Node node && node.Name == "MG_" + captured.Id)
+									{ node.QueueFree(); break; }
+							btnRef.Text = Loc.Tr("dlc.launch");
+							btnRef.AddThemeStyleboxOverride("normal", new StyleBoxFlat { BgColor = new Color(0.2f, 0.5f, 0.3f), CornerRadiusTopLeft = 4, CornerRadiusTopRight = 4, CornerRadiusBottomLeft = 4, CornerRadiusBottomRight = 4 });
+							btnRef.AddThemeStyleboxOverride("hover", new StyleBoxFlat { BgColor = new Color(0.15f, 0.4f, 0.25f), CornerRadiusTopLeft = 4, CornerRadiusTopRight = 4, CornerRadiusBottomLeft = 4, CornerRadiusBottomRight = 4 });
 							return;
 						}
-						DlcManager.LaunchMinigame(gm, captured);
-						dp.QueueFree();
+						// 启动
+						var gm = Services.GameManager;
+						if (gm != null && GodotObject.IsInstanceValid(gm))
+						{
+							DlcManager.LaunchMinigame(gm, captured);
+						}
+						else
+						{
+							LaunchMinigameFromMenu(captured);
+						}
+						btnRef.Text = Loc.Tr("dlc.close");
+						btnRef.AddThemeStyleboxOverride("normal", new StyleBoxFlat { BgColor = new Color(0.6f, 0.2f, 0.2f), CornerRadiusTopLeft = 4, CornerRadiusTopRight = 4, CornerRadiusBottomLeft = 4, CornerRadiusBottomRight = 4 });
+						btnRef.AddThemeStyleboxOverride("hover", new StyleBoxFlat { BgColor = new Color(0.5f, 0.15f, 0.15f), CornerRadiusTopLeft = 4, CornerRadiusTopRight = 4, CornerRadiusBottomLeft = 4, CornerRadiusBottomRight = 4 });
 					};
 					dp.AddChild(launchBtn);
 				}
