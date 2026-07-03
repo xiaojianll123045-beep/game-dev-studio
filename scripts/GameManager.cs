@@ -4201,9 +4201,10 @@ public partial class GameManager : Node3D
         SetupEmpSelectAllKeys(p, _empMgr.Employees);
         _refreshEmployeeList = () =>
         {
+            DlcManager.Log("Refresh", "queuing AllEmployeesPanel rebuild via timer");
             var t = new Timer { WaitTime = 0.01f, OneShot = true };
             AddChild(t);
-            t.Timeout += () => { CloseAll(); ShowAllEmployeesPanel(); t.QueueFree(); };
+            t.Timeout += () => { DlcManager.Log("Refresh", "timer fired, rebuilding AllEmployeesPanel"); CloseAll(); ShowAllEmployeesPanel(); t.QueueFree(); };
             t.Start();
         };
 
