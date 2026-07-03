@@ -762,6 +762,33 @@ public partial class StoryEvents : Node
             }
         }
 
+        // ── 更多内部事件 ──
+        if (!_triggeredEvents.Contains($"pay_raise_petition_{_gm.GameMonth}"))
+        {
+            var lowSat = emps.Where(e => e.Satisfaction < 30).ToList();
+            if (lowSat.Count >= 2)
+            {
+                _triggeredEvents.Add($"pay_raise_petition_{_gm.GameMonth}");
+                var rep = lowSat[0];
+                _gm.ShowChoicePopup("📋 加薪联名信", $"以{rep.Name}为首的{lowSat.Count}名员工提交了联名加薪申请！",
+                    "统一加薪(花费¥10万,满意度+15)", "个别谈话",
+                    () => { if (_res != null) _res.SpendMoney(100000, "salary"); foreach (var e in lowSat) e.Satisfaction += 15; },
+                    () => { foreach (var e in lowSat) e.Satisfaction += 3; },
+                    new Color(0.9f, 0.6f, 0.1f));
+                return $"加薪联名信: {rep.Name}等{lowSat.Count}人";
+            }
+        }
+        if (!_triggeredEvents.Contains($"founder_speech_{_gm.GameMonth}"))
+        {
+            _triggeredEvents.Add($"founder_speech_{_gm.GameMonth}");
+            _gm.ShowChoicePopup("🎤 创始人演讲", "公司创始人受邀参加游戏开发者大会并发表演讲！",
+                "去！（灵感+10,粉丝+300）", "让总监代劳",
+                () => { if (_res != null) _res.GainInspiration(10); if (fanMgr != null) fanMgr.CasualFans += 300; },
+                () => {},
+                new Color(0.4f, 0.3f, 0.8f));
+            return $"创始人演讲";
+        }
+
         return null;
     }
 
@@ -918,6 +945,18 @@ public partial class StoryEvents : Node
                 () => { fanMgr.DiehardFans += Mathf.Max(5, (int)(fanMgr.DiehardFans * 0.08f)); },
                 () => { },
                 new Color(0.5f, 0.5f, 0.9f)),
+            ("📝 速通大赛", "速通社区自发组织了你游戏的速通比赛！", "赞助奖品(¥2万,粉丝+10%)", "口头支持",
+                () => { if (res.SpendMoney(20000, "community")) fanMgr.CasualFans += Mathf.Max(5, (int)(fanMgr.CasualFans * 0.1f)); },
+                () => { fanMgr.CasualFans += Mathf.Max(2, (int)(fanMgr.CasualFans * 0.02f)); },
+                new Color(0.9f, 0.5f, 0.2f)),
+            ("📝 本地化请求", "巴西玩家请求添加葡萄牙语支持！", "加（¥5万,粉丝+8%）", "人手不足",
+                () => { if (res.SpendMoney(50000, "l10n")) fanMgr.CasualFans += Mathf.Max(5, (int)(fanMgr.CasualFans * 0.08f)); },
+                () => { fanMgr.DiehardFans = Mathf.Max(0, fanMgr.DiehardFans - 50); },
+                new Color(0.2f, 0.7f, 0.3f)),
+            ("📝 Bug悬赏", "有玩家发现了一个严重影响体验的BUG", "紧急修复（声誉+5）", "下个版本再说",
+                () => { _gm.Engines.ForEach(e => e.Reputation += 5); },
+                () => { _gm.Engines.ForEach(e => e.Reputation = Mathf.Max(0, e.Reputation - 8)); },
+                new Color(0.9f, 0.2f, 0.2f)),
         };
 
         var p = posts[new Random().Next(posts.Length)];
@@ -1347,6 +1386,38 @@ public partial class StoryEvents : Node
                     new Color(0.9f, 0.7f, 0.1f));
                 return;
             }
+        }
+        // ── 新趣味事件 ──
+        if (!_triggeredEvents.Contains($"dev_vlog_{_gm.GameMonth}") && hasDev)
+        {
+            _triggeredEvents.Add($"dev_vlog_{_gm.GameMonth}");
+            var projN = devTeams[0].CurrentProject?.Name ?? "项目";
+            _gm.ShowChoicePopup("🎬 开发者日志爆火", $"团队制作的《{projN}》开发日志视频在B站播放量破百万！",
+                "趁热打铁出新视频", "低调继续开发",
+                () => { if (fanMgr != null) fanMgr.CasualFans += 600; var p = devTeams[0].CurrentProject; if (p != null) p.MarketingHype = Mathf.Min(100, p.MarketingHype + 10); },
+                () => {},
+                new Color(0.8f, 0.3f, 0.5f));
+            return;
+        }
+        if (!_triggeredEvents.Contains($"press_interview_{_gm.GameMonth}"))
+        {
+            _triggeredEvents.Add($"press_interview_{_gm.GameMonth}");
+            _gm.ShowChoicePopup("📰 游戏媒体专访", "一家知名游戏媒体想对你的工作室进行专访！",
+                "接受专访(声誉+10)", "婉拒",
+                () => { _gm.Engines.ForEach(e => e.Reputation += 10); if (fanMgr != null) fanMgr.CasualFans += 300; },
+                () => {},
+                new Color(0.3f, 0.4f, 0.8f));
+            return;
+        }
+        if (!_triggeredEvents.Contains($"collab_project_{_gm.GameMonth}") && hasDev)
+        {
+            _triggeredEvents.Add($"collab_project_{_gm.GameMonth}");
+            _gm.ShowChoicePopup("🤝 联动合作邀请", "另一家工作室想和你搞一波梦幻联动！",
+                "合作(工时+3月, 粉丝+800)", "各做各的",
+                () => { var p = devTeams[0].CurrentProject; if (p != null) p.EstimatedMonths += 3; if (fanMgr != null) { fanMgr.CasualFans += 800; fanMgr.DiehardFans += 150; } },
+                () => {},
+                new Color(0.6f, 0.3f, 0.9f));
+            return;
         }
     }
 
