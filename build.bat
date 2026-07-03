@@ -9,7 +9,8 @@ set ENG=C:\Users\xijil\AppData\Local\Microsoft\WinGet\Packages\GodotEngine.Godot
 echo === Building GameTycoon v%VER% ===
 echo.
 
-echo [1/2] Compiling C#
+echo [1/2] Cleaning cache and compiling C#
+if exist "%~dp0.godot\mono\temp" rmdir /S /Q "%~dp0.godot\mono\temp"
 dotnet build "%~dp0GameTycoon.csproj" --configuration Release
 if errorlevel 1 (
     echo === C# build FAILED ===
@@ -27,5 +28,5 @@ if errorlevel 1 (
 
 echo.
 echo === Done! build\GameTycoon.exe v%VER% ===
-echo (DLC and mods excluded from PCK ¡ª use user:// for external content)
+echo (DLC and mods excluded from PCK ï¿½ï¿½ use user:// for external content)
 pause
