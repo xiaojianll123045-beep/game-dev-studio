@@ -31,20 +31,16 @@ var _dragging: bool = false
 var _drag_start: Vector2 = Vector2()
 var _drag_cell_r: int = -1
 var _drag_cell_c: int = -1
+var _modal_overlay = null
 var title_label: Label
 var diff_row: HBoxContainer
 var close_x_btn: Button
 var bottom_bar: HBoxContainer
-var grid_container: Control
-var _init_pw: float = 0.0
-var _init_ph: float = 0.0
-var _init_cell_size: int = 32
-var _modal_overlay: ColorRect = null
 
 func OnLoad(_gm, bridge):
 	gm = _gm
 	StartGame()
-	# 全屏遮罩 + IsAnyModalOpen（和游戏内弹窗/百科一致，阻止 3D 场景输入）
+	# 全屏遮罩 + IsAnyModalOpen（和游戏内弹窗一致，阻止 3D 场景输入）
 	if gm != null:
 		var uilayer = gm.get("UiLayer")
 		if uilayer != null:
@@ -82,11 +78,10 @@ func StartNew(nr: int, nc: int, nm: int):
 	var pw = cols * cell_size + 80
 	var ph = rows * cell_size + 130
 
-	# 必须先记录初始值，_RefreshLayout 可能在创建过程中被调用
-	_init_pw = pw; _init_ph = ph; _init_cell_size = cell_size
-	_pan_x = 0; _pan_y = 0; _dragging = false; _drag_cell_r = -1; _drag_cell_c = -1
-
 	if panel != null:
+		for ch in panel.get_children():
+			panel.remove_child(ch)
+			ch.queue_free()
 		panel.queue_free()
 
 	var vp = get_viewport().get_visible_rect().size
@@ -94,9 +89,9 @@ func StartNew(nr: int, nc: int, nm: int):
 	panel.anchor_left = 0.5; panel.anchor_top = 0.5
 	panel.offset_left = -pw/2; panel.offset_top = -ph/2
 	panel.offset_right = pw/2; panel.offset_bottom = ph/2
-	panel.mouse_filter = Control.MOUSE_FILTER_STOP
 	add_child(panel)
 
+	panel.mouse_filter = Control.MOUSE_FILTER_STOP
 	var bg = StyleBoxFlat.new()
 	bg.bg_color = Color(0.85, 0.85, 0.87)
 	bg.corner_radius_top_left = 8; bg.corner_radius_top_right = 8
@@ -129,6 +124,16 @@ func StartNew(nr: int, nc: int, nm: int):
 	timer_label.horizontal_alignment = HORIZONTAL_ALIGNMENT_RIGHT
 	panel.add_child(timer_label)
 
+	mode_btn = Button.new()
+	mode_btn.text = "⛏ 挖掘"
+	mode_btn.flat = true
+	mode_btn.add_theme_font_size_override("font_size", 12)
+	mode_btn.add_theme_color_override("font_color", Color(0.2, 0.3, 0.6))
+	mode_btn.position = Vector2(pw/2 - 40, 72)
+	mode_btn.size = Vector2(80, 24)
+	mode_btn.pressed.connect(self._ToggleMode)
+	panel.add_child(mode_btn)
+
 	diff_row = HBoxContainer.new()
 	diff_row.position = Vector2(pw/2 - 140, 44)
 	diff_row.size = Vector2(280, 24)
@@ -153,32 +158,24 @@ func StartNew(nr: int, nc: int, nm: int):
 	close_x_btn.pressed.connect(self._Close)
 	panel.add_child(close_x_btn)
 
-	# 雷区容器（裁剪超出部分，放 cell 和 bottom_bar）
-	grid_container = Control.new()
-	grid_container.clip_contents = true
-	grid_container.mouse_filter = Control.MOUSE_FILTER_PASS
-	grid_container.position = Vector2(offset_x, offset_y)
-	grid_container.size = Vector2(cols * cell_size, rows * cell_size + 38)
-	panel.add_child(grid_container)
-
 	for r in range(rows):
 		cells.append([])
 		for c in range(cols):
 			var cr = ColorRect.new()
 			cr.color = Color(0.7, 0.75, 0.8)
 			cr.size = Vector2(cell_size - 2, cell_size - 2)
-			cr.position = Vector2(c * cell_size, r * cell_size)
+			cr.position = Vector2(offset_x + c * cell_size, offset_y + r * cell_size)
 			var cap_r = r; var cap_c = c
 			var gui = Control.new()
 			gui.mouse_filter = Control.MOUSE_FILTER_STOP
 			gui.gui_input.connect(func(ev): _OnCellInput(ev, cap_r, cap_c))
 			gui.size = cr.size
 			cr.add_child(gui)
-			grid_container.add_child(cr)
+			panel.add_child(cr)
 			cells[r].append(cr)
 
 	bottom_bar = HBoxContainer.new()
-	bottom_bar.position = Vector2(0, rows * cell_size + 6)
+	bottom_bar.position = Vector2(offset_x, offset_y + rows * cell_size + 6)
 	bottom_bar.size = Vector2(cols * cell_size, 32)
 	var close_txt = Button.new()
 	close_txt.text = "✕ 关闭"
@@ -190,21 +187,10 @@ func StartNew(nr: int, nc: int, nm: int):
 	var spacer = Control.new()
 	spacer.size_flags_horizontal = Control.SIZE_EXPAND_FILL
 	bottom_bar.add_child(spacer)
-	grid_container.add_child(bottom_bar)
-
-	# mode_btn 放在 grid_container 之后，确保在顶层可点击
-	mode_btn = Button.new()
-	mode_btn.text = "⛏ 挖掘"
-	mode_btn.flat = true
-	mode_btn.add_theme_font_size_override("font_size", 12)
-	mode_btn.add_theme_color_override("font_color", Color(0.2, 0.3, 0.6))
-	mode_btn.position = Vector2(pw/2 - 40, 72)
-	mode_btn.size = Vector2(80, 24)
-	mode_btn.pressed.connect(self._ToggleMode)
-	panel.add_child(mode_btn)
+	panel.add_child(bottom_bar)
 
 	# 重置平移 & 面板输入
-	_pan_x = 0; _pan_y = 0; _dragging = false; _drag_cell_r = -1; _drag_cell_c = -1
+	_pan_x = 0; _pan_y = 0; _dragging = false
 	panel.gui_input.connect(_OnPanelInput)
 
 func _ToggleMode():
@@ -214,12 +200,6 @@ func _ToggleMode():
 
 func _Reset(r: int, c: int, m: int):
 	StartNew(r, c, m)
-
-func _unhandled_input(ev: InputEvent):
-	# 兜底：阻止右键/滚轮穿透到底层 3D 场景
-	if ev is InputEventMouseButton and (ev.button_index == MOUSE_BUTTON_RIGHT or ev.button_index == MOUSE_BUTTON_WHEEL_UP or ev.button_index == MOUSE_BUTTON_WHEEL_DOWN):
-		if panel != null and panel.visible:
-			get_viewport().set_input_as_handled()
 
 func _OnPanelInput(ev: InputEvent):
 	if game_over or won: return
@@ -240,6 +220,11 @@ func _OnPanelInput(ev: InputEvent):
 		_pan_x += mp.x - _drag_start.x; _pan_y += mp.y - _drag_start.y
 		_drag_start = mp; _RefreshLayout()
 
+func _unhandled_input(ev: InputEvent):
+	if ev is InputEventMouseButton and (ev.button_index == MOUSE_BUTTON_RIGHT or ev.button_index == MOUSE_BUTTON_WHEEL_UP or ev.button_index == MOUSE_BUTTON_WHEEL_DOWN):
+		if panel != null and panel.visible:
+			get_viewport().set_input_as_handled()
+
 func _ZoomIn():
 	cell_size = min(cell_size + 4, 64)
 	_RefreshLayout()
@@ -249,19 +234,22 @@ func _ZoomOut():
 	_RefreshLayout()
 
 func _RefreshLayout():
-	if panel == null or grid_container == null: return
-	# 面板和 UI 固定，只有雷区缩放
-	panel.offset_left = -_init_pw/2; panel.offset_top = -_init_ph/2
-	panel.offset_right = _init_pw/2; panel.offset_bottom = _init_ph/2
-	# 裁剪容器尺寸固定（初始尺寸），超出部分自动隐藏
-	if _init_cell_size > 0:
-		grid_container.size = Vector2(cols * _init_cell_size, rows * _init_cell_size + 38)
+	var pw = cols * cell_size + 80
+	var ph = rows * cell_size + 130
+	panel.offset_left = -pw/2; panel.offset_top = -ph/2
+	panel.offset_right = pw/2; panel.offset_bottom = ph/2
+	title_label.position.x = pw/2 - 80
+	mine_counter.position.x = 10
+	timer_label.position.x = pw - 110
+	mode_btn.position.x = pw/2 - 40
+	diff_row.position.x = pw/2 - 140
+	close_x_btn.position.x = pw - 30
 	for r in range(rows):
 		for c in range(cols):
 			var cr = cells[r][c]
 			var sz = cell_size - 2
 			cr.size = Vector2(sz, sz)
-			cr.position = Vector2(c * cell_size + _pan_x, r * cell_size + _pan_y)
+			cr.position = Vector2(offset_x + c * cell_size + _pan_x, offset_y + r * cell_size + _pan_y)
 			for ch in cr.get_children():
 				if ch is Control:
 					ch.size = cr.size
@@ -273,18 +261,17 @@ func _RefreshLayout():
 		bottom_bar.size = Vector2(cols * cell_size, 32)
 
 func _Close():
-	_CleanupOverlay()
-	if panel != null:
-		panel.queue_free()
-		panel = null
-	queue_free()
-
-func _CleanupOverlay():
 	if _modal_overlay != null:
 		_modal_overlay.queue_free()
 		_modal_overlay = null
 	if gm != null:
 		gm.set("IsAnyModalOpen", false)
+	if panel != null:
+		panel.queue_free()
+		panel = null
+	queue_free()
+
+	
 
 func _OnCellInput(ev: InputEvent, r: int, c: int):
 	if game_over or won: return
@@ -439,10 +426,10 @@ func _GameOver():
 	msg.text = "💥 踩雷了！点难度重开"
 	msg.add_theme_font_size_override("font_size", 16)
 	msg.add_theme_color_override("font_color", Color(0.9, 0.2, 0.2))
-	msg.position = Vector2(_pan_x, rows * cell_size + _pan_y + 10)
+	msg.position = Vector2(offset_x + _pan_x, offset_y + rows * cell_size + _pan_y + 10)
 	msg.size = Vector2(cols * cell_size, 30)
 	msg.horizontal_alignment = HORIZONTAL_ALIGNMENT_CENTER
-	grid_container.add_child(msg)
+	panel.add_child(msg)
 
 func _CheckWin():
 	var revealed_count = 0
@@ -455,16 +442,20 @@ func _CheckWin():
 		msg.text = "🎉 你赢了！耗时 " + str(int(timer)) + " 秒"
 		msg.add_theme_font_size_override("font_size", 16)
 		msg.add_theme_color_override("font_color", Color(0.2, 0.7, 0.3))
-		msg.position = Vector2(_pan_x, rows * cell_size + _pan_y + 10)
+		msg.position = Vector2(offset_x + _pan_x, offset_y + rows * cell_size + _pan_y + 10)
 		msg.size = Vector2(cols * cell_size, 30)
 		msg.horizontal_alignment = HORIZONTAL_ALIGNMENT_CENTER
-		grid_container.add_child(msg)
+		panel.add_child(msg)
 		for r in range(rows):
 			for c in range(cols):
 				if flagged[r][c] and board[r][c] != -1:
 					_ToggleFlag(r, c)
 
 func OnUnload():
-	_CleanupOverlay()
+	if _modal_overlay != null:
+		_modal_overlay.queue_free()
+		_modal_overlay = null
+	if gm != null:
+		gm.set("IsAnyModalOpen", false)
 	if panel != null:
 		panel.queue_free()
