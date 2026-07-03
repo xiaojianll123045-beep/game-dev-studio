@@ -172,8 +172,8 @@ public partial class MenuManager : Node
 		btnContainer.AddThemeConstantOverride("separation", 10);
 		_ui.AddChild(btnContainer);
 
-		string[] labels = { Loc.Tr("menu.new_game"), Loc.Tr("menu.continue"), Loc.Tr("menu.load_game"), Loc.Tr("menu.settings"), Loc.Tr("menu.about"), Loc.Tr("mod.title"), Loc.Tr("menu.dlc"), Loc.Tr("menu.exit") };
-		System.Action[] actions = { OnNewGame, OnContinue, OnLoadGame, OnSettings, OnAbout, ShowModList, ShowDlcList, () => GetTree().Quit() };
+		string[] labels = { Loc.Tr("menu.new_game"), Loc.Tr("menu.continue"), Loc.Tr("menu.load_game"), Loc.Tr("menu.settings"), Loc.Tr("menu.about"), Loc.Tr("mod.title"), Loc.Tr("menu.exit") };
+		System.Action[] actions = { OnNewGame, OnContinue, OnLoadGame, OnSettings, OnAbout, ShowModList, () => GetTree().Quit() };
 
 		var buttonRefs = new List<Button>();
 		for (int i = 0; i < labels.Length; i++)
@@ -217,6 +217,26 @@ public partial class MenuManager : Node
 			var loadBtn = buttonRefs[2];
 			loadBtn.Disabled = !hasSave;
 			if (loadBtn.Disabled) loadBtn.Modulate = new Color(1, 1, 1, 0.35f);
+		}
+
+		// 小游戏入口（从 DLC 加载，可多个）
+		if (DlcManager.Loaded.Count == 0) DlcManager.ScanAll();
+		var mgs = DlcManager.ActiveMinigames;
+		if (mgs.Count > 0)
+		{
+			var mgBtn = new Button { Text = "🎮 " + (mgs.Count == 1 ? mgs[0].Name : Loc.Tr("menu.minigames")), Flat = true };
+			mgBtn.AddThemeFontSizeOverride("font_size", 11);
+			mgBtn.AddThemeColorOverride("font_color", new Color(0.4f, 0.45f, 0.55f));
+			mgBtn.AddThemeColorOverride("font_hover_color", new Color(0.25f, 0.30f, 0.35f));
+			mgBtn.Position = new(vp.X - 200, vp.Y - 32);
+			mgBtn.Size = new(180, 24);
+			mgBtn.Pressed += () => {
+				if (mgs.Count == 1)
+					LaunchMinigameFromMenu(mgs[0]);
+				else
+					ShowMinigamePicker(mgs);
+			};
+			_ui.AddChild(mgBtn);
 		}
 
 		_ui.AddChild(MkLabel(Loc.Tr("menu.footer"), cx - 180, vp.Y - 28, 360, 20, 9, new Color(0.35f, 0.4f, 0.5f), HorizontalAlignment.Center));
@@ -941,6 +961,34 @@ public partial class MenuManager : Node
 		botClose.AddThemeColorOverride("font_color", Colors.Black);
 		botClose.Pressed += () => dp.QueueFree();
 		dp.AddChild(botClose);
+	}
+
+	private void LaunchMinigameFromMenu(DlcManifest dlc)
+	{
+		if (dlc.LoadedScript != null)
+		{
+			var n = new Node { Name = "MG_" + dlc.Id };
+			n.SetScript(dlc.LoadedScript);
+			_ui.AddChild(n);
+			var bridge = GetNodeOrNull("/root/GameManager/ModBridge") as ModBridge;
+			try { n.Call("OnLoad", Services.GameManager, bridge); } catch { }
+		}
+	}
+
+	private void ShowMinigamePicker(IReadOnlyList<DlcManifest> games)
+	{
+		var menu = new PopupMenu();
+		int i = 0;
+		foreach (var g in games)
+		{
+			menu.AddItem($"{g.Name} v{g.Version}", i);
+			menu.SetItemTooltip(i, g.Description);
+			i++;
+		}
+		menu.Position = (Vector2I)(GetViewport().GetMousePosition());
+		menu.IdPressed += (long id) => { if (id >= 0 && id < games.Count) { LaunchMinigameFromMenu(games[(int)id]); menu.QueueFree(); } };
+		_ui.AddChild(menu);
+		menu.Popup();
 	}
 
 	private void ShowModRiskConfirm(ModManifest mod, Action onAccept, Action onDecline)
