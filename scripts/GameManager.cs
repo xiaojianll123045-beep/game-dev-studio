@@ -1274,24 +1274,7 @@ public partial class GameManager : Node3D
         if (!ModAPI.IsFeatureEnabled(ModAPI.Features.OutsourceSystem)) return;
         RefreshOutsourcePool();
         ProcessOutsourceMonthly();
-        // 处理旧系统外包（Team.CurrentContract + OutsourceMonthsRemaining）
-        var tm = GetNode<TeamManager>("TeamManager");
-        if (tm == null) return;
-        foreach (var team in tm.Teams.Where(t => t.Task == TeamTask.Outsource && t.CurrentContract.HasValue).ToList())
-        {
-            team.OutsourceMonthsRemaining--;
-            if (team.OutsourceMonthsRemaining <= 0)
-            {
-                var c = team.CurrentContract.Value;
-                _res.EarnMoney(c.Payment, "outsource");
-                _res.GainInspiration(c.ExpReward);
-                team.Task = TeamTask.None;
-                team.CurrentContract = null;
-                team.OutsourceMonthsRemaining = 0;
-                // 图表立刻体现收益 + 弹窗通知
-                RebuildHUDTabs();
-                ShowToast(Loc.Tr("toast.outsource_done"), $"{c.Name} +¥{c.Payment / 1000f:F0}K", new Color(0.3f, 0.8f, 0.5f));
-            }
+    }
         }
     }
 
@@ -1423,6 +1406,7 @@ public partial class GameManager : Node3D
                     else if (task.GivesTechBoost) { _res.EarnMoney(task.Reward, "outsource"); _res.GainInspiration(3); }
                     else if (task.GivesReputation) { _res.EarnMoney(task.Reward, "outsource"); _res.GainInspiration(2); }
                     else { _res.EarnMoney(task.Reward, "outsource"); _res.GainInspiration(3); }
+                    ShowToast(Loc.Tr("toast.outsource_done"), $"{task.Name} +¥{task.Reward / 1000f:F0}K", new Color(0.3f, 0.8f, 0.5f));
                 }
                 else
                 {
@@ -1433,6 +1417,7 @@ public partial class GameManager : Node3D
                 task.AssignedTeam.CurrentContract = null;
                 task.AssignedTeam = null;
                 task.Remaining = 0;
+                RebuildHUDTabs();
             }
         }
         OutsourceTaskPool.RemoveAll(t => t.Remaining <= 0);
@@ -4776,9 +4761,13 @@ public partial class GameManager : Node3D
                             PrimarySkill = capTask.RequiredSkill, MinSkillLevel = capTask.RequiredLevel, ExpReward = 5
                         };
                         team.OutsourceMonthsRemaining = capTask.Duration;
+                        // 同时加入 OutsourceTaskPool，让 ProcessOutsourceMonthly 处理结算和通知
+                        capTask.Accepted = true;
+                        capTask.AssignedTeam = team;
+                        capTask.MonthsSpent = 0;
                         assigned++;
                     }
-                    if (assigned > 0) { OutsourceTaskPool.Remove(capTask); RebuildHUDTabs(); }
+                    if (assigned > 0) { RebuildHUDTabs(); }
                     overlay.QueueFree(); ShowContractsPanel();
                 };
                 pp.AddChild(startBtn);
