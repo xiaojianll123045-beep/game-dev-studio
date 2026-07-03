@@ -4756,6 +4756,7 @@ public partial class GameManager : Node3D
                             RequiredMonths = capTask.Duration, Payment = capTask.Reward, PenaltyRate = 0.2f,
                             PrimarySkill = capTask.RequiredSkill, MinSkillLevel = capTask.RequiredLevel, ExpReward = 5
                         };
+                        team.OutsourceMonthsRemaining = capTask.Duration;
                         assigned++;
                     }
                     if (assigned > 0) { OutsourceTaskPool.Remove(capTask); RebuildHUDTabs(); }
