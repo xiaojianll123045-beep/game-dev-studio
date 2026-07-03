@@ -43,9 +43,10 @@ var _modal_overlay: ColorRect = null
 
 func OnLoad(_gm, bridge):
 	gm = _gm
+	StartGame()
 	# 全屏遮罩 + IsAnyModalOpen（和游戏内弹窗/百科一致，阻止 3D 场景输入）
 	if gm != null:
-		var uilayer = gm.get("UiLayer") as Control
+		var uilayer = gm.get("UiLayer")
 		if uilayer != null:
 			_modal_overlay = ColorRect.new()
 			_modal_overlay.color = Color(0, 0, 0, 0.35)
@@ -53,7 +54,6 @@ func OnLoad(_gm, bridge):
 			_modal_overlay.set_anchors_and_offsets_preset(Control.LayoutPreset.FULL_RECT)
 			uilayer.add_child(_modal_overlay)
 		gm.set("IsAnyModalOpen", true)
-	StartGame()
 	# 用 Timer 代替 _Process，避免暂停影响
 	var t = Timer.new()
 	t.wait_time = 0.5; t.one_shot = false
