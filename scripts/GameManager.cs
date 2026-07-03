@@ -502,15 +502,11 @@ public partial class GameManager : Node3D
                     tp.Visible = true;
         }
 
-        if (GlobalSettings.NewGame && Founder.HasCreated && _tutorialMgr != null && !_tutorialMgr.TutorialCompleted)
+        if (GlobalSettings.NewGame && Founder.HasCreated)
         {
-            _tutorialMgr.StartTutorial();
-            // 教程结束后弹出欢迎语
-            Callable.From(() => {
-                ShowPopup(Loc.Tr("tutorial.welcome_title"),
-                    Loc.Tr("tutorial.welcome_desc"),
-                    new Color(0.3f, 0.8f, 0.5f));
-            }).CallDeferred();
+            ShowPopup(Loc.Tr("tutorial.welcome_title"),
+                Loc.Tr("tutorial.welcome_desc"),
+                new Color(0.3f, 0.8f, 0.5f));
         }
     }
 

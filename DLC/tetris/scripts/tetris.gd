@@ -188,6 +188,26 @@ func _spawn_piece():
 		game_over = true
 		_draw_grid()
 		_update_ui()
+		_show_game_over()
+
+func _show_game_over():
+	var pw = panel.size.x; var ph = panel.size.y
+	var lbl = Label.new()
+	lbl.text = "💀 游戏结束"
+	lbl.add_theme_font_size_override("font_size", 22)
+	lbl.add_theme_color_override("font_color", Color(1, 0.2, 0.2))
+	lbl.position = Vector2(pw/2 - 80, ph/2 - 40)
+	lbl.size = Vector2(160, 30); lbl.horizontal_alignment = HORIZONTAL_ALIGNMENT_CENTER
+	panel.add_child(lbl)
+	var rst = Button.new()
+	rst.text = "↻ 重新开始"
+	rst.flat = true
+	rst.add_theme_font_size_override("font_size", 14)
+	rst.add_theme_color_override("font_color", Color(0.8, 0.8, 0.9))
+	rst.position = Vector2(pw/2 - 50, ph/2)
+	rst.size = Vector2(100, 28)
+	rst.pressed.connect(self.start_game)
+	panel.add_child(rst)
 
 func _random_piece():
 	var idx = randi() % piece_order.size()
@@ -303,6 +323,10 @@ func _process(delta):
 		_move(0, 1)
 
 func _input(ev):
+	if game_over:
+		if ev is InputEventKey and ev.pressed and not ev.echo and (ev.keycode == KEY_ENTER or ev.keycode == KEY_R):
+			start_game()
+		return
 	if not started or game_over: return
 	if ev is InputEventKey and ev.pressed and not ev.echo:
 		match ev.keycode:

@@ -123,12 +123,17 @@ func _draw_all():
 		cr.size = Vector2(CELL - 1, CELL - 1)
 		cr.color = Color(0.2, 0.8, 0.2) if i > 0 else Color(0.3, 1, 0.3)
 		panel.add_child(cr)
-	# 右边界线
-	var line = ColorRect.new()
-	line.position = Vector2(20 + COLS * CELL - 1, 10)
-	line.size = Vector2(2, GRID_H)
-	line.color = Color(0.3, 0.3, 0.35)
-	panel.add_child(line)
+	# 右边界线 + 下边界线
+	var rl = ColorRect.new()
+	rl.position = Vector2(20 + COLS * CELL - 1, 10)
+	rl.size = Vector2(2, GRID_H)
+	rl.color = Color(0.3, 0.3, 0.35)
+	panel.add_child(rl)
+	var bl = ColorRect.new()
+	bl.position = Vector2(20, 10 + GRID_H - 1)
+	bl.size = Vector2(GRID_W, 2)
+	bl.color = Color(0.3, 0.3, 0.35)
+	panel.add_child(bl)
 	food_label.position = Vector2(20 + food.x * CELL, 10 + food.y * CELL - 2)
 
 func _unhandled_input(ev):
@@ -185,6 +190,16 @@ func _info_msg(msg):
 	lbl.position = Vector2(panel.size.x/2 - 100, panel.size.y/2 - 20)
 	lbl.size = Vector2(200, 40); lbl.horizontal_alignment = HORIZONTAL_ALIGNMENT_CENTER
 	panel.add_child(lbl)
+	# 重置按钮
+	var rst = Button.new()
+	rst.text = "↻ 重新开始"
+	rst.flat = true
+	rst.add_theme_font_size_override("font_size", 14)
+	rst.add_theme_color_override("font_color", Color(0.8, 0.8, 0.9))
+	rst.position = Vector2(panel.size.x/2 - 50, panel.size.y/2 + 20)
+	rst.size = Vector2(100, 28)
+	rst.pressed.connect(self.start_game)
+	panel.add_child(rst)
 
 func _update_ui():
 	score_label.text = "长度: " + str(snake.size()) + "  得分: " + str(score)
