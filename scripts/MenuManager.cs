@@ -598,11 +598,9 @@ public partial class MenuManager : Node
 		{
 			var rowBg = new ColorRect { Position = new(ex - 4, ly), Size = new(ew + 8, 44), Color = idx % 2 == 0 ? new Color(1, 1, 1, 0.5f) : new Color(0, 0, 0, 0.02f), MouseFilter = Control.MouseFilterEnum.Ignore };
 			_thanksPanel.AddChild(rowBg);
-			var tn = new RichTextLabel { Position = new(ex, ly + 2), Size = new(ew, 20), BbcodeEnabled = true };
-			tn.Text = t.name;
+			var tn = new Label { Text = t.name, Position = new(ex, ly + 2), Size = new(ew, 20), MouseFilter = Control.MouseFilterEnum.Ignore };
 			tn.AddThemeFontSizeOverride("font_size", 13);
-			tn.AddThemeColorOverride("default_color", new Color(0.12f, 0.15f, 0.22f));
-			tn.SelectionEnabled = true; tn.MouseFilter = Control.MouseFilterEnum.Stop;
+			tn.AddThemeColorOverride("font_color", new Color(0.12f, 0.15f, 0.22f));
 			_thanksPanel.AddChild(tn);
 			ly += 18;
 			bool hasExtra = !string.IsNullOrEmpty(t.role) || !string.IsNullOrEmpty(t.contact);
