@@ -1,0 +1,316 @@
+extends Node
+
+var gm: Node
+var board: Array
+var revealed: Array
+var flagged: Array
+var rows: int = 9
+var cols: int = 9
+var mine_count: int = 10
+var cell_size: int = 32
+var offset_x: int = 40
+var offset_y: int = 80
+var game_over: bool = false
+var first_click: bool = true
+var flag_mode: bool = false
+var timer: float = 0.0
+var mines_remaining: int = 10
+var started: bool = false
+var won: bool = false
+
+var cells: Array = []
+var flag_labels: Array = []
+var timer_label: Label
+var mine_counter: Label
+var panel: Panel
+var mode_btn: Button
+
+func OnLoad(_gm, bridge):
+	gm = _gm
+	StartGame()
+
+func StartGame():
+	StartNew(9, 9, 10)
+
+func StartNew(r: int, c: int, m: int):
+	rows = r; cols = c; mine_count = m
+	game_over = false; first_click = true; started = false; won = false
+	timer = 0.0; mines_remaining = m
+	flag_mode = false
+	board = []
+	revealed = []
+	flagged = []
+	cells = []
+
+	cell_size = clamp(600 / max(rows, cols), 20, 48)
+	var pw = cols * cell_size + 80
+	var ph = rows * cell_size + 130
+
+	if panel != null:
+		for ch in panel.get_children():
+			panel.remove_child(ch)
+			ch.queue_free()
+		panel.queue_free()
+
+	var vp = get_viewport().get_visible_rect().size
+	panel = Panel.new()
+	panel.anchor_left = 0.5; panel.anchor_top = 0.5
+	panel.margin_left = -pw/2; panel.margin_top = -ph/2
+	panel.margin_right = pw/2; panel.margin_bottom = ph/2
+	add_child(panel)
+
+	var bg = StyleBoxFlat.new()
+	bg.bg_color = Color(0.85, 0.85, 0.87)
+	bg.corner_radius_top_left = 8; bg.corner_radius_top_right = 8
+	bg.corner_radius_bottom_left = 8; bg.corner_radius_bottom_right = 8
+	panel.add_theme_stylebox_override("panel", bg)
+
+	var title = Label.new()
+	title.text = "💣 扫雷"
+	title.add_theme_font_size_override("font_size", 22)
+	title.add_theme_color_override("font_color", Color(0.12, 0.14, 0.18))
+	title.position = Vector2(pw/2 - 80, 8)
+	title.size = Vector2(160, 30)
+	title.horizontal_alignment = HORIZONTAL_ALIGNMENT_CENTER
+	panel.add_child(title)
+
+	mine_counter = Label.new()
+	mine_counter.text = "💣 " + str(mines_remaining)
+	mine_counter.add_theme_font_size_override("font_size", 16)
+	mine_counter.add_theme_color_override("font_color", Color(0.8, 0.15, 0.15))
+	mine_counter.position = Vector2(10, 45)
+	mine_counter.size = Vector2(100, 24)
+	panel.add_child(mine_counter)
+
+	timer_label = Label.new()
+	timer_label.text = "⏱ 0"
+	timer_label.add_theme_font_size_override("font_size", 16)
+	timer_label.add_theme_color_override("font_color", Color(0.15, 0.15, 0.8))
+	timer_label.position = Vector2(pw - 110, 45)
+	timer_label.size = Vector2(100, 24)
+	timer_label.horizontal_alignment = HORIZONTAL_ALIGNMENT_RIGHT
+	panel.add_child(timer_label)
+
+	mode_btn = Button.new()
+	mode_btn.text = "⛏ 挖掘"
+	mode_btn.flat = true
+	mode_btn.add_theme_font_size_override("font_size", 12)
+	mode_btn.add_theme_color_override("font_color", Color(0.2, 0.3, 0.6))
+	mode_btn.position = Vector2(pw/2 - 40, 44)
+	mode_btn.size = Vector2(80, 24)
+	mode_btn.pressed.connect(self._ToggleMode)
+	panel.add_child(mode_btn)
+
+	var diff_row = HBoxContainer.new()
+	diff_row.position = Vector2(pw/2 - 140, 44)
+	diff_row.size = Vector2(280, 24)
+
+	for diff in [["初级 9×9", 9, 9, 10], ["中级 16×16", 16, 16, 40], ["高级 30×16", 30, 16, 99]]:
+		var btn = Button.new()
+		btn.text = diff[0]
+		btn.flat = true; btn.add_theme_font_size_override("font_size", 10)
+		btn.add_theme_color_override("font_color", Color(0.4, 0.4, 0.4))
+		var dr = diff[1]; var dc = diff[2]; var dm = diff[3]
+		btn.pressed.connect(self._Reset.bind(dr, dc, dm))
+		diff_row.add_child(btn)
+
+	var close_btn = Button.new()
+	close_btn.text = "✕"
+	close_btn.flat = true
+	close_btn.add_theme_font_size_override("font_size", 14)
+	close_btn.add_theme_color_override("font_color", Color(0.8, 0.3, 0.3))
+	close_btn.position = Vector2(pw - 30, 6)
+	close_btn.size = Vector2(24, 24)
+	close_btn.pressed.connect(self._Close)
+	panel.add_child(close_btn)
+
+	for r in range(rows):
+		cells.append([])
+		for c in range(cols):
+			var cr = ColorRect.new()
+			cr.color = Color(0.7, 0.75, 0.8)
+			cr.size = Vector2(cell_size - 2, cell_size - 2)
+			cr.position = Vector2(offset_x + c * cell_size, offset_y + r * cell_size)
+			var cap_r = r; var cap_c = c
+			var gui = Control.new()
+			gui.mouse_filter = Control.MOUSE_FILTER_STOP
+			gui.gui_input.connect(func(ev): _OnCellInput(ev, cap_r, cap_c))
+			gui.size = cr.size
+			cr.add_child(gui)
+			panel.add_child(cr)
+			cells[r].append(cr)
+
+func _ToggleMode():
+	flag_mode = not flag_mode
+	mode_btn.text = "🚩 标记" if flag_mode else "⛏ 挖掘"
+	mode_btn.add_theme_color_override("font_color", Color(0.8, 0.5, 0.1) if flag_mode else Color(0.2, 0.3, 0.6))
+
+func _Reset(r: int, c: int, m: int):
+	StartNew(r, c, m)
+
+func _Close():
+	panel.queue_free()
+	queue_free()
+
+func _Process(delta):
+	if started and not game_over and not won:
+		timer += delta
+		timer_label.text = "⏱ " + str(int(timer))
+
+func _OnCellInput(ev: InputEvent, r: int, c: int):
+	if game_over or won: return
+	if not (ev is InputEventMouseButton and ev.pressed): return
+
+	if ev.button_index == MOUSE_BUTTON_LEFT:
+		if flag_mode:
+			_ToggleFlag(r, c)
+		else:
+			_RevealCell(r, c)
+	elif ev.button_index == MOUSE_BUTTON_RIGHT:
+		_ToggleFlag(r, c)
+
+func _ToggleFlag(r: int, c: int):
+	if r < 0 or r >= rows or c < 0 or c >= cols: return
+	if revealed[r][c]: return
+	flagged[r][c] = not flagged[r][c]
+	_UpdateCellVisual(r, c)
+	mines_remaining += -1 if flagged[r][c] else 1
+	mine_counter.text = "💣 " + str(mines_remaining)
+
+func _RevealCell(r: int, c: int):
+	if r < 0 or r >= rows or c < 0 or c >= cols: return
+	if revealed[r][c] or flagged[r][c]: return
+
+	if first_click:
+		_GenerateBoard(r, c)
+		first_click = false
+		started = true
+
+	revealed[r][c] = true
+
+	if board[r][c] == -1:
+		_GameOver()
+		return
+
+	_UpdateCellVisual(r, c)
+
+	if board[r][c] == 0:
+		for dr in [-1, 0, 1]:
+			for dc in [-1, 0, 1]:
+				if dr == 0 and dc == 0: continue
+				_RevealCell(r + dr, c + dc)
+
+	_CheckWin()
+
+func _GenerateBoard(safe_r: int, safe_c: int):
+	board = []
+	revealed = []
+	flagged = []
+	for r in range(rows):
+		board.append([])
+		revealed.append([])
+		flagged.append([])
+		for c in range(cols):
+			board[r].append(0)
+			revealed[r].append(false)
+			flagged[r].append(false)
+
+	var rng = RandomNumberGenerator.new()
+	var placed = 0
+	while placed < mine_count:
+		var rr = rng.randi_range(0, rows - 1)
+		var rc = rng.randi_range(0, cols - 1)
+		if board[rr][rc] == -1: continue
+		if abs(rr - safe_r) <= 1 and abs(rc - safe_c) <= 1: continue
+		board[rr][rc] = -1
+		placed += 1
+
+	for r in range(rows):
+		for c in range(cols):
+			if board[r][c] == -1: continue
+			var cnt = 0
+			for dr in [-1, 0, 1]:
+				for dc in [-1, 0, 1]:
+					var nr = r + dr; var nc = c + dc
+					if nr >= 0 and nr < rows and nc >= 0 and nc < cols and board[nr][nc] == -1:
+						cnt += 1
+			board[r][c] = cnt
+
+func _UpdateCellVisual(r: int, c: int):
+	var cr = cells[r][c]
+	if revealed[r][c]:
+		if board[r][c] == -1:
+			cr.color = Color(0.9, 0.2, 0.2)
+		elif board[r][c] == 0:
+			cr.color = Color(0.85, 0.88, 0.9)
+		else:
+			cr.color = Color(0.8, 0.82, 0.85)
+	elif flagged[r][c]:
+		cr.color = Color(0.9, 0.5, 0.1)
+	else:
+		cr.color = Color(0.7, 0.75, 0.8)
+
+	if revealed[r][c] and board[r][c] > 0:
+		var nums = [Color(0.2, 0.4, 0.9), Color(0.2, 0.7, 0.2), Color(0.9, 0.2, 0.2),
+			Color(0.2, 0.2, 0.8), Color(0.7, 0.1, 0.1), Color(0.2, 0.6, 0.6),
+			Color(0.3, 0.3, 0.3), Color(0.5, 0.5, 0.5)]
+		if cr.get_child_count() > 0 and cr.get_child(0) is Label:
+			var lbl = cr.get_child(0) as Label
+			lbl.text = str(board[r][c])
+			lbl.add_theme_color_override("font_color", nums[board[r][c] - 1])
+	elif revealed[r][c] and board[r][c] == -1:
+		if cr.get_child_count() > 0 and cr.get_child(0) is Label:
+			var lbl = cr.get_child(0) as Label
+			lbl.text = "💣"
+			lbl.add_theme_color_override("font_color", Color(0, 0, 0))
+	else:
+		for ch in cr.get_children():
+			cr.remove_child(ch); ch.queue_free()
+
+	if revealed[r][c] and board[r][c] >= 0 and cr.get_child_count() == 0:
+		var lbl = Label.new()
+		lbl.horizontal_alignment = HORIZONTAL_ALIGNMENT_CENTER
+		lbl.vertical_alignment = VERTICAL_ALIGNMENT_CENTER
+		lbl.size = cr.size
+		lbl.add_theme_font_size_override("font_size", clamp(cell_size - 12, 8, 22))
+		cr.add_child(lbl)
+
+func _GameOver():
+	game_over = true
+	for r in range(rows):
+		for c in range(cols):
+			if board[r][c] == -1:
+				revealed[r][c] = true
+				_UpdateCellVisual(r, c)
+	var msg = Label.new()
+	msg.text = "💥 踩雷了！点难度重开"
+	msg.add_theme_font_size_override("font_size", 16)
+	msg.add_theme_color_override("font_color", Color(0.9, 0.2, 0.2))
+	msg.position = Vector2(offset_x, offset_y + rows * cell_size + 10)
+	msg.size = Vector2(cols * cell_size, 30)
+	msg.horizontal_alignment = HORIZONTAL_ALIGNMENT_CENTER
+	panel.add_child(msg)
+
+func _CheckWin():
+	var revealed_count = 0
+	for r in range(rows):
+		for c in range(cols):
+			if revealed[r][c]: revealed_count += 1
+	if revealed_count == rows * cols - mine_count:
+		won = true
+		var msg = Label.new()
+		msg.text = "🎉 你赢了！耗时 " + str(int(timer)) + " 秒"
+		msg.add_theme_font_size_override("font_size", 16)
+		msg.add_theme_color_override("font_color", Color(0.2, 0.7, 0.3))
+		msg.position = Vector2(offset_x, offset_y + rows * cell_size + 10)
+		msg.size = Vector2(cols * cell_size, 30)
+		msg.horizontal_alignment = HORIZONTAL_ALIGNMENT_CENTER
+		panel.add_child(msg)
+		for r in range(rows):
+			for c in range(cols):
+				if flagged[r][c] and board[r][c] != -1:
+					_ToggleFlag(r, c)
+
+func OnUnload():
+	if panel != null:
+		panel.queue_free()

@@ -2287,6 +2287,7 @@ public partial class GameManager : Node3D
         _tabButtons.Clear();
 
         // 10个 SVG 图标按钮（Feather Icons 风格一致）
+        bool hasDlc = DlcManager.ActiveMinigames.Count > 0;
         string[] svgPaths = {
             "res://assets/icons/play.svg", "res://assets/icons/file-text.svg", "res://assets/icons/file.svg",
             "res://assets/icons/users.svg", "res://assets/icons/user.svg", "res://assets/icons/zap.svg",
@@ -2294,6 +2295,7 @@ public partial class GameManager : Node3D
             "res://assets/icons/shield.svg", "res://assets/icons/home.svg"
         };
         string[] tips = { "hud.dev", "hud.projects", "hud.contracts", "hud.teams", "hud.employees", "hud.tech", "hud.server", "hud.company", "hud.attack", "hud.room" };
+        if (hasDlc) { svgPaths = svgPaths.Concat(new[] { "res://assets/icons/play.svg" }).ToArray(); tips = tips.Concat(new[] { "hud.dlc" }).ToArray(); }
         // 尝试从文件加载 SVG 纹理，失败则回退到 emoji
         Texture2D[] iconTextures = new Texture2D[svgPaths.Length];
         for (int si = 0; si < svgPaths.Length; si++)
@@ -2429,7 +2431,37 @@ public partial class GameManager : Node3D
             case 7: ShowCompanyPanel(); break;
             case 8: ShowAttackPanel(); break;
             case 9: ShowRoomPanel(); break;
+            case 10: LaunchDlcMinigame(); break;
         }
+    }
+
+    private void LaunchDlcMinigame()
+    {
+        var games = DlcManager.ActiveMinigames;
+        if (games.Count == 0) return;
+        if (games.Count == 1)
+        {
+            DlcManager.LaunchMinigame(this, games[0]);
+            return;
+        }
+        // 多个小游戏时弹出选择
+        var menu = new PopupMenu();
+        int i = 0;
+        foreach (var g in games)
+        {
+            menu.AddItem($"{g.Name} v{g.Version}", i);
+            menu.SetItemTooltip(i, g.Description);
+            i++;
+        }
+        menu.Position = (Vector2I)GetViewport().GetMousePosition();
+        menu.IdPressed += (long id) =>
+        {
+            if (id >= 0 && id < games.Count)
+                DlcManager.LaunchMinigame(this, games[(int)id]);
+            menu.QueueFree();
+        };
+        _uiLayer.AddChild(menu);
+        menu.Popup();
     }
 
     // ==================== 面板弹出 ====================

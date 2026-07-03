@@ -1977,7 +1977,8 @@
   "hud.company": "Company",
   "hud.attack": "Attack",
   "hud.tech": "Technology",
-   "hud.room": "Office",
+    "hud.room": "Office",
+    "hud.dlc": "🎮 Minigames",
    "hud.trust": "Trust {0}",
 
   "dev.new_project": "New Game",
