@@ -79,7 +79,7 @@ public static class DlcManager
         if (DirAccess.DirExistsAbsolute(exeDir + "/DLC"))
             ScanDlcFrom(exeDir + "/DLC/");
         // 始终扫 res://DLC（开发环境 / 内置 DLC）
-        ScanDlcFrom("res://DLC");
+        ScanDlcFrom("res://DLC/");
         LoadEnabled();
         Log("DlcManager", $"DLC scan done, {_loaded.Count} total, {_activeMinigames.Count} minigames, {_enabledDlcIds.Count} enabled");
     }
