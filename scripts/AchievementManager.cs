@@ -2378,8 +2378,8 @@ public partial class AchievementManager : Node
         var originals = OriginalReleases(devMgr);
         int releasedCount = originals.Count;
         int totalCompleted = devMgr.CompletedProjects.Count;
-        float maxScore = devMgr.CompletedProjects.Max(p => p.FinalScore);
-        float maxSales = devMgr.CompletedProjects.Max(p => p.Sales);
+        float maxScore = totalCompleted > 0 ? devMgr.CompletedProjects.Max(p => p.FinalScore) : 0;
+        float maxSales = totalCompleted > 0 ? devMgr.CompletedProjects.Max(p => p.Sales) : 0;
 
         TryUnlock("first_game", totalCompleted >= 1);
         TryUnlock("first_hit", maxScore >= 85);
@@ -2516,12 +2516,12 @@ public partial class AchievementManager : Node
         if (empMgr != null)
             TryUnlock("easter_broken", empMgr.Employees.Count > 0 && empMgr.Employees.All(e => e.Satisfaction < 20));
         TryUnlock("easter_god_like", devMgr.CompletedProjects.Any(p => p.MonthsOnMarket >= 18));
-        // 躺平计数器（仅当有未发布项目时才检查）
-        if (devMgr.Projects.Any(p => !p.IsReleased))
-        {
-            if (devMgr.Projects.All(p => p.IsReleased || p.Phase != DevPhase.Developing)) _idleMonths++;
-            else _idleMonths = 0;
-        }
+        // 躺平计数器：连续6个月没有任何开发中的项目（含打磨）
+        bool hasActiveWork = devMgr.Projects.Any(p => !p.IsReleased
+            && (p.Phase == DevPhase.Developing || p.Phase == DevPhase.Polishing
+                || p.Phase == DevPhase.Testing || p.Phase == DevPhase.Marketing));
+        if (hasActiveWork) _idleMonths = 0;
+        else _idleMonths++;
         TryUnlock("easter_lay_flat", _idleMonths >= 6);
 
         ShowNewUnlocks();
