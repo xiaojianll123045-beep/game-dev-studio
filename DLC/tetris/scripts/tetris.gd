@@ -29,6 +29,12 @@ var level_label: Label
 var next_label: Label
 var pause_overlay: ColorRect = null
 
+var das_timer = 0.0
+var das_delay = 0.17
+var das_interval = 0.05
+var das_dir = 0
+var das_initial = true
+
 var pieces = {
 	I = {blocks = [Vector2(0,1),Vector2(1,1),Vector2(2,1),Vector2(3,1)], color = Color(0,1,1)},
 	O = {blocks = [Vector2(0,0),Vector2(1,0),Vector2(0,1),Vector2(1,1)], color = Color(1,1,0)},
@@ -274,14 +280,32 @@ func _process(delta):
 		if not _move(0, 1):
 			_lock_piece()
 			_draw_grid()
+	# DAS (Delayed Auto Shift) — 长按支持
+	var left = Input.is_key_pressed(KEY_LEFT)
+	var right = Input.is_key_pressed(KEY_RIGHT)
+	var down = Input.is_key_pressed(KEY_DOWN)
+	if left or right:
+		var dir = -1 if left else 1
+		if dir != das_dir:
+			das_dir = dir; das_timer = 0.0; das_initial = true
+			_move(dir, 0)
+		else:
+			das_timer += delta
+			if das_initial and das_timer >= das_delay:
+				das_initial = false; das_timer = 0.0
+				_move(dir, 0)
+			elif not das_initial and das_timer >= das_interval:
+				das_timer = 0.0
+				_move(dir, 0)
+	else:
+		das_dir = 0
+	if down:
+		_move(0, 1)
 
 func _input(ev):
 	if not started or game_over: return
 	if ev is InputEventKey and ev.pressed and not ev.echo:
 		match ev.keycode:
-			KEY_LEFT: _move(-1, 0)
-			KEY_RIGHT: _move(1, 0)
-			KEY_DOWN: _move(0, 1)
 			KEY_UP: _rotate()
 			KEY_SPACE: _hard_drop()
 			KEY_P:
