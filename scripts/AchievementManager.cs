@@ -2274,6 +2274,7 @@ public partial class AchievementManager : Node
         "冯骥","冯骥",
     };
 
+    public static bool IsKnownBigGame(string name) => _knownBigGames.Contains(name);
     public void TrackRejectedTask() { _rejectedTaskCount++; }
     public void TrackNameClash() { _hasNameClash = true; }
     public void TrackFiredCEO() { _hasFiredCEO = true; }

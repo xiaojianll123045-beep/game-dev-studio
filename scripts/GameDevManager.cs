@@ -829,6 +829,9 @@ public partial class GameDevManager : Node
         // 随机同名检测（触发彩蛋"巧合？"）
         if (Projects.Any(p => p.Name.Equals(name, StringComparison.OrdinalIgnoreCase)))
             Services.AchievementManager?.TrackNameClash();
+        // 创建项目时立即检查"律师函"成就
+        if (AchievementManager.IsKnownBigGame(name))
+            Services.AchievementManager?.TryUnlock("easter_cease_desist", true);
 
         var proj = new GameProject
         {
