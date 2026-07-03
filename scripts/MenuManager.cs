@@ -893,23 +893,32 @@ public partial class MenuManager : Node
 
 				if (d.Type == "minigame" && (d.LoadedScene != null || d.LoadedScript != null))
 				{
-					var launchBtn = new Button { Text = Loc.Tr("dlc.launch"), Position = new(pw - 110, y + 4), Size = new(90, 30) };
+					bool isRunning = DlcManager.IsDlcRunning(d.Id);
+					var launchBtn = new Button { Text = isRunning ? Loc.Tr("dlc.close") : Loc.Tr("dlc.launch"), Position = new(pw - 110, y + 4), Size = new(90, 30) };
 					launchBtn.AddThemeFontSizeOverride("font_size", 12);
 					launchBtn.AddThemeColorOverride("font_color", Colors.White);
 					launchBtn.AddThemeColorOverride("font_hover_color", new Color(0.8f, 0.8f, 0.8f));
-					launchBtn.AddThemeStyleboxOverride("normal", new StyleBoxFlat { BgColor = new Color(0.2f, 0.5f, 0.3f), CornerRadiusTopLeft = 4, CornerRadiusTopRight = 4, CornerRadiusBottomLeft = 4, CornerRadiusBottomRight = 4 });
-					launchBtn.AddThemeStyleboxOverride("hover", new StyleBoxFlat { BgColor = new Color(0.15f, 0.4f, 0.25f), CornerRadiusTopLeft = 4, CornerRadiusTopRight = 4, CornerRadiusBottomLeft = 4, CornerRadiusBottomRight = 4 });
+					if (isRunning)
+					{
+						launchBtn.AddThemeStyleboxOverride("normal", new StyleBoxFlat { BgColor = new Color(0.6f, 0.2f, 0.2f), CornerRadiusTopLeft = 4, CornerRadiusTopRight = 4, CornerRadiusBottomLeft = 4, CornerRadiusBottomRight = 4 });
+						launchBtn.AddThemeStyleboxOverride("hover", new StyleBoxFlat { BgColor = new Color(0.5f, 0.15f, 0.15f), CornerRadiusTopLeft = 4, CornerRadiusTopRight = 4, CornerRadiusBottomLeft = 4, CornerRadiusBottomRight = 4 });
+					}
+					else
+					{
+						launchBtn.AddThemeStyleboxOverride("normal", new StyleBoxFlat { BgColor = new Color(0.2f, 0.5f, 0.3f), CornerRadiusTopLeft = 4, CornerRadiusTopRight = 4, CornerRadiusBottomLeft = 4, CornerRadiusBottomRight = 4 });
+						launchBtn.AddThemeStyleboxOverride("hover", new StyleBoxFlat { BgColor = new Color(0.15f, 0.4f, 0.25f), CornerRadiusTopLeft = 4, CornerRadiusTopRight = 4, CornerRadiusBottomLeft = 4, CornerRadiusBottomRight = 4 });
+					}
 					var captured = d;
 					launchBtn.Pressed += () => {
-						dp.QueueFree();
+						if (DlcManager.IsDlcRunning(captured.Id)) return; // 关闭由 DLC 内部处理
 						var gm = Services.GameManager;
 						if (gm == null || !GodotObject.IsInstanceValid(gm)) {
-							var vp = GetViewport().GetVisibleRect().Size;
 							var tip = new AcceptDialog { DialogText = Loc.Tr("dlc.need_game"), Title = "", Size = new Vector2I(400, 150) };
 							_ui.AddChild(tip); tip.PopupCentered();
 							return;
 						}
 						DlcManager.LaunchMinigame(gm, captured);
+						dp.QueueFree();
 					};
 					dp.AddChild(launchBtn);
 				}
