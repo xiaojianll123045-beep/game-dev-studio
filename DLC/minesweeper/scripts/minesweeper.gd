@@ -270,29 +270,32 @@ func _UpdateCellVisual(r: int, c: int):
 	else:
 		cr.color = Color(0.7, 0.75, 0.8)
 
-	if revealed[r][c] and board[r][c] > 0:
-		var nums = [Color(0.2, 0.4, 0.9), Color(0.2, 0.7, 0.2), Color(0.9, 0.2, 0.2),
-			Color(0.2, 0.2, 0.8), Color(0.7, 0.1, 0.1), Color(0.2, 0.6, 0.6),
-			Color(0.3, 0.3, 0.3), Color(0.5, 0.5, 0.5)]
-		if cr.get_child_count() > 0 and cr.get_child(0) is Label:
-			var lbl = cr.get_child(0) as Label
-			lbl.text = str(board[r][c])
-			lbl.add_theme_color_override("font_color", nums[board[r][c] - 1])
-	elif revealed[r][c] and board[r][c] == -1:
-		if cr.get_child_count() > 0 and cr.get_child(0) is Label:
-			var lbl = cr.get_child(0) as Label
-			lbl.text = "💣"
-			lbl.add_theme_color_override("font_color", Color(0, 0, 0))
-	else:
-		for ch in cr.get_children():
+	# 移除旧 label
+	for ch in cr.get_children():
+		if ch is Label:
 			cr.remove_child(ch); ch.queue_free()
 
-	if revealed[r][c] and board[r][c] >= 0 and cr.get_child_count() == 0:
+	if revealed[r][c] and board[r][c] >= 0:
 		var lbl = Label.new()
 		lbl.horizontal_alignment = HORIZONTAL_ALIGNMENT_CENTER
 		lbl.vertical_alignment = VERTICAL_ALIGNMENT_CENTER
 		lbl.size = cr.size
 		lbl.add_theme_font_size_override("font_size", clamp(cell_size - 12, 8, 22))
+		cr.add_child(lbl)
+		if board[r][c] > 0:
+			var nums = [Color(0.2, 0.4, 0.9), Color(0.2, 0.7, 0.2), Color(0.9, 0.2, 0.2),
+				Color(0.2, 0.2, 0.8), Color(0.7, 0.1, 0.1), Color(0.2, 0.6, 0.6),
+				Color(0.3, 0.3, 0.3), Color(0.5, 0.5, 0.5)]
+			lbl.text = str(board[r][c])
+			lbl.add_theme_color_override("font_color", nums[board[r][c] - 1])
+	elif revealed[r][c] and board[r][c] == -1:
+		var lbl = Label.new()
+		lbl.horizontal_alignment = HORIZONTAL_ALIGNMENT_CENTER
+		lbl.vertical_alignment = VERTICAL_ALIGNMENT_CENTER
+		lbl.size = cr.size
+		lbl.add_theme_font_size_override("font_size", clamp(cell_size - 12, 8, 22))
+		lbl.text = "💣"
+		lbl.add_theme_color_override("font_color", Color(0, 0, 0))
 		cr.add_child(lbl)
 
 func _GameOver():
