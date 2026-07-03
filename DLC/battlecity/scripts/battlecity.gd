@@ -41,6 +41,8 @@ var up = false
 var down = false
 var shoot_timer = 0.0
 var shoot_cooldown = 0.25
+var move_timer = 0.0
+var move_interval = 0.12
 
 var dirs = {0: Vector2(0,-1), 1: Vector2(1,0), 2: Vector2(0,1), 3: Vector2(-1,0)}
 var dir_angles = {0: 0, 1: 90, 2: 180, 3: 270}
@@ -205,8 +207,9 @@ func next_wave():
 func _process(delta):
 	if game_over or won: return
 	shoot_timer -= delta
-	# 玩家移动
-	if player != null:
+	# 玩家移动（带冷却）
+	move_timer -= delta
+	if player != null and move_timer <= 0:
 		player.invincible_timer -= delta
 		var dir = -1
 		if up: dir = 0
@@ -224,6 +227,7 @@ func _process(delta):
 				if _tank_at(nx, ny): blocked = true
 				if not blocked:
 					player.x = nx; player.y = ny
+					move_timer = move_interval
 			_draw_player()
 	# 生成敌人
 	spawn_timer -= delta
