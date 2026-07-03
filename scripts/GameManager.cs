@@ -2276,35 +2276,31 @@ public partial class GameManager : Node3D
             _soundMgr?.PlayGameBgm();
             // 开局欢迎弹窗（仿教程弹窗样式，自动换行）
             Callable.From(() => {
-                var S = (Func<float, float>)(v => v * UIScale);
                 var vp = GetViewport().GetVisibleRect().Size;
+                var overlay = new ColorRect { Color = new Color(0, 0, 0, 0.5f), MouseFilter = Control.MouseFilterEnum.Stop };
+                overlay.SetAnchorsAndOffsetsPreset(Control.LayoutPreset.FullRect);
+                overlay.TreeExiting += () => { Paused = _wasPausedBeforePopup; };
+                Paused = true;
+                var S = (Func<float, float>)(v => v * UIScale);
                 float pw = S(440), pad = S(18);
-                var panel = new Panel();
+                float panelH = S(220);
+                var panel = new Panel { Position = new((vp.X - pw) / 2, (vp.Y - panelH) / 2), Size = new(pw, panelH) };
                 panel.AddThemeStyleboxOverride("panel", new StyleBoxFlat { BgColor = new Color(0.96f, 0.95f, 0.92f, 0.98f), BorderWidthLeft = 2, BorderWidthTop = 2, BorderWidthRight = 2, BorderWidthBottom = 2, BorderColor = new Color(0.2f, 0.55f, 0.9f, 0.6f), CornerRadiusTopLeft = 10, CornerRadiusTopRight = 10, CornerRadiusBottomLeft = 10, CornerRadiusBottomRight = 10 });
-                // 深蓝标题栏
+                overlay.AddChild(panel);
                 var titleBar = new Panel { Position = new(0, 0), Size = new(pw, S(36)), MouseFilter = Control.MouseFilterEnum.Stop };
                 titleBar.AddThemeStyleboxOverride("panel", new StyleBoxFlat { BgColor = new Color(0.18f, 0.42f, 0.75f, 0.9f), CornerRadiusTopLeft = 10, CornerRadiusTopRight = 10 });
                 panel.AddChild(titleBar);
                 var titleLbl = new Label { Text = Loc.Tr("tutorial.welcome_title"), Position = new(pad, S(6)), Size = new(pw - pad * 2, S(24)) };
                 titleLbl.AddThemeFontSizeOverride("font_size", 16); titleLbl.AddThemeColorOverride("font_color", new Color(1, 1, 1));
                 titleBar.AddChild(titleLbl);
-                // 描述文本（自动换行）
                 var descLbl = new Label { Text = Loc.Tr("tutorial.welcome_desc"), Position = new(pad, S(48)), Size = new(pw - pad * 2, S(120)) };
                 descLbl.AddThemeFontSizeOverride("font_size", 13); descLbl.AddThemeColorOverride("font_color", new Color(0.10f, 0.14f, 0.22f));
                 descLbl.AutowrapMode = TextServer.AutowrapMode.Arbitrary;
                 panel.AddChild(descLbl);
-                // 确定按钮
                 var okBtn = new Button { Text = Loc.Tr("ui.got_it"), Position = new(pw / 2 - S(50), S(170)), Size = new(S(100), S(34)) };
                 okBtn.AddThemeFontSizeOverride("font_size", 14);
-                var overlay = new ColorRect { Color = new Color(0, 0, 0, 0.5f), MouseFilter = Control.MouseFilterEnum.Stop };
-                overlay.SetAnchorsAndOffsetsPreset(Control.LayoutPreset.FullRect);
-                overlay.TreeExiting += () => { Paused = _wasPausedBeforePopup; };
-                Paused = true;
                 okBtn.Pressed += () => overlay.QueueFree();
                 panel.AddChild(okBtn);
-                overlay.AddChild(panel);
-                panel.Position = new((vp.X - pw) / 2, (vp.Y - S(220)) / 2);
-                panel.Size = new(pw, S(220));
                 _uiLayer.AddChild(overlay);
             }).CallDeferred();
             // 启动教程
