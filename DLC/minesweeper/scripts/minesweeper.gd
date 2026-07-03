@@ -178,8 +178,8 @@ func StartNew(nr: int, nc: int, nm: int):
 			cells[r].append(cr)
 
 	bottom_bar = HBoxContainer.new()
-	bottom_bar.position = Vector2(offset_x, offset_y + rows * cell_size + 6)
-	bottom_bar.size = Vector2(cols * cell_size, 32)
+	bottom_bar.position = Vector2(offset_x, offset_y + rows * _init_cs + 6)
+	bottom_bar.size = Vector2(cols * _init_cs, 32)
 	var close_txt = Button.new()
 	close_txt.text = "✕ 关闭"
 	close_txt.flat = true
@@ -267,8 +267,8 @@ func _RefreshLayout():
 					ch.size = cr.size
 					ch.add_theme_font_size_override("font_size", clamp(cell_size - 12, 8, 22))
 	if bottom_bar != null:
-		bottom_bar.position = Vector2(offset_x, offset_y + rows * cell_size + 6)
-		bottom_bar.size = Vector2(cols * cell_size, 32)
+		bottom_bar.position = Vector2(offset_x, offset_y + rows * _init_cs + 6)
+		bottom_bar.size = Vector2(cols * _init_cs, 32)
 
 func _Close():
 	if _modal_overlay != null:
