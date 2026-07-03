@@ -265,11 +265,12 @@ func _process(delta):
 		_draw_enemy(e)
 	# 子弹更新（带冷却）
 	bullet_move_timer -= delta
-	if bullet_move_timer <= 0:
+	var bullet_ready = bullet_move_timer <= 0
+	if bullet_ready:
 		bullet_move_timer = bullet_move_interval
 	var new_bullets = []
 	for b in bullets:
-		if bullet_move_timer > 0: continue
+		if not bullet_ready: continue
 		b.timer -= delta
 		if b.timer <= 0: continue
 		var d = dirs[b.dir]
