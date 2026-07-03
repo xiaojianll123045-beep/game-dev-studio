@@ -27,6 +27,7 @@ var mode_btn: Button
 
 func OnLoad(_gm, bridge):
 	gm = _gm
+	process_mode = PROCESS_MODE_ALWAYS
 	StartGame()
 
 func StartGame():
