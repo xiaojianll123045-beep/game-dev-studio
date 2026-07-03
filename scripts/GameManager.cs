@@ -1274,6 +1274,22 @@ public partial class GameManager : Node3D
         if (!ModAPI.IsFeatureEnabled(ModAPI.Features.OutsourceSystem)) return;
         RefreshOutsourcePool();
         ProcessOutsourceMonthly();
+        // 处理旧系统外包（Team.CurrentContract + OutsourceMonthsRemaining）
+        var tm = GetNode<TeamManager>("TeamManager");
+        if (tm == null) return;
+        foreach (var team in tm.Teams.Where(t => t.Task == TeamTask.Outsource && t.CurrentContract.HasValue))
+        {
+            team.OutsourceMonthsRemaining--;
+            if (team.OutsourceMonthsRemaining <= 0)
+            {
+                var c = team.CurrentContract.Value;
+                _res.EarnMoney(c.Payment, "outsource");
+                _res.GainInspiration(c.ExpReward);
+                team.Task = TeamTask.None;
+                team.CurrentContract = null;
+                team.OutsourceMonthsRemaining = 0;
+            }
+        }
     }
 
     private void MonthEndPhase_PublishingMonthly()
