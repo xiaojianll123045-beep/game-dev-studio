@@ -916,10 +916,10 @@ public partial class GameManager : Node3D
         DoMonthPhase(ModAPI.MonthlyPhase.FounderLegacyTick, MonthEndPhase_FounderLegacyTick);
         DoMonthPhase(ModAPI.MonthlyPhase.ResourceMonthEnd, MonthEndPhase_ResourceMonthEnd);
         DoMonthPhase(ModAPI.MonthlyPhase.EngineMaintenance, MonthEndPhase_EngineMaintenance);
+        DoMonthPhase(ModAPI.MonthlyPhase.OutsourceTick, MonthEndPhase_OutsourceTick);
         DoMonthPhase(ModAPI.MonthlyPhase.ProfitLogging, MonthEndPhase_ProfitLogging);
         DoMonthPhase(ModAPI.MonthlyPhase.AnnualAwards, MonthEndPhase_AnnualAwards);
         DoMonthPhase(ModAPI.MonthlyPhase.EmployeeSatisfaction, MonthEndPhase_EmployeeSatisfaction);
-        DoMonthPhase(ModAPI.MonthlyPhase.OutsourceTick, MonthEndPhase_OutsourceTick);
         DoMonthPhase(ModAPI.MonthlyPhase.PublishingMonthly, MonthEndPhase_PublishingMonthly);
         DoMonthPhase(ModAPI.MonthlyPhase.EngineMonthlyTick, MonthEndPhase_EngineMonthlyTick);
         DoMonthPhase(ModAPI.MonthlyPhase.ContractRefresh, MonthEndPhase_ContractRefresh);
@@ -1277,6 +1277,7 @@ public partial class GameManager : Node3D
         // 兜底：处理所有 Task=Outsource 的团队（确保收入一定到账）
         var tm = GetNodeOrNull<TeamManager>("TeamManager");
         if (tm == null) return;
+        bool anyDone = false;
         foreach (var t in tm.Teams.Where(x => x.Task == TeamTask.Outsource).ToList())
         {
             if (t.CurrentContract.HasValue)
@@ -1289,15 +1290,15 @@ public partial class GameManager : Node3D
                     _res?.GainInspiration(c.ExpReward);
                     ShowToast(Loc.Tr("toast.outsource_done"), $"{c.Name} +¥{c.Payment / 1000f:F0}K", new Color(0.3f, 0.8f, 0.5f));
                     t.Task = TeamTask.None; t.CurrentContract = null; t.OutsourceMonthsRemaining = 0;
-                    RebuildHUDTabs();
+                    anyDone = true;
                 }
             }
             else
             {
-                // 没有合同数据但任务标记为外包 → 清除
                 t.Task = TeamTask.None;
             }
         }
+        if (anyDone) RebuildHUDTabs();
     }
 
     private void MonthEndPhase_PublishingMonthly()
