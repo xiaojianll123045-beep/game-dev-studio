@@ -2306,23 +2306,11 @@ public partial class GameManager : Node3D
         };
         string[] tips = { "hud.dev", "hud.projects", "hud.contracts", "hud.teams", "hud.employees", "hud.tech", "hud.server", "hud.company", "hud.attack", "hud.room" };
         if (hasDlc) { svgPaths = svgPaths.Concat(new[] { "res://assets/icons/play.svg" }).ToArray(); tips = tips.Concat(new[] { "hud.dlc" }).ToArray(); }
-        // 尝试从文件加载 SVG 纹理，失败则回退到 emoji
+        // 从 Godot 导入管线加载 SVG 纹理（同时适配编辑器和导出）
         Texture2D[] iconTextures = new Texture2D[svgPaths.Length];
         for (int si = 0; si < svgPaths.Length; si++)
         {
-            var f = Godot.FileAccess.Open(svgPaths[si], Godot.FileAccess.ModeFlags.Read);
-            if (f != null)
-            {
-                string svgContent = f.GetAsText();
-                f.Close();
-                if (!string.IsNullOrEmpty(svgContent))
-                {
-                    var img = new Image();
-                    var err = img.LoadSvgFromString(svgContent, 1.0f);
-                    if (err == Error.Ok)
-                        iconTextures[si] = ImageTexture.CreateFromImage(img);
-                }
-            }
+            iconTextures[si] = ResourceLoader.Load<Texture2D>(svgPaths[si]);
         }
         float tabW = (vp.X - S(24)) / svgPaths.Length;
         for (int i = 0; i < svgPaths.Length; i++)
