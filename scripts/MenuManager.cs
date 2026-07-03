@@ -966,7 +966,7 @@ public partial class MenuManager : Node
 			okBtn.AddThemeColorOverride("font_hover_color", new Color(0.6f, 0.05f, 0.05f));
 			okBtn.AddThemeStyleboxOverride("normal", MakeBtnStyle(new Color(1f, 0.95f, 0.95f), new Color(0.9f, 0.3f, 0.2f)));
 			okBtn.AddThemeStyleboxOverride("hover", MakeBtnStyle(new Color(1f, 0.85f, 0.85f), new Color(0.9f, 0.2f, 0.1f)));
-			okBtn.Pressed += () => { dp.QueueFree(); ShowModTimedConfirm(mod, riskTypes, onAccept, onDecline); };
+			okBtn.Pressed += () => { dp.QueueFree(); ShowModTimedConfirm(mod, warningCount, onAccept, onDecline); };
 			dp.AddChild(okBtn);
 
 			var cancelBtn = new Button { Text = Loc.Tr("mod_risk.cancel"), Position = new(220, 114), Size = new(130, 34), Flat = true };
@@ -978,7 +978,7 @@ public partial class MenuManager : Node
 		}
 		else
 		{
-			ShowModTimedConfirm(mod, riskTypes, onAccept, onDecline);
+			ShowModTimedConfirm(mod, warningCount, onAccept, onDecline);
 		}
 	}
 
@@ -987,7 +987,7 @@ public partial class MenuManager : Node
 		return new StyleBoxFlat { BgColor = bg, BorderWidthLeft = 1, BorderWidthTop = 1, BorderWidthRight = 1, BorderWidthBottom = 1, BorderColor = border, CornerRadiusTopLeft = 4, CornerRadiusTopRight = 4, CornerRadiusBottomLeft = 4, CornerRadiusBottomRight = 4 };
 	}
 
-	private void ShowModTimedConfirm(ModManifest mod, int riskTypes, Action onAccept, Action onDecline)
+	private void ShowModTimedConfirm(ModManifest mod, int warningCount, Action onAccept, Action onDecline)
 	{
 		var vp = GetViewport().GetVisibleRect().Size;
 		var S = (Func<float, float>)(v => v * _uiScale);
@@ -1004,7 +1004,7 @@ public partial class MenuManager : Node
 		float msgY = S(44), msgW = pw - S(32), msgH = ph - S(96);
 		var sc = new ScrollContainer { Position = new(S(16), msgY), Size = new(msgW, msgH) };
 		sc.HorizontalScrollMode = ScrollContainer.ScrollMode.Disabled;
-		var msg = new Label { Text = Loc.TrF("mod_risk.final_msg_fmt", riskTypes) };
+		var msg = new Label { Text = Loc.TrF("mod_risk.final_msg_fmt", warningCount) };
 		msg.AddThemeFontSizeOverride("font_size", 10); msg.AddThemeColorOverride("font_color", new Color(0.12f, 0.14f, 0.18f));
 		msg.AutowrapMode = TextServer.AutowrapMode.Word;
 		msg.SizeFlagsHorizontal = Control.SizeFlags.ExpandFill;
