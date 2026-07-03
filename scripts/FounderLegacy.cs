@@ -28,6 +28,7 @@ public partial class FounderLegacy : Node
     private void TriggerSuccession()
     {
         SuccessionCount++;
+        _gm.IsAnyModalOpen = true;
         var vp = _gm.GetViewport().GetVisibleRect().Size;
         var panel = new Panel { Position = new(vp.X * 0.12f, vp.Y * 0.1f), Size = new(vp.X * 0.76f, vp.Y * 0.8f) };
         panel.AddThemeStyleboxOverride("panel", new StyleBoxFlat { BgColor = new Color(0.97f, 0.96f, 0.94f, 0.97f),
@@ -35,6 +36,7 @@ public partial class FounderLegacy : Node
             BorderColor = new Color(0.5f, 0.3f, 0.8f, 0.6f), CornerRadiusTopLeft = 12, CornerRadiusTopRight = 12,
             CornerRadiusBottomLeft = 12, CornerRadiusBottomRight = 12 });
         _gm.UiLayer.AddChild(panel);
+        panel.TreeExited += () => _gm.IsAnyModalOpen = false;
 
         var scroll = new ScrollContainer { Position = new Vector2(10, 10), Size = new Vector2(panel.Size.X - 20, panel.Size.Y - 20) };
         panel.AddChild(scroll);
