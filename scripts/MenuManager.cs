@@ -219,10 +219,10 @@ public partial class MenuManager : Node
 			if (loadBtn.Disabled) loadBtn.Modulate = new Color(1, 1, 1, 0.35f);
 		}
 
-		// 小游戏入口（从 DLC 加载，可多个）
+		// 小游戏入口（从 DLC 加载，仅游戏内可用）
 		if (DlcManager.Loaded.Count == 0) DlcManager.ScanAll();
 		var mgs = new System.Collections.Generic.List<DlcManifest>();
-		if (DlcManager.EnabledDlcCount > 0)
+		if (DlcManager.EnabledDlcCount > 0 && Services.GameManager != null && GodotObject.IsInstanceValid(Services.GameManager))
 			foreach (var d in DlcManager.ActiveMinigames) if (DlcManager.IsDlcEnabled(d.Id)) mgs.Add(d);
 		if (mgs.Count > 0)
 		{
