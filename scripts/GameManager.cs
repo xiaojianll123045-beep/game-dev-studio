@@ -544,6 +544,10 @@ public partial class GameManager : Node3D
             UpdateRevenueChart();
         }
 
+        // 每120帧（约2秒）检查一次成就，避免月结延迟
+        if (_hudFrameCounter % 120 == 0)
+            Services.AchievementManager?.CheckNow();
+
         // 买卖股票后刷新公司详情
         if (_needCompanyDetailRefresh)
         {

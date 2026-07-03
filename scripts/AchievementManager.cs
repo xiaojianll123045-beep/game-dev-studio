@@ -2440,14 +2440,26 @@ public partial class AchievementManager : Node
         ShowNewUnlocks();
     }
 
-    /// <summary>立即检查所有非发售触发的成就（替代月结等待）</summary>
+    /// <summary>立即检查所有非发售触发的成就</summary>
     public void CheckNow()
     {
         var res = _gm.GetNodeOrNull<ResourceManager>("ResourceManager");
         var empMgr = _gm.GetNodeOrNull<EmployeeManager>("EmployeeManager");
         var devMgr = _gm.GetNodeOrNull<GameDevManager>("GameDevManager");
+        var techMgr = _gm.GetNodeOrNull<TechManager>("TechManager");
+        var fanMgr = _gm.GetNodeOrNull<FanManager>("FanManager");
         if (res != null) TryUnlock("money_100m", res.Money >= 100_000_000);
         if (empMgr != null) TryUnlock("team_50", empMgr.Employees.Count >= 50);
+        if (_gm != null)
+        {
+            TryUnlock("year_10", _gm.GameYear >= 10);
+            TryUnlock("year_30", _gm.GameYear >= 30);
+            TryUnlock("engine_v5", _gm.Engines.Any(e => e.Generation >= 5));
+            TryUnlock("challenge_open_source", _gm.Engines.Any(e => e.BizModel == EngineBizModel.OpenSource && e.LicenseCount >= 100));
+        }
+        if (techMgr != null)
+            TryUnlock("all_tech", TechTreeData.AllTech.Count > 0 && TechTreeData.AllTech.Keys.All(id => techMgr.ResearchedTech.ContainsKey(id) && techMgr.ResearchedTech[id]));
+        if (fanMgr != null) TryUnlock("fan_1m", fanMgr.TotalFans >= 1_000_000);
         if (devMgr != null)
         {
             var debtMgr = _gm.GetNodeOrNull<TechDebtManager>("TechDebtManager");
