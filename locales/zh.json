@@ -1698,7 +1698,7 @@
     "status.idle":  "空闲中",
     "status.none":  "-",
     "status.outsourcing":  "执行外包",
-    "status.outsourcing_n":  "外包({0}月)",
+    "status.outsourcing_n":  "{0} 外包({1}月)",
     "status.refactoring":  "重构中",
     "status.researching":  "研发{0}",
     "status.researching_tech":  "研发科技",

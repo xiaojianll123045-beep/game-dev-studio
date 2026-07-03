@@ -3686,7 +3686,7 @@ public partial class GameManager : Node3D
         {
             TeamTask.DevelopGame => Loc.TrF("status.developing_game", team.CurrentProject?.Name ?? "???"),
             TeamTask.ResearchTech => Loc.TrF("status.researching", team.TargetTech?.Name ?? "???"),
-            TeamTask.Outsource => Loc.TrF("status.outsourcing_n", team.OutsourceMonthsRemaining),
+            TeamTask.Outsource => Loc.TrF("status.outsourcing_n", team.CurrentContract?.Name ?? "?", team.OutsourceMonthsRemaining),
             TeamTask.Refactor => Loc.Tr("status.refactoring"),
             TeamTask.DevelopEngine => Loc.Tr("status.developing_engine"),
             _ => Loc.Tr("status.idle")
@@ -4702,34 +4702,72 @@ public partial class GameManager : Node3D
                 var row = new HBoxContainer();
                 row.AddChild(MkPLabel($"  💰 {task.Name}  {task.RequiredSkill}Lv{task.RequiredLevel}  {task.Duration}{Loc.Tr("ui.month_unit")}  ¥{task.Reward / 1000f:F0}K", 12, new Color(0.7f, 0.8f, 0.4f)));
 
-                var takeBtn = MkPButton(Loc.Tr("dev.take_contract"), 70, 24);
-                var capTask = task;
-                takeBtn.Pressed += () => {
-                    var tm = GetNode<TeamManager>("TeamManager");
-                    var idle = tm.Teams.Where(t => t.Task == TeamTask.None).ToList();
-                    if (idle.Count == 0)
+            var takeBtn = MkPButton(Loc.Tr("dev.take_contract"), 70, 24);
+            var capTask = task;
+            takeBtn.Pressed += () => {
+                var tm = GetNode<TeamManager>("TeamManager");
+                var idle = tm.Teams.Where(t => t.Task == TeamTask.None && t.Members.Count > 0).ToList();
+                if (idle.Count == 0)
+                {
+                    ShowToast(Loc.Tr("dev.no_idle_team"), Loc.Tr("dev.no_idle_team_msg"), new Color(0.9f, 0.5f, 0.2f));
+                    return;
+                }
+                // 弹出团队选择（类似科技研发）
+                var vp = GetViewport().GetVisibleRect().Size;
+                float pw = 400f * UIScale, ph = Mathf.Min(vp.Y * 0.75f, (60f + idle.Count * 36f) * UIScale);
+                var overlay = new ColorRect { Color = new Color(0, 0, 0, 0.5f), MouseFilter = Control.MouseFilterEnum.Stop };
+                overlay.SetAnchorsAndOffsetsPreset(Control.LayoutPreset.FullRect);
+                var pp = new Panel { Position = new((vp.X - pw) / 2, (vp.Y - ph) / 2), Size = new(pw, ph) };
+                pp.AddThemeStyleboxOverride("panel", new StyleBoxFlat { BgColor = new Color(0.97f, 0.96f, 0.94f), CornerRadiusTopLeft = 8, CornerRadiusTopRight = 8, CornerRadiusBottomLeft = 8, CornerRadiusBottomRight = 8 });
+                overlay.AddChild(pp);
+                var title = new Label { Text = Loc.Tr("tech.select_team"), Position = new(12f * UIScale, 8f * UIScale), Size = new(pw - 24f * UIScale, 24f * UIScale) };
+                title.AddThemeFontSizeOverride("font_size", 16); title.AddThemeColorOverride("font_color", new Color(0, 0, 0));
+                pp.AddChild(title);
+                bool[] sel = new bool[idle.Count];
+                for (int i = 0; i < idle.Count; i++)
+                {
+                    int idx = i; var t = idle[i];
+                    float y = (36f + i * 34f) * UIScale;
+                    var row2 = new Panel { Position = new(8f * UIScale, y), Size = new(pw - 16f * UIScale, 30f * UIScale) };
+                    row2.AddThemeStyleboxOverride("panel", new StyleBoxFlat { BgColor = new Color(0.92f, 0.92f, 0.90f), CornerRadiusTopLeft = 4, CornerRadiusTopRight = 4, CornerRadiusBottomLeft = 4, CornerRadiusBottomRight = 4 });
+                    var check = new Label { Text = "☐", Position = new(4f * UIScale, 3f * UIScale), Size = new(20f * UIScale, 24f * UIScale) };
+                    check.AddThemeFontSizeOverride("font_size", 14); check.AddThemeColorOverride("font_color", new Color(0, 0, 0));
+                    row2.AddChild(check);
+                    var nl = new Label { Text = $"{t.Name} ({t.Members.Count}{Loc.Tr("ui.people_suffix")})", Position = new(28f * UIScale, 3f * UIScale), Size = new(pw - 80f * UIScale, 24f * UIScale) };
+                    nl.AddThemeFontSizeOverride("font_size", 12); nl.AddThemeColorOverride("font_color", new Color(0, 0, 0));
+                    row2.AddChild(nl);
+                    row2.MouseFilter = Control.MouseFilterEnum.Stop;
+                    row2.GuiInput += (ie) => { if (ie is InputEventMouseButton mb && mb.Pressed && mb.ButtonIndex == MouseButton.Left) { sel[idx] = !sel[idx]; check.Text = sel[idx] ? "☑" : "☐"; } };
+                    pp.AddChild(row2);
+                }
+                float btnY = ph - 36f * UIScale;
+                var startBtn = new Button { Text = Loc.Tr("dev.take_contract"), Position = new(8f * UIScale, btnY), Size = new(pw / 2 - 12f * UIScale, 28f * UIScale) };
+                startBtn.Pressed += () =>
+                {
+                    int assigned = 0;
+                    for (int i = 0; i < idle.Count; i++)
                     {
-                        ShowToast(Loc.Tr("dev.no_idle_team"), Loc.Tr("dev.no_idle_team_msg"), new Color(0.9f, 0.5f, 0.2f));
-                        return;
+                        if (!sel[i]) continue;
+                        var team = idle[i];
+                        team.Task = TeamTask.Outsource;
+                        team.CurrentContract = new OutsourceContract
+                        {
+                            Name = capTask.Name, Difficulty = capTask.Difficulty > 0.7f ? OutsourceDifficulty.Hard : capTask.Difficulty > 0.4f ? OutsourceDifficulty.Medium : OutsourceDifficulty.Easy,
+                            RequiredMonths = capTask.Duration, Payment = capTask.Reward, PenaltyRate = 0.2f,
+                            PrimarySkill = capTask.RequiredSkill, MinSkillLevel = capTask.RequiredLevel, ExpReward = 5
+                        };
+                        assigned++;
                     }
-                    var team = idle[0];
-                    team.Task = TeamTask.Outsource;
-                    team.CurrentContract = new OutsourceContract
-                    {
-                        Name = capTask.Name,
-                        Difficulty = capTask.Difficulty > 0.7f ? OutsourceDifficulty.Hard : capTask.Difficulty > 0.4f ? OutsourceDifficulty.Medium : OutsourceDifficulty.Easy,
-                        RequiredMonths = capTask.Duration,
-                        Payment = capTask.Reward,
-                        PenaltyRate = 0.2f,
-                        PrimarySkill = capTask.RequiredSkill,
-                        MinSkillLevel = capTask.RequiredLevel,
-                        ExpReward = 5
-                    };
-                    OutsourceTaskPool.Remove(capTask);
-                    RebuildHUDTabs();
-                    ShowContractsPanel();
+                    if (assigned > 0) { OutsourceTaskPool.Remove(capTask); RebuildHUDTabs(); }
+                    overlay.QueueFree(); ShowContractsPanel();
                 };
-                row.AddChild(takeBtn);
+                pp.AddChild(startBtn);
+                var cancelBtn = new Button { Text = Loc.Tr("ui.cancel"), Position = new(pw / 2 + 4f * UIScale, btnY), Size = new(pw / 2 - 12f * UIScale, 28f * UIScale) };
+                cancelBtn.Pressed += () => overlay.QueueFree();
+                pp.AddChild(cancelBtn);
+                _uiLayer.AddChild(overlay);
+            };
+            row.AddChild(takeBtn);
                 c.AddChild(row);
             }
         }

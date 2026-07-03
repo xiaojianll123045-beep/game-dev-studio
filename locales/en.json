@@ -1732,7 +1732,7 @@
   "status.refactoring": "Refactoring",
   "status.developing_engine": "Developing Engine",
   "status.outsourcing": "Outsourcing",
-  "status.outsourcing_n": "Outsrc({0}mo)",
+  "status.outsourcing_n": "{0} Outsrc({1}mo)",
   "status.busy": "Busy",
   "status.training": "Training({0}mo)",
   "status.can_mentor": "Can Mentor",
