@@ -3241,7 +3241,7 @@ public partial class GameManager : Node3D
     private Action _activePanelOnSelectChanged;        // 选择变化回调（如更新雇佣按钮）
     private Action _activePanelEnterAction;            // 当前面板的回车操作
     private Action _activePanelSelectAllAction;        // 当前面板的 Ctrl+A 全选操作
-    private Action _refreshEmployeeList;               // 当前员工面板的刷新回调
+    private Action _refreshEmployeeList;               // 当前员工面板的刷新回调（就地更新，不关不重开）
 
     private void ShowTeamPanel()
     {
@@ -3401,7 +3401,6 @@ public partial class GameManager : Node3D
         if (parent == null) { DlcManager.Log("EmpHL", "parent is null"); return; }
         if (parent is VBoxContainer list && _empListSources.TryGetValue(list, out var sourceList))
         {
-            DlcManager.Log("EmpHL", $"refreshing {sourceList.Count} rows, sel=[{string.Join(",", _selectedEmployees)}]");
             int idx = 0;
             foreach (var ch in list.GetChildren())
             {
@@ -3413,7 +3412,33 @@ public partial class GameManager : Node3D
                 }
             }
         }
-        else DlcManager.Log("EmpHL", $"list not found in _empListSources, parentType={parent?.GetType().Name ?? "null"}");
+    }
+
+    private delegate void EmpRowBuilder(VBoxContainer list, Employee emp, int idx, List<Employee> source);
+
+    private void RebuildEmpListInPlace(VBoxContainer list, List<Employee> source, EmpRowBuilder builder)
+    {
+        if (!_empListSources.ContainsKey(list)) return;
+        var children = list.GetChildren();
+        // 保留最后一个子节点（汇总行）
+        PanelContainer summaryPc = null;
+        if (children.Count > 0)
+        {
+            var last = children[children.Count - 1];
+            if (last is PanelContainer lastPc) summaryPc = lastPc;
+        }
+        // 删除所有非汇总行
+        var toRemove = new System.Collections.Generic.List<Node>();
+        foreach (var ch in children)
+            if (ch != summaryPc) toRemove.Add(ch);
+        foreach (var ch in toRemove) { list.RemoveChild(ch); ch.QueueFree(); }
+        // 重建员工行
+        for (int i = 0; i < source.Count; i++)
+            builder(list, source[i], i, source);
+        // 重新添加汇总行
+        if (summaryPc != null) list.AddChild(summaryPc);
+        // 更新注册表中的 sumber list 引用（原 list 不变，子节点已替换）
+        _empListSources[list] = source;
     }
 
     private void ApplyAllEmpHighlights()
@@ -4141,13 +4166,6 @@ public partial class GameManager : Node3D
     private void ShowAllEmployeesPanel()
     {
         var p = MakePanel(Loc.Tr("panel.all_employees_title"));
-        _refreshEmployeeList = () =>
-        {
-            var t = new Timer { WaitTime = 0.01f, OneShot = true };
-            AddChild(t);
-            t.Timeout += () => { CloseAll(); ShowAllEmployeesPanel(); t.QueueFree(); };
-            t.Start();
-        };
 
         // 右键提示
         var hintLabel = MkPLabel(Loc.Tr("panel.all_emp_hint"), 10, new Color(0.55f, 0.58f, 0.6f));
@@ -4181,6 +4199,13 @@ public partial class GameManager : Node3D
         p.AddChild(scroll);
 
         SetupEmpSelectAllKeys(p, _empMgr.Employees);
+        _refreshEmployeeList = () =>
+        {
+            var t = new Timer { WaitTime = 0.01f, OneShot = true };
+            AddChild(t);
+            t.Timeout += () => { CloseAll(); ShowAllEmployeesPanel(); t.QueueFree(); };
+            t.Start();
+        };
 
         if (_empMgr.Employees.Count == 0)
         {
@@ -4694,30 +4719,23 @@ public partial class GameManager : Node3D
 
         var sorted = _empMgr.Employees.OrderByDescending(e => e.GetHighestLevel()).ToList();
         RegisterEmpList(list, sorted);
-        for (int ei = 0; ei < sorted.Count; ei++)
+        EmpRowBuilder simpleBuilder = (lst, e, ei, src) =>
         {
-            var emp = sorted[ei];
-            int avgLv = emp.Skills.Count > 0 ? (int)emp.Skills.Values.Average(s => s.Level) : 0;
-            string tags = emp.IsCaptain ? "👤" : emp.IsChiefArchitect ? "★" : "";
-            string traitText = emp.Trait != EmployeeTrait.None ? $" {GetTraitName(emp.Trait)}" : "";
-            Color satColor = emp.Satisfaction > 70 ? new Color(0.3f, 0.9f, 0.3f) : emp.Satisfaction > 40 ? new Color(0.9f, 0.8f, 0.3f) : new Color(0.9f, 0.3f, 0.3f);
-            var (pc, hb) = MakeEmpRowContainer(emp);
+            int avgLv = e.Skills.Count > 0 ? (int)e.Skills.Values.Average(s => s.Level) : 0;
+            string tags = e.IsCaptain ? "👤" : e.IsChiefArchitect ? "★" : "";
+            string traitText = e.Trait != EmployeeTrait.None ? $" {GetTraitName(e.Trait)}" : "";
+            Color satColor = e.Satisfaction > 70 ? new Color(0.3f, 0.9f, 0.3f) : e.Satisfaction > 40 ? new Color(0.9f, 0.8f, 0.3f) : new Color(0.9f, 0.3f, 0.3f);
+            var (pc, hb) = MakeEmpRowContainer(e);
             void AddL(string text, float w, int r, int g, int b) { var l = new Label { Text = text, CustomMinimumSize = new(w, UIScale * 30) }; l.AutowrapMode = TextServer.AutowrapMode.Word; l.AddThemeFontSizeOverride("font_size", 12); l.AddThemeColorOverride("font_color", new Color(r / 255f, g / 255f, b / 255f)); l.MouseFilter = Control.MouseFilterEnum.Ignore; hb.AddChild(l); }
-            AddL($" {tags} {Loc.DisplayName(emp.Name)}{traitText}", UIScale * 180, 8, 17, 28);
+            AddL($" {tags} {Loc.DisplayName(e.Name)}{traitText}", UIScale * 180, 8, 17, 28);
             AddL(Loc.TrF("ui.lv", avgLv), UIScale * 50, 30, 50, 35);
-            AddL(emp.TeamName ?? "-", UIScale * 100, 18, 22, 30);
-            AddL($"{emp.Satisfaction:F0}%", UIScale * 80, (int)(satColor.R * 255), (int)(satColor.G * 255), (int)(satColor.B * 255));
-            AttachEmpClickHandler(pc, emp, ei, sorted);
-            list.AddChild(pc);
-        }
-        _refreshEmployeeList = () =>
-        {
-            DlcManager.Log("Refresh", "queuing panel refresh via timer");
-            var t = new Timer { WaitTime = 0.01f, OneShot = true };
-            AddChild(t);
-            t.Timeout += () => { DlcManager.Log("Refresh", "timer fired"); CloseAll(); ShowEmployeePanel(); t.QueueFree(); };
-            t.Start();
+            AddL(e.TeamName ?? "-", UIScale * 100, 18, 22, 30);
+            AddL($"{e.Satisfaction:F0}%", UIScale * 80, (int)(satColor.R * 255), (int)(satColor.G * 255), (int)(satColor.B * 255));
+            AttachEmpClickHandler(pc, e, ei, src);
+            lst.AddChild(pc);
         };
+        for (int ei = 0; ei < sorted.Count; ei++) simpleBuilder(list, sorted[ei], ei, sorted);
+        _refreshEmployeeList = () => RebuildEmpListInPlace(list, _empMgr.Employees.OrderByDescending(e => e.GetHighestLevel()).ToList(), simpleBuilder);
 
         float botY = p.Size.Y - UIScale * 55;
         var backBtn = new Button { Text = "← 返回", Flat = true };
