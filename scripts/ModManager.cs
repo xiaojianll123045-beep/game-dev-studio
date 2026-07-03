@@ -38,7 +38,15 @@ public static class ModManager
     private static void ScanMods()
     {
         LoadedMods.Clear();
-        var dir = DirAccess.Open(ModsRoot);
+        // 扫描内置 mods/ 目录（导出时已排除，仅开发阶段有内容）
+        ScanModsFrom(ModsRoot);
+        // 扫描用户目录（方便用户安装外部 mod）
+        ScanModsFrom("user://mods/");
+    }
+
+    private static void ScanModsFrom(string root)
+    {
+        var dir = DirAccess.Open(root);
         if (dir == null) return;
         dir.ListDirBegin();
         while (true)
@@ -48,7 +56,7 @@ public static class ModManager
             if (name.StartsWith(".")) continue;
             if (dir.CurrentIsDir())
             {
-                var m = ModManifest.Load(ModsRoot + name);
+                var m = ModManifest.Load(root + name);
                 if (m != null) LoadedMods.Add(m);
             }
         }

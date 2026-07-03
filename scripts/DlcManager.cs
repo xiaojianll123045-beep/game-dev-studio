@@ -74,8 +74,16 @@ public static class DlcManager
         Log("DlcManager", "=== DLC Scan Start ===");
         _loaded.Clear();
         _activeMinigames.Clear();
-        var dir = DirAccess.Open("res://DLC");
-        if (dir == null) { Log("DlcManager", "DLC directory not found"); return; }
+        ScanDlcFrom("res://DLC");
+        ScanDlcFrom("user://dlc/");
+        LoadEnabled();
+        Log("DlcManager", $"DLC scan done, {_loaded.Count} total, {_activeMinigames.Count} minigames, {_enabledDlcIds.Count} enabled");
+    }
+
+    private static void ScanDlcFrom(string root)
+    {
+        var dir = DirAccess.Open(root);
+        if (dir == null) return;
 
         dir.ListDirBegin();
         while (true)
@@ -85,7 +93,7 @@ public static class DlcManager
             if (name.StartsWith(".")) continue;
             if (!dir.CurrentIsDir()) continue;
 
-            string folder = "res://DLC/" + name;
+            string folder = root + name;
             string jsonPath = folder + "/dlc.json";
             if (!FileAccess.FileExists(jsonPath)) continue;
 
@@ -176,8 +184,6 @@ public static class DlcManager
             }
         }
         dir.ListDirEnd();
-        LoadEnabled();
-        Log("DlcManager", $"DLC scan done, {_loaded.Count} total, {_activeMinigames.Count} minigames, {_enabledDlcIds.Count} enabled");
     }
 
     /// <summary>启动一个小游戏 DLC（挂载到 GameManager 下）</summary>
