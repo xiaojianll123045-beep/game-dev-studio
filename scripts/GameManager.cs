@@ -507,8 +507,8 @@ public partial class GameManager : Node3D
             _tutorialMgr.StartTutorial();
             // 教程结束后弹出欢迎语
             Callable.From(() => {
-                ShowPopup("🎮 欢迎成为游戏制作人！",
-                    "本游戏主流程是开发游戏积攒粉丝和金钱，最终成为第一大公司！如果您没钱了，可以考虑接外包合同哦",
+                ShowPopup(Loc.Tr("tutorial.welcome_title"),
+                    Loc.Tr("tutorial.welcome_desc"),
                     new Color(0.3f, 0.8f, 0.5f));
             }).CallDeferred();
         }

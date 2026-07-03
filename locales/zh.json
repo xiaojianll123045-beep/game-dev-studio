@@ -2332,6 +2332,8 @@
     "toast.team_rename_ok":  "改名成功",
     "toast.training_msg":  "{0} 获得+30经验",
     "toast.training_start":  "培训中",
+    "tutorial.welcome_title":  "🎮 欢迎成为游戏制作人！",
+    "tutorial.welcome_desc":  "本游戏主流程是开发游戏积攒粉丝和金钱，最终成为第一大公司！如果您没钱了，可以考虑接外包合同哦",
     "trait.ambitious":  "野心家",
     "trait.chill":  "佛系",
     "trait.genius":  "天才",

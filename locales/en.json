@@ -1758,6 +1758,8 @@
   "status.training": "Training({0}mo)",
   "status.can_mentor": "Can Mentor",
   "status.none": "-",
+  "tutorial.welcome_title": "🎮 Welcome, Game Developer!",
+  "tutorial.welcome_desc": "The main goal is to develop games, earn fans and money, and become the #1 company! If you're short on cash, try taking outsource contracts.",
   "trait.workaholic": "Workaholic",
   "trait.social": "Social",
   "trait.sensitive": "Sensitive",
