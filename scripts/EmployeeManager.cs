@@ -161,6 +161,7 @@ public partial class EmployeeManager : Node
             emp.Id = _nextId++;
             Employees.Add(emp);
             _res.TotalEmployees = Employees.Count;
+            Services.AchievementManager?.CheckNow();
             _gm.GetNodeOrNull<TutorialManager>("TutorialManager")?.NotifyAction("employee_hired");
             ModAPI.FireHooks(ModAPI.GameHook.AfterEmployeeHire);
             return true;
@@ -186,6 +187,7 @@ public partial class EmployeeManager : Node
         }
         Employees.Remove(emp);
         _res.TotalEmployees = Employees.Count;
+        Services.AchievementManager?.CheckNow();
         ModAPI.FireHooks(ModAPI.GameHook.AfterEmployeeLeave);
     }
 

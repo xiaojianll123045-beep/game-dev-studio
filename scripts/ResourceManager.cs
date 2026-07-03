@@ -60,6 +60,7 @@ public partial class ResourceManager : Node
         if (Money >= amount)
         {
             Money -= amount;
+            Services.AchievementManager?.CheckNow();
             MonthlyExpense += amount;
             switch (category)
             {
@@ -80,6 +81,7 @@ public partial class ResourceManager : Node
     public void EarnMoney(float amount, string source)
     {
         Money += amount;
+        Services.AchievementManager?.CheckNow();
         MonthlyIncome += amount;
         TotalRevenue += amount;
 

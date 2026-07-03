@@ -2440,6 +2440,35 @@ public partial class AchievementManager : Node
         ShowNewUnlocks();
     }
 
+    /// <summary>立即检查所有非发售触发的成就（替代月结等待）</summary>
+    public void CheckNow()
+    {
+        var res = _gm.GetNodeOrNull<ResourceManager>("ResourceManager");
+        var empMgr = _gm.GetNodeOrNull<EmployeeManager>("EmployeeManager");
+        var devMgr = _gm.GetNodeOrNull<GameDevManager>("GameDevManager");
+        if (res != null) TryUnlock("money_100m", res.Money >= 100_000_000);
+        if (empMgr != null) TryUnlock("team_50", empMgr.Employees.Count >= 50);
+        if (devMgr != null)
+        {
+            var debtMgr = _gm.GetNodeOrNull<TechDebtManager>("TechDebtManager");
+            TryUnlock("easter_rival_hater", _gm.CorpActions.ActionLogs.Count >= 10);
+            if (empMgr != null)
+                TryUnlock("easter_broken", empMgr.Employees.Count > 0 && empMgr.Employees.All(e => e.Satisfaction < 20));
+            TryUnlock("easter_next_time", devMgr.CompletedProjects.Any(p => p.DelayCount >= 3));
+            TryUnlock("easter_all_in", devMgr.Projects.Count(p => !p.IsReleased && p.Phase == DevPhase.Developing) >= 3);
+            TryUnlock("easter_god_like", devMgr.CompletedProjects.Any(p => p.MonthsOnMarket >= 18));
+            TryUnlock("easter_company_name", _gm.Founder != null && _knownGameStudios.Contains(_gm.Founder.CompanyName));
+            TryUnlock("easter_founder_name", _gm.Founder != null && _knownGameDirectors.Contains(_gm.Founder.Name));
+            TryUnlock("easter_bankrupt", res != null && res.Money <= 0 && devMgr.CompletedProjects.Count > 0);
+            TryUnlock("easter_reject_100", _rejectedTaskCount >= 100);
+            TryUnlock("easter_name_clash", _hasNameClash);
+            TryUnlock("easter_fired_ceo", _hasFiredCEO);
+            TryUnlock("easter_996", debtMgr != null && debtMgr.ActiveCrunchMonths >= 6);
+            TryUnlock("easter_lay_flat", _idleMonths >= 6);
+        }
+        ShowNewUnlocks();
+    }
+
     /// <summary>金钱变化时检查（每次收入/支出后）</summary>
     public void OnMoneyChanged(float currentMoney)
     {
