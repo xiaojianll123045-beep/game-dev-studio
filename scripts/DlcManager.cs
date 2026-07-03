@@ -76,8 +76,7 @@ public static class DlcManager
         _activeMinigames.Clear();
         // 优先扫 exe 同目录（安装包根目录），用户放 DLC/ 文件夹在旁边
         string exeDir = System.IO.Path.GetDirectoryName(OS.GetExecutablePath());
-        string dlcDir = exeDir.Replace("\\", "/") + "/DLC";
-        Log("DlcManager", $"exeDir={exeDir} dlcDir={dlcDir} exists={DirAccess.DirExistsAbsolute(dlcDir)}");
+        string dlcDir = exeDir + "/DLC";
         if (DirAccess.DirExistsAbsolute(dlcDir))
             ScanDlcFrom(dlcDir + "/");
         else
