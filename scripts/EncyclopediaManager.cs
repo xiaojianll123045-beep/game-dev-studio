@@ -199,23 +199,7 @@ public class TechInfoEntry
 
 public class MechanicsData
 {
-    public MechanicsCategory development_flow { get; set; } = new();
-    public MechanicsCategory employee_system { get; set; } = new();
-    public MechanicsCategory economy_system { get; set; } = new();
-    public MechanicsCategory market_system { get; set; } = new();
-    public MechanicsCategory tech_system { get; set; } = new();
-    public MechanicsCategory founder_system { get; set; } = new();
-    public MechanicsCategory design_canvas { get; set; } = new();
-    public MechanicsCategory components_system { get; set; } = new();
-    public MechanicsCategory tech_debt_system { get; set; } = new();
-    public MechanicsCategory post_release_system { get; set; } = new();
-    public MechanicsCategory engine_business_system { get; set; } = new();
-    public MechanicsCategory competitor_system { get; set; } = new();
-    public MechanicsCategory fan_community_system { get; set; } = new();
-    public MechanicsCategory office_room_system { get; set; } = new();
-    public MechanicsCategory sprint_system { get; set; } = new();
-    public MechanicsCategory stock_system { get; set; } = new();
-    public MechanicsCategory card_system { get; set; } = new();
+    public Dictionary<string, MechanicsCategory> Items { get; set; } = new();
 }
 
 public class MechanicsCategory

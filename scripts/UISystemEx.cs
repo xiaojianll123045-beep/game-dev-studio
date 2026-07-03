@@ -157,35 +157,12 @@ public partial class UISystemEx : Node
             leftList.Clear();
             var mech = encyMgr.GetMechanics();
             currentItemList = new();
-            if (mech != null)
+            if (mech?.Items != null)
             {
-                var mechCategories = new (string id, string name, MechanicsCategory cat)[]
+                foreach (var kv in mech.Items)
                 {
-                    ("dev_flow", mech.development_flow.title, mech.development_flow),
-                    ("employee", mech.employee_system.title, mech.employee_system),
-                    ("economy", mech.economy_system.title, mech.economy_system),
-                    ("market", mech.market_system.title, mech.market_system),
-                    ("tech", mech.tech_system.title, mech.tech_system),
-                    ("founder", mech.founder_system.title, mech.founder_system),
-                    ("design", mech.design_canvas.title, mech.design_canvas),
-                    ("components", mech.components_system.title, mech.components_system),
-                    ("tech_debt", mech.tech_debt_system.title, mech.tech_debt_system),
-                    ("post_release", mech.post_release_system.title, mech.post_release_system),
-                    ("engine_biz", mech.engine_business_system.title, mech.engine_business_system),
-                    ("competitor", mech.competitor_system.title, mech.competitor_system),
-                    ("fan_community", mech.fan_community_system.title, mech.fan_community_system),
-                    ("office", mech.office_room_system.title, mech.office_room_system),
-                    ("sprint", mech.sprint_system.title, mech.sprint_system),
-                    ("stock", mech.stock_system.title, mech.stock_system),
-                    ("card", mech.card_system.title, mech.card_system),
-                    ("localization", mech.localization_system.title, mech.localization_system),
-                    ("qa_testing", mech.qa_testing_system.title, mech.qa_testing_system),
-                    ("mod_support", mech.mod_support_system.title, mech.mod_support_system)
-                };
-                foreach (var mc in mechCategories)
-                {
-                    leftList.AddItem(mc.name);
-                    currentItemList.Add((mc.id, mc.name));
+                    leftList.AddItem(kv.Value.title);
+                    currentItemList.Add((kv.Key, kv.Value.title));
                 }
             }
             rightTitle.Text = "";
@@ -249,36 +226,8 @@ public partial class UISystemEx : Node
         void ShowMechanicsDetail(string mechId)
         {
             var mech = encyMgr.GetMechanics();
-            if (mech == null) return;
-            MechanicsCategory cat = null;
-            var cats = new (string id, MechanicsCategory c)[]
-            {
-                ("dev_flow", mech.development_flow),
-                ("employee", mech.employee_system),
-                ("economy", mech.economy_system),
-                ("market", mech.market_system),
-                ("tech", mech.tech_system),
-                ("founder", mech.founder_system),
-                ("design", mech.design_canvas),
-                ("components", mech.components_system),
-                ("tech_debt", mech.tech_debt_system),
-                ("post_release", mech.post_release_system),
-                ("engine_biz", mech.engine_business_system),
-                ("competitor", mech.competitor_system),
-                ("fan_community", mech.fan_community_system),
-                ("office", mech.office_room_system),
-                ("sprint", mech.sprint_system),
-                ("stock", mech.stock_system),
-                ("card", mech.card_system),
-                ("localization", mech.localization_system),
-                ("qa_testing", mech.qa_testing_system),
-                ("mod_support", mech.mod_support_system)
-            };
-            foreach (var c in cats)
-            {
-                if (c.id == mechId) { cat = c.c; break; }
-            }
-            if (cat == null) return;
+            if (mech?.Items == null) return;
+            if (!mech.Items.TryGetValue(mechId, out var cat)) return;
             rightTitle.Text = cat.title;
             string text = "";
             foreach (var sec in cat.sections)
