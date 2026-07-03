@@ -71,10 +71,11 @@ func StartNew(nr: int, nc: int, nm: int):
 	var pw = cols * cell_size + 80
 	var ph = rows * cell_size + 130
 
+	# 必须先记录初始值，_RefreshLayout 可能在创建过程中被调用
+	_init_pw = pw; _init_ph = ph; _init_cell_size = cell_size
+	_pan_x = 0; _pan_y = 0; _dragging = false; _drag_cell_r = -1; _drag_cell_c = -1
+
 	if panel != null:
-		for ch in panel.get_children():
-			panel.remove_child(ch)
-			ch.queue_free()
 		panel.queue_free()
 
 	var vp = get_viewport().get_visible_rect().size
@@ -82,9 +83,9 @@ func StartNew(nr: int, nc: int, nm: int):
 	panel.anchor_left = 0.5; panel.anchor_top = 0.5
 	panel.offset_left = -pw/2; panel.offset_top = -ph/2
 	panel.offset_right = pw/2; panel.offset_bottom = ph/2
+	panel.mouse_filter = Control.MOUSE_FILTER_STOP
 	add_child(panel)
 
-	panel.mouse_filter = Control.MOUSE_FILTER_STOP
 	var bg = StyleBoxFlat.new()
 	bg.bg_color = Color(0.85, 0.85, 0.87)
 	bg.corner_radius_top_left = 8; bg.corner_radius_top_right = 8
@@ -205,6 +206,12 @@ func _ToggleMode():
 func _Reset(r: int, c: int, m: int):
 	StartNew(r, c, m)
 
+func _unhandled_input(ev: InputEvent):
+	# 兜底：阻止右键/滚轮穿透到底层 3D 场景
+	if ev is InputEventMouseButton and (ev.button_index == MOUSE_BUTTON_RIGHT or ev.button_index == MOUSE_BUTTON_WHEEL_UP or ev.button_index == MOUSE_BUTTON_WHEEL_DOWN):
+		if panel != null and panel.visible:
+			get_viewport().set_input_as_handled()
+
 func _OnPanelInput(ev: InputEvent):
 	if game_over or won: return
 	if ev is InputEventMouseButton and ev.pressed:
@@ -233,11 +240,13 @@ func _ZoomOut():
 	_RefreshLayout()
 
 func _RefreshLayout():
+	if panel == null or grid_container == null: return
 	# 面板和 UI 固定，只有雷区缩放
 	panel.offset_left = -_init_pw/2; panel.offset_top = -_init_ph/2
 	panel.offset_right = _init_pw/2; panel.offset_bottom = _init_ph/2
 	# 裁剪容器尺寸固定（初始尺寸），超出部分自动隐藏
-	grid_container.size = Vector2(cols * _init_cell_size, rows * _init_cell_size + 38)
+	if _init_cell_size > 0:
+		grid_container.size = Vector2(cols * _init_cell_size, rows * _init_cell_size + 38)
 	for r in range(rows):
 		for c in range(cols):
 			var cr = cells[r][c]
