@@ -240,11 +240,9 @@ public partial class GameManager : Node3D
 
         // DLC 系统
         DlcManager.ScanAll();
-        // 执行已启用的非 minigame DLC 脚本（如安详音乐的设置注册）
-        GD.Print($"[DLC] scanning for executable scripts, {DlcManager.Loaded.Count} loaded, {DlcManager.EnabledDlcCount} enabled");
-        foreach (var dlc in DlcManager.Loaded)
-            GD.Print($"  DLC: {dlc.Id} type={dlc.Type} script={dlc.LoadedScript != null} enabled={DlcManager.IsDlcEnabled(dlc.Id)}");
-        foreach (var dlc in DlcManager.Loaded.Where(d => d.Type != "minigame" && d.LoadedScript != null && DlcManager.IsDlcEnabled(d.Id)))
+        // 执行已启用的 DLC 脚本（如安详音乐的设置注册）
+        DlcManager.Log("DLC", $"=== Executing DLC scripts: {DlcManager.Loaded.Count} loaded, {DlcManager.EnabledDlcCount} enabled ===");
+        foreach (var dlc in DlcManager.Loaded.Where(d => d.LoadedScript != null && DlcManager.IsDlcEnabled(d.Id)))
         {
             try
             {
