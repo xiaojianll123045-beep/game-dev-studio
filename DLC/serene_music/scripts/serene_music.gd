@@ -30,7 +30,9 @@ func OnLoad(game_manager, bridge):
 			tracks.append(loaded)
 	
 	# Get or create the persistent manager node (namespaced to avoid conflicts)
-	var mgr_name = b.node_name("serene_music", "manager")
+	var mgr_name = "Mod_serene_music_manager"
+	if b != null:
+		mgr_name = b.node_name("serene_music", "manager")
 	var mgr = b.get_node_or_null(mgr_name)
 	if mgr == null:
 		mgr = Node.new()
