@@ -14,12 +14,26 @@ public partial class SoundManager : Node
     {
         _clickPlayer = AddPlayer("Click", "switch6.wav", false);
         _hoverPlayer = AddPlayer("Hover", "rollover1.wav", false);
-        _bgmPlayer = AddPlayer("Bgm", "", true);
         _menuPlayer = AddPlayer("Menu", "bgm_加载.wav", true);
-        // 加载两首 MP3 交替播放
-        _bgmTracks[0] = ResourceLoader.Load<AudioStream>("res://assets/sounds/Casa Bossa Nova.mp3");
-        _bgmTracks[1] = ResourceLoader.Load<AudioStream>("res://assets/sounds/Thinking Music.mp3");
+        // BGM 用 AudioStreamMP3 直接从文件加载（不需 import）
+        _bgmPlayer = new AudioStreamPlayer { Name = "BgmPlayer", VolumeDb = 0f };
+        AddChild(_bgmPlayer);
+        _LoadMp3Track(0, "res://assets/sounds/Casa Bossa Nova.mp3");
+        _LoadMp3Track(1, "res://assets/sounds/Thinking Music.mp3");
         _bgmPlayer.Finished += _SwapBgm;
+    }
+
+    private void _LoadMp3Track(int idx, string path)
+    {
+        if (!FileAccess.FileExists(path)) { GD.Print($"MP3 not found: {path}"); return; }
+        using var f = FileAccess.Open(path, FileAccess.ModeFlags.Read);
+        if (f == null) return;
+        var buf = f.GetBuffer((int)f.GetLength());
+        var mp3 = new AudioStreamMP3();
+        mp3.Data = buf;
+        mp3.Loop = false;
+        _bgmTracks[idx] = mp3;
+        GD.Print($"Loaded MP3: {path} ({buf.Length} bytes)");
     }
 
     private void _SwapBgm()
