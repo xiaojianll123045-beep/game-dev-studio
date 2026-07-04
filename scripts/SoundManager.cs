@@ -20,6 +20,7 @@ public partial class SoundManager : Node
         AddChild(_bgmPlayer);
         _LoadMp3Track(0, "res://assets/sounds/Casa Bossa Nova.mp3");
         _LoadMp3Track(1, "res://assets/sounds/Thinking Music.mp3");
+        _bgmPlayer.Stream = _bgmTracks[0];
         _bgmPlayer.Finished += _SwapBgm;
     }
 
