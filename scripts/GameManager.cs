@@ -226,7 +226,7 @@ public partial class GameManager : Node3D
 
     public override void _Ready()
     {
-        UIScale = GlobalSettings.UIScale;
+        UIScale = 1.0f; // UI 缩放已隐藏，强制 1.0
         // Mod 桥接（必须先于 ApplyAll，供 GDScript Mod 使用）
         // 注册为 GDScript 全局单例，Mod 可直接用 ModBridge.add_money() 调用
         _modBridge = new ModBridge { Name = "ModBridge" };
@@ -6830,15 +6830,15 @@ public partial class GameManager : Node3D
             chk.Toggled += (b) => { GlobalSettings.VSync = b; DisplayServer.WindowSetVsyncMode(b ? DisplayServer.VSyncMode.Enabled : DisplayServer.VSyncMode.Disabled); };
             AddRow("", chk);
         }
-        {
-            float[] scales = { 0.5f, 0.6f, 0.7f, 0.8f, 0.9f, 1.0f, 1.1f, 1.2f, 1.3f, 1.5f, 1.7f, 2.0f };
-            string[] sn = { "0.5x", "0.6x", "0.7x", "0.8x", "0.9x", "1.0x", "1.1x", "1.2x", "1.3x", "1.5x", "1.7x", "2.0x" };
-            int si = 5;
-            for (int j = 0; j < scales.Length; j++) if (Mathf.Abs(scales[j] - UIScale) < 0.05f) { si = j; break; }
-            var opt = MkOpt(sn, si);
-            opt.ItemSelected += (long i) => { UIScale = scales[i]; GlobalSettings.UIScale = scales[i]; GetTree().ReloadCurrentScene(); };
-            AddRow(Loc.Tr("set.ui_scale"), opt);
-        }
+        //{
+        //    float[] scales = { 0.5f, 0.6f, 0.7f, 0.8f, 0.9f, 1.0f, 1.1f, 1.2f, 1.3f, 1.5f, 1.7f, 2.0f };
+        //    string[] sn = { "0.5x", "0.6x", "0.7x", "0.8x", "0.9x", "1.0x", "1.1x", "1.2x", "1.3x", "1.5x", "1.7x", "2.0x" };
+        //    int si = 5;
+        //    for (int j = 0; j < scales.Length; j++) if (Mathf.Abs(scales[j] - UIScale) < 0.05f) { si = j; break; }
+        //    var opt = MkOpt(sn, si);
+        //    opt.ItemSelected += (long i) => { UIScale = scales[i]; GlobalSettings.UIScale = scales[i]; GetTree().ReloadCurrentScene(); };
+        //    AddRow(Loc.Tr("set.ui_scale"), opt);
+        //}
         {
             var opt = MkOpt(Loc.LangLabels, Loc.CurrentLang);
             opt.ItemSelected += (long i) => { Loc.SetLang((int)i); GlobalSettings.Language = (int)i; GlobalSettings.Save(); GetTree().ReloadCurrentScene(); };

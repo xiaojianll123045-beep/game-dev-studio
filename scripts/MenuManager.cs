@@ -42,7 +42,7 @@ public partial class MenuManager : Node
 		if (GlobalSettings.Language >= 0)
 			Loc.CurrentLang = GlobalSettings.Language;
 
-		_uiScale = GlobalSettings.UIScale;
+		_uiScale = 1.0f; // UI 缩放已隐藏
 		_resIdx = GlobalSettings.Resolution;
 		_modeIdx = GlobalSettings.DisplayMode;
 		_fpsCap = GlobalSettings.FpsCap;
@@ -338,15 +338,15 @@ public partial class MenuManager : Node
 		// 分隔线
 		root.AddChild(new ColorRect { Color = new Color(0.70f, 0.72f, 0.75f, 0.25f), CustomMinimumSize = new(0, 1) });
 
-		// ── UI 缩放 ──
-		float[] scales = { 0.5f, 0.6f, 0.7f, 0.8f, 0.9f, 1.0f, 1.1f, 1.2f, 1.3f, 1.5f, 1.7f, 2.0f };
-		string[] scaleNames = { "0.5x", "0.6x", "0.7x", "0.8x", "0.9x", "1.0x", "1.1x", "1.2x", "1.3x", "1.5x", "1.7x", "2.0x" };
-		int selScale = 5;
-		for (int si = 0; si < scales.Length; si++)
-			if (Mathf.Abs(scales[si] - _uiScale) < 0.05f) selScale = si;
-		var scaleOpt = MkOpt(scaleNames, selScale);
-		scaleOpt.ItemSelected += (long i) => { _uiScale = scales[i]; GlobalSettings.UIScale = _uiScale; _ui.Scale = new Vector2(_uiScale, _uiScale); GlobalSettings.Save(); };
-		AddSettingRowLayout(root, Loc.Tr("set.ui_scale"), scaleOpt, rowH);
+		// ── UI 缩放（已隐藏，功能保留但背景缩放问题暂未修复）──
+		//float[] scales = { 0.5f, 0.6f, 0.7f, 0.8f, 0.9f, 1.0f, 1.1f, 1.2f, 1.3f, 1.5f, 1.7f, 2.0f };
+		//string[] scaleNames = { "0.5x", "0.6x", "0.7x", "0.8x", "0.9x", "1.0x", "1.1x", "1.2x", "1.3x", "1.5x", "1.7x", "2.0x" };
+		//int selScale = 5;
+		//for (int si = 0; si < scales.Length; si++)
+		//	if (Mathf.Abs(scales[si] - _uiScale) < 0.05f) selScale = si;
+		//var scaleOpt = MkOpt(scaleNames, selScale);
+		//scaleOpt.ItemSelected += (long i) => { _uiScale = scales[i]; GlobalSettings.UIScale = _uiScale; _ui.Scale = new Vector2(_uiScale, _uiScale); GlobalSettings.Save(); };
+		//AddSettingRowLayout(root, Loc.Tr("set.ui_scale"), scaleOpt, rowH);
 
 		// 语言
 		var langOpt = new OptionButton();
