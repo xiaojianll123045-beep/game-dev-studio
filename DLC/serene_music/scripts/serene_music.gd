@@ -19,9 +19,10 @@ func OnLoad(game_manager, bridge):
 	for i in range(1, 5):
 		var loaded = null
 		var path = base_path + "/assets/%d.mp3" % i
-		# Use C# load_mp3 if available (works correctly), fallback to GDScript AudioStreamMP3.data
 		if b != null:
 			loaded = b.load_mp3(path)
+			if loaded != null and b != null:
+				b.log("serene: track " + str(i) + " loaded via C#")
 		if loaded == null and FileAccess.file_exists(path):
 			var file = FileAccess.open(path, FileAccess.READ)
 			if file != null:
@@ -29,6 +30,7 @@ func OnLoad(game_manager, bridge):
 				s.data = file.get_buffer(file.get_length())
 				file.close()
 				loaded = s
+				if b != null: b.log("serene: track " + str(i) + " loaded via GDScript")
 		if loaded != null:
 			tracks.append(loaded)
 	

@@ -133,12 +133,15 @@ func _force_serene():
 	if not use_serene or _gm == null or serene_tracks.size() == 0: return
 	var sm = _gm.get_node("SoundManager") if _gm else null
 	if sm == null:
+		if b != null: b.log("serene: _force_serene retry (no SoundManager)")
 		call_deferred("_force_serene")
 		return
 	var bgm = sm.get_node("BgmPlayer") if sm else null
 	if bgm == null:
+		if b != null: b.log("serene: _force_serene retry (no BgmPlayer)")
 		call_deferred("_force_serene")
 		return
+	if b != null: b.log("serene: _force_serene setting stream idx=" + str(_track_idx))
 	# Detect interruption: BGM was changed or stopped by game
 	var interrupted = false
 	if bgm.stream != serene_tracks[_track_idx]:
@@ -187,10 +190,19 @@ func _on_serene_track_finished():
 
 func _override_menu_music():
 	var tree = Engine.get_main_loop()
-	if tree == null: return
+	if tree == null: 
+		if b != null: b.log("serene: _override_menu_music tree=null")
+		return
 	var mm = tree.root.find_child("MenuMusic", true, false)
-	if mm == null or serene_tracks.size() == 0: return
+	if mm == null: 
+		if b != null: b.log("serene: _override_menu_music MenuMusic not found")
+		return
+	if serene_tracks.size() == 0:
+		if b != null: b.log("serene: _override_menu_music tracks=0")
+		return
+	if b != null: b.log("serene: _override_menu_music OK, setting stream")
 	if _menu_stream == null:
 		_menu_stream = mm.stream
+	mm.process_mode = Node.PROCESS_MODE_ALWAYS
 	mm.stream = serene_tracks[0]
 	if not mm.playing: mm.play()
