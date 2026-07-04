@@ -7,7 +7,6 @@ public partial class SoundManager : Node
     private AudioStreamPlayer _hoverPlayer;
     private AudioStreamPlayer _bgmPlayer;
     private AudioStreamPlayer _menuPlayer;
-    private int _bgmTrack = 0;
     private AudioStream[] _bgmTracks = new AudioStream[2];
     private int _bgmIndex = 0;
 
@@ -19,9 +18,10 @@ public partial class SoundManager : Node
         // BGM 用 AudioStreamMP3 直接从文件加载（不需 import）
         _bgmPlayer = new AudioStreamPlayer { Name = "BgmPlayer", VolumeDb = 0f };
         AddChild(_bgmPlayer);
-        _bgmTracks[0] = AddPlayerLoad("res://assets/sounds/Casa Bossa Nova.wav");
-        _bgmTracks[1] = AddPlayerLoad("res://assets/sounds/Thinking Music.wav");
-        _bgmPlayer.Stream = _bgmTracks[0];
+        _bgmTracks[0] = ResourceLoader.Load<AudioStream>("res://assets/sounds/Casa Bossa Nova.mp3");
+        _bgmTracks[1] = ResourceLoader.Load<AudioStream>("res://assets/sounds/Thinking Music.mp3");
+        GD.Print($"Loaded BGM0={_bgmTracks[0] != null} BGM1={_bgmTracks[1] != null}");
+        if (_bgmTracks[0] != null) _bgmPlayer.Stream = _bgmTracks[0];
         _bgmPlayer.Finished += _SwapBgm;
     }
 
