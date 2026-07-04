@@ -6868,6 +6868,13 @@ public partial class GameManager : Node3D
             slider.ValueChanged += (v) => { GlobalSettings.MusicVolume = (float)v; _soundMgr?.RefreshVolume(); GlobalSettings.Save(); };
             AddRow(Loc.Tr("set.music_volume"), slider);
         }
+        // ── Mod 自定义设置项 ──
+        foreach (var cs in ModBridge.GetCustomSettings())
+        {
+            root.AddChild(new ColorRect { Color = new Color(0.70f, 0.72f, 0.75f, 0.25f), CustomMinimumSize = new(0, 1) });
+            root.AddChild(new Label { Text = cs.label, CustomMinimumSize = new(0, 30) });
+            try { cs.render.Call(root, rowH); } catch (Exception ex) { GD.PrintErr($"[ModSetting] {cs.id} render error: {ex.Message}"); }
+        }
         // 名称缩写
         {
             var chk = new CheckBox { Text = Loc.Tr("set.name_abbr"), ButtonPressed = GlobalSettings.ArabicNameAbbr };

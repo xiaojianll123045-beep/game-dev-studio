@@ -1,5 +1,6 @@
 using Godot;
 using System;
+using System.Collections.Generic;
 using System.Linq;
 
 [GlobalClass]
@@ -169,6 +170,18 @@ public partial class ModBridge : Node
     /// <summary>清除 Mod 注册</summary>
     public void unregister_mod(string mod_id)
         => ModCommAPI.UnregisterMod(mod_id);
+
+    // ═══════════════ 自定义设置 ═══════════════
+    private static List<(string id, string label, Callable render)> _customSettings = new();
+    /// <summary>注册自定义设置项（显示在音乐设置下方）</summary>
+    public void register_setting(string id, string label, Callable render_fn)
+    {
+        _customSettings.RemoveAll(s => s.id == id);
+        _customSettings.Add((id, label, render_fn));
+    }
+    public void unregister_setting(string id) => _customSettings.RemoveAll(s => s.id == id);
+    /// <summary>供设置面板读取</summary>
+    public static System.Collections.Generic.IReadOnlyList<(string id, string label, Callable render)> GetCustomSettings() => _customSettings.AsReadOnly();
 
     // ═══════════════ 日志 ═══════════════
     public void log(string msg) => GD.Print($"[Mod] {msg}");

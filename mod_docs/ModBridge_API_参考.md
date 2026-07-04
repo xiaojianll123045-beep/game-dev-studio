@@ -111,6 +111,35 @@ func _my_minigame():
 | `b.unregister_key(KEY_F1)` | 取消注册按键 |
 在 `OnLoad` 中注册，按键会在游戏处理之前触发回调，不会被其他 UI 拦截。
 
+### ⚙ 自定义设置项
+| GDScript 调用 | 说明 |
+|----------|------|
+| `b.register_setting("id", "显示名称", Callable)` | 在游戏设置的音效/音乐区域下方添加自定义选项 |
+| `b.unregister_setting("id")` | 移除自定义设置项 |
+`Callable` 接收两个参数：`(VBoxContainer root, float rowH)`，你可以在 `root` 中添加 UI 控件（CheckBox、OptionButton 等）。示例：
+```gdscript
+func OnLoad(gm, bridge):
+	bridge.register_setting("my_setting", "我的设置", self._render)
+
+func _render(root, rowH):
+	var hb = HBoxContainer.new()
+	hb.add_theme_constant_override("separation", 8)
+	hb.custom_minimum_size = Vector2(0, rowH)
+	var label = Label.new()
+	label.text = "开关选项"
+	label.add_theme_font_size_override("font_size", 11)
+	label.custom_minimum_size = Vector2(130, rowH)
+	hb.add_child(label)
+	var cb = CheckBox.new()
+	cb.text = "启用"
+	cb.toggled.connect(func(on): print("开关:", on))
+	hb.add_child(cb)
+	var spacer = Control.new()
+	spacer.size_flags_horizontal = Control.SIZE_EXPAND_FILL
+	hb.add_child(spacer)
+	root.add_child(hb)
+```
+
 ### 📋 日志与配置
 | GDScript 调用 | 说明 |
 |----------|------|

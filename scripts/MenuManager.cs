@@ -386,6 +386,14 @@ public partial class MenuManager : Node
 			{ var hb = RowHBox(rowH); hb.Add(LUI.Label(Loc.Tr("set.music_volume"), 11, Colors.Black, rowH)); hb.Add(slider); hb.Add(new Control(), 1); root.AddChild(hb); }
 		}
 
+		// ── Mod 自定义设置项 ──
+		foreach (var cs in ModBridge.GetCustomSettings())
+		{
+			root.AddChild(new ColorRect { Color = new Color(0.70f, 0.72f, 0.75f, 0.25f), CustomMinimumSize = new(0, 1) });
+			root.AddChild(LUI.Label(cs.label, 12, new Color(0.10f, 0.14f, 0.22f), 30));
+			try { cs.render.Call(root, rowH); } catch (Exception ex) { GD.PrintErr($"[ModSetting] {cs.id} render error: {ex.Message}"); }
+		}
+
 		// 名称缩写（仅阿拉伯语）
 		if (Loc.CurrentLang == 10)
 		{
