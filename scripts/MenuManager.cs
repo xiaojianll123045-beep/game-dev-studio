@@ -1023,7 +1023,7 @@ public partial class MenuManager : Node
 					dp.AddChild(authLbl);
 				}
 
-				if (d.Type == "minigame" && (d.LoadedScene != null || d.LoadedScript != null))
+				if ((d.Type == "minigame" || d.LoadedScript != null) && (d.LoadedScene != null || d.LoadedScript != null))
 				{
 					bool enabled = DlcManager.IsDlcEnabled(d.Id);
 					var toggleBtn = new Button { Text = enabled ? Loc.Tr("dlc.disable") : Loc.Tr("dlc.enable"), Position = new(pw - 110, y + 4), Size = new(90, 30) };
