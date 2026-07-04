@@ -10,6 +10,7 @@ var _menu_stream = null
 var _gm = null
 var _serene_rounds = 0
 var _ach_unlocked = false
+var _serene_player = null
 
 func _init_manager(bridge, tracks):
 	b = bridge
@@ -108,7 +109,10 @@ func _stop_serene():
 	if _lock_timer != null:
 		_lock_timer.stop()
 	_lock_timer = null
-	_serene_rounds = 0  # Reset counter on disable
+	_serene_rounds = 0
+	if _serene_player != null:
+		_serene_player.stop()
+		_serene_player = null
 	# Restore menu music if at menu
 	if _gm == null:
 		if _menu_stream != null:
@@ -120,7 +124,7 @@ func _stop_serene():
 					if not mm.playing: mm.play()
 			_menu_stream = null
 		return
-	# In-game: restore original BGM
+	# In-game: restore original BGM via game's player
 	var sm = _gm.get_node("SoundManager") if _gm else null
 	if sm != null:
 		var bgm = sm.get_node("BgmPlayer") if sm else null
@@ -132,57 +136,35 @@ func _stop_serene():
 func _force_serene():
 	if not use_serene or _gm == null or serene_tracks.size() == 0: return
 	var sm = _gm.get_node("SoundManager") if _gm else null
-	if sm == null:
-		if b != null: b.log("serene: _force_serene retry (no SoundManager)")
-		call_deferred("_force_serene")
-		return
+	if sm == null: return
 	var bgm = sm.get_node("BgmPlayer") if sm else null
-	if bgm == null:
-		if b != null: b.log("serene: _force_serene retry (no BgmPlayer)")
-		call_deferred("_force_serene")
-		return
-	if b != null: b.log("serene: _force_serene setting stream idx=" + str(_track_idx))
-	# Detect interruption: BGM was changed or stopped by game
-	var interrupted = false
-	if bgm.stream != serene_tracks[_track_idx]:
-		# Stream was replaced (e.g. by C# _SwapBgm after track finish)
-		interrupted = true
-	if _original_stream == null:
-		# Save original on first call only (before any override)
-		if bgm.stream != null:
-			_original_stream = bgm.stream
-		elif serene_tracks.size() > 0:
-			# No original stream yet, set our own
-			pass
-	# Connect to finished signal for track cycling and round counting (once)
-	if not bgm.finished.is_connected(_on_serene_track_finished):
-		bgm.finished.connect(_on_serene_track_finished)
+	if bgm == null: return
+	# Own player bypasses C# _SwapBgm interference
+	if _serene_player == null:
+		_serene_player = AudioStreamPlayer.new()
+		_serene_player.process_mode = Node.PROCESS_MODE_ALWAYS
+		_serene_player.volume_db = 0
+		_serene_player.bus = "Master"
+		add_child(_serene_player)
+		_serene_player.finished.connect(_on_serene_track_finished)
+	bgm.stop()
 	var menu = sm.get_node("MenuPlayer") if sm else null
-	if menu != null:
-		menu.process_mode = Node.PROCESS_MODE_ALWAYS
-		menu.stream = serene_tracks[0]
-	bgm.process_mode = Node.PROCESS_MODE_ALWAYS
-	bgm.stream = serene_tracks[_track_idx]
-	if not bgm.playing:
-		# BGM was stopped (e.g. by PlayMenuBgm) → interruption
-		interrupted = true
-		bgm.play()
-	if interrupted:
-		_serene_rounds = 0
+	if menu != null: menu.stop()
+	if _serene_player.stream != serene_tracks[_track_idx]:
+		_serene_player.stream = serene_tracks[_track_idx]
+	if not _serene_player.playing:
+		_serene_player.play()
+	if _original_stream == null:
+		_original_stream = bgm.stream
 
 func _on_serene_track_finished():
-	# Track finished naturally → cycle to next and count
 	if not use_serene: return
 	_track_idx = (_track_idx + 1) % serene_tracks.size()
 	_serene_rounds += 1
-	# Sync stream immediately (Timer will maintain it)
-	var sm = _gm.get_node("SoundManager") if _gm else null
-	var bgm = sm.get_node("BgmPlayer") if sm else null
-	if bgm != null:
-		bgm.stream = serene_tracks[_track_idx]
-		if not bgm.playing:
-			bgm.play()
-	# Check achievement
+	if _serene_player != null:
+		_serene_player.stream = serene_tracks[_track_idx]
+		if not _serene_player.playing:
+			_serene_player.play()
 	if not _ach_unlocked and _serene_rounds >= 5:
 		_ach_unlocked = true
 		if b != null:
