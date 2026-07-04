@@ -232,9 +232,10 @@ public partial class GameManager : Node3D
         _modBridge = new ModBridge { Name = "ModBridge" };
         AddChild(_modBridge);
         _modBridge.Init(this);
-        // 菜单已注册过单例，跳过重复注册避免警告
-        if (!Engine.HasSingleton("ModBridge"))
-            Engine.RegisterSingleton("ModBridge", _modBridge);
+        // 始终注册（覆盖菜单释放后可能已悬挂的旧单例）
+        if (Engine.HasSingleton("ModBridge"))
+            Engine.UnregisterSingleton("ModBridge");
+        Engine.RegisterSingleton("ModBridge", _modBridge);
 
         // Mod 系统初始化
         ModManager.Init();
@@ -293,17 +294,17 @@ public partial class GameManager : Node3D
         _loadingOverlay = loadOverlay;
 
         // UI 层提前创建，供 BuildFounderCreationScreen 使用
+        // _uiBg: 背景层（全屏遮罩、弹窗背景等不缩放元素）
+        _uiBg = new Control();
+        _uiBg.SetAnchorsAndOffsetsPreset(Control.LayoutPreset.FullRect);
+        _uiBg.MouseFilter = Control.MouseFilterEnum.Pass;
+        AddChild(_uiBg);
         // _uiLayer: 缩放层（所有交互组件在此，Scale = UIScale）
         _uiLayer = new Control();
         _uiLayer.SetAnchorsAndOffsetsPreset(Control.LayoutPreset.FullRect);
         _uiLayer.MouseFilter = Control.MouseFilterEnum.Ignore;
         _uiLayer.Scale = new Vector2(UIScale, UIScale);
         AddChild(_uiLayer);
-        // _uiBg: 背景层（全屏遮罩、弹窗背景等不缩放元素）
-        _uiBg = new Control();
-        _uiBg.SetAnchorsAndOffsetsPreset(Control.LayoutPreset.FullRect);
-        _uiBg.MouseFilter = Control.MouseFilterEnum.Pass;
-        AddChild(_uiBg);
 
         // 节点引用必须在 _Ready 同步获取
         _res = GetNode<ResourceManager>("ResourceManager");

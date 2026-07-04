@@ -52,7 +52,8 @@ public static class CardUI
 
     public static void ShowStore()
     {
-        _activeStorePanel?.QueueFree();
+        if (_activeStorePanel != null && GodotObject.IsInstanceValid(_activeStorePanel))
+            _activeStorePanel.QueueFree();
         var p = _gm.MakePanel(Loc.Tr("card.store_title"));
         var sc = _gm.AddScroll(p);
         var vb = new VBoxContainer();
