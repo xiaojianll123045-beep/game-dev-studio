@@ -9,6 +9,7 @@ public partial class SoundManager : Node
     private AudioStreamPlayer _menuPlayer;
     private int _bgmTrack = 0;
     private AudioStream[] _bgmTracks = new AudioStream[2];
+    private int _bgmIndex = 0;
 
     public override void _Ready()
     {
@@ -18,31 +19,40 @@ public partial class SoundManager : Node
         // BGM 用 AudioStreamMP3 直接从文件加载（不需 import）
         _bgmPlayer = new AudioStreamPlayer { Name = "BgmPlayer", VolumeDb = 0f };
         AddChild(_bgmPlayer);
-        _LoadMp3Track(0, "res://assets/sounds/Casa Bossa Nova.mp3");
-        _LoadMp3Track(1, "res://assets/sounds/Thinking Music.mp3");
+        _bgmTracks[0] = AddPlayerLoad("res://assets/sounds/Casa Bossa Nova.wav");
+        _bgmTracks[1] = AddPlayerLoad("res://assets/sounds/Thinking Music.wav");
         _bgmPlayer.Stream = _bgmTracks[0];
         _bgmPlayer.Finished += _SwapBgm;
     }
 
-    private void _LoadMp3Track(int idx, string path)
+    private AudioStream AddPlayerLoad(string path)
     {
-        if (!FileAccess.FileExists(path)) { GD.Print($"MP3 not found: {path}"); return; }
+        if (!FileAccess.FileExists(path)) { GD.Print($"WAV not found: {path}"); return null; }
+        var res = ResourceLoader.Load<AudioStream>(path);
+        if (res != null) { GD.Print($"Loaded WAV: {path}"); return res; }
+        // fallback: manual parse
         using var f = FileAccess.Open(path, FileAccess.ModeFlags.Read);
-        if (f == null) return;
-        var buf = f.GetBuffer((int)f.GetLength());
-        var mp3 = new AudioStreamMP3();
-        mp3.Data = buf;
-        mp3.Loop = false;
-        _bgmTracks[idx] = mp3;
-        GD.Print($"Loaded MP3: {path} ({buf.Length} bytes)");
+        if (f == null) return null;
+        var len = (int)f.GetLength();
+        var buf = f.GetBuffer(len);
+        if (len < 44) return null;
+        int sr = buf[24] | (buf[25] << 8) | (buf[26] << 16) | (buf[27] << 24);
+        int ch = buf[22] | (buf[23] << 8);
+        int bits = buf[34] | (buf[35] << 8);
+        int pos = 12, dSize = 0;
+        while (pos < len - 8) { int csz = buf[pos+4] | (buf[pos+5] << 8) | (buf[pos+6] << 16) | (buf[pos+7] << 24); if (buf[pos]=='d' && buf[pos+1]=='a' && buf[pos+2]=='t' && buf[pos+3]=='a') { dSize = csz; break; } pos += 8 + csz; }
+        pos += 8; if (dSize <= 0 || pos >= len) return null;
+        int pcmLen = Mathf.Min(dSize, len - pos);
+        var pcm = new byte[pcmLen]; System.Buffer.BlockCopy(buf, pos, pcm, 0, pcmLen);
+        return new AudioStreamWav { Data = pcm, LoopMode = AudioStreamWav.LoopModeEnum.Disabled, Format = bits == 8 ? AudioStreamWav.FormatEnum.Format8Bits : AudioStreamWav.FormatEnum.Format16Bits, MixRate = sr, Stereo = ch >= 2 };
     }
 
     private void _SwapBgm()
     {
-        _bgmTrack = 1 - _bgmTrack;
-        if (_bgmTracks[_bgmTrack] != null)
+        _bgmIndex = 1 - _bgmIndex;
+        if (_bgmTracks[_bgmIndex] != null)
         {
-            _bgmPlayer.Stream = _bgmTracks[_bgmTrack];
+            _bgmPlayer.Stream = _bgmTracks[_bgmIndex];
             _bgmPlayer.Play();
         }
     }
