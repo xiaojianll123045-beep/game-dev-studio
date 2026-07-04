@@ -2,17 +2,23 @@ extends Node
 
 var b = null
 var gm = null
+var dlc_folder = null
 
 func OnLoad(game_manager, bridge):
 	gm = game_manager; b = bridge
 	if b == null:
 		b = Engine.get_singleton("ModBridge")
 	
-	# Load serene tracks (manual FileAccess as fallback)
+	# Use dlc_folder (passed by DlcManager) to find assets
+	var base_path = "res://DLC/serene_music"
+	if dlc_folder != null and dlc_folder != "":
+		base_path = dlc_folder
+	
+	# Load serene tracks
 	var tracks = []
 	for i in range(1, 5):
 		var loaded = null
-		var path = "res://DLC/serene_music/assets/%d.mp3" % i
+		var path = base_path + "/assets/%d.mp3" % i
 		if FileAccess.file_exists(path):
 			var file = FileAccess.open(path, FileAccess.READ)
 			if file != null:

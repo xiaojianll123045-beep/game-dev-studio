@@ -103,6 +103,7 @@ public static class DlcManager
             {
                 var n = new Node { Name = "DLC_" + dlc.Id };
                 n.SetScript(dlc.LoadedScript);
+                n.Set("dlc_folder", dlc.Folder);
                 // 暂时不加入场景树，只调用 OnLoad 注册设置
                 n.Call("OnLoad", new Variant(), new Variant());
                 n.QueueFree();
@@ -123,6 +124,7 @@ public static class DlcManager
             {
                 var n = new Node { Name = "DLC_" + dlc.Id };
                 n.SetScript(dlc.LoadedScript);
+                n.Set("dlc_folder", dlc.Folder);
                 parent.AddChild(n);
                 MarkRunning(dlc.Id, n);
                 n.Call("OnLoad", parent, new Variant());
