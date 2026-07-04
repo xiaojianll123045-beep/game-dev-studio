@@ -226,8 +226,6 @@ public partial class GameManager : Node3D
     public override void _Ready()
     {
         UIScale = GlobalSettings.UIScale;
-        DlcManager.Log("DLC", "=== GameManager._Ready START ===");
-
         // Mod 桥接（必须先于 ApplyAll，供 GDScript Mod 使用）
         _modBridge = new ModBridge { Name = "ModBridge" };
         AddChild(_modBridge);
@@ -241,21 +239,21 @@ public partial class GameManager : Node3D
 
         // DLC 系统
         DlcManager.ScanAll();
-        // 执行已启用的 DLC 脚本（如安详音乐的设置注册）
-        DlcManager.Log("DLC", $"=== Executing DLC scripts: {DlcManager.Loaded.Count} loaded, {DlcManager.EnabledDlcCount} enabled ===");
-        foreach (var dlc in DlcManager.Loaded.Where(d => d.LoadedScript != null && DlcManager.IsDlcEnabled(d.Id)))
+        GD.Print("=== POST_SCAN ===");
+        try
         {
-            try
+            foreach (var dlc in DlcManager.Loaded.Where(d => d.LoadedScript != null && DlcManager.IsDlcEnabled(d.Id)))
             {
                 var n = new Node { Name = "DLC_" + dlc.Id };
                 n.SetScript(dlc.LoadedScript);
                 AddChild(n);
                 DlcManager.MarkRunning(dlc.Id, n);
                 n.Call("OnLoad", this, _modBridge);
-                DlcManager.Log("DLC", $"[{dlc.Name}] script executed");
+                GD.Print("[DLC] script executed: " + dlc.Name);
             }
-            catch (Exception ex) { GD.PrintErr($"[DLC] script exec error for {dlc.Name}: {ex.Message}"); }
         }
+        catch (Exception ex) { GD.PrintErr("[DLC] exec error: " + ex.Message); }
+        GD.Print("=== PRE_SYSTEM_LOG ===");
         DlcManager.Log("System", $"Game started — v{ModManager.GameVersion}");
         DlcManager.Log("System", $"Mods loaded: {ModManager.LoadedMods.Count} total, {ModManager.ActiveScriptMods.Count} script");
         DlcManager.Log("System", "Press F9 to view this log");
