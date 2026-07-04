@@ -96,6 +96,25 @@ public static class DlcManager
         ScanDlcFrom("res://DLC/");
         LoadEnabled();
         Log("DlcManager", $"DLC scan done, {_loaded.Count} total, {_activeMinigames.Count} minigames, {_enabledDlcIds.Count} enabled");
+        // 执行已启用的 DLC 脚本（菜单和游戏都需要）
+        var gm = Services.GameManager;
+        var bridge = gm?.GetNodeOrNull<ModBridge>("ModBridge");
+        if (gm != null && bridge != null)
+        {
+            foreach (var dlc in _loaded.Where(d => d.LoadedScript != null && _enabledDlcIds.Contains(d.Id)))
+            {
+                try
+                {
+                    var n = new Node { Name = "DLC_" + dlc.Id };
+                    n.SetScript(dlc.LoadedScript);
+                    gm.AddChild(n);
+                    MarkRunning(dlc.Id, n);
+                    n.Call("OnLoad", gm, bridge);
+                    Log("DLC", $"[{dlc.Name}] script executed");
+                }
+                catch (Exception ex) { GD.PrintErr($"[DLC] script exec error for {dlc.Name}: {ex.Message}"); }
+            }
+        }
     }
 
     private static void ScanDlcFrom(string root)

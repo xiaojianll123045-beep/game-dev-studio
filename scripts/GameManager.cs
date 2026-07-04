@@ -237,23 +237,8 @@ public partial class GameManager : Node3D
         ModManager.Init();
         ModManager.ApplyAll(this);
 
-        // DLC 系统
+        // DLC 系统（脚本执行在 DlcManager.ScanAll 内完成）
         DlcManager.ScanAll();
-        GD.Print("=== POST_SCAN ===");
-        try
-        {
-            foreach (var dlc in DlcManager.Loaded.Where(d => d.LoadedScript != null && DlcManager.IsDlcEnabled(d.Id)))
-            {
-                var n = new Node { Name = "DLC_" + dlc.Id };
-                n.SetScript(dlc.LoadedScript);
-                AddChild(n);
-                DlcManager.MarkRunning(dlc.Id, n);
-                n.Call("OnLoad", this, _modBridge);
-                GD.Print("[DLC] script executed: " + dlc.Name);
-            }
-        }
-        catch (Exception ex) { GD.PrintErr("[DLC] exec error: " + ex.Message); }
-        GD.Print("=== PRE_SYSTEM_LOG ===");
         DlcManager.Log("System", $"Game started — v{ModManager.GameVersion}");
         DlcManager.Log("System", $"Mods loaded: {ModManager.LoadedMods.Count} total, {ModManager.ActiveScriptMods.Count} script");
         DlcManager.Log("System", "Press F9 to view this log");
