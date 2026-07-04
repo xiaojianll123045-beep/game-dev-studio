@@ -130,7 +130,10 @@ public partial class SoundManager : Node
     public void PlayMenuBgm()
     {
         RefreshVolume();
-        _bgmPlayer?.Stop(); _menuPlayer?.Stop(); _menuPlayer?.Play();
+        _bgmPlayer?.Stop(); _menuPlayer?.Stop();
+        // 菜单也播 BGM 轮播（用第一首）
+        if (_bgmTracks[0] != null) { _bgmPlayer.Stream = _bgmTracks[0]; _bgmPlayer.Play(); }
+        else _menuPlayer?.Play();
     }
 
     public void StopBgm() { _bgmPlayer?.Stop(); _menuPlayer?.Stop(); }
