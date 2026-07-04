@@ -370,8 +370,7 @@ public partial class UISystemEx : Node
     // ── 成就馆 ──
     public void ShowAchievementGallery()
     {
-        var devMgr = Services.GameDevManager;
-        var gm = Services.GameManager;
+        var achMgr = Services.AchievementManager;
         var overlay = new ColorRect { Color = new Color(0, 0, 0, 0.6f) };
         overlay.SetAnchorsAndOffsetsPreset(Control.LayoutPreset.FullRect);
         overlay.MouseFilter = Control.MouseFilterEnum.Stop;
@@ -380,22 +379,99 @@ public partial class UISystemEx : Node
 
         var panel = new Panel();
         panel.SetAnchorsAndOffsetsPreset(Control.LayoutPreset.Center);
-        panel.Size = new Vector2(600, 450);
+        panel.Size = new Vector2(850, 560);
         panel.Position -= panel.Size / 2;
 
-        var title = new Label { Text = "\U0001f3c6 \u6210\u5c31\u9986", Position = new Vector2(20, 10), Size = new Vector2(560, 30) };
-        title.AddThemeFontSizeOverride("font_size", 20);
+        var title = new Label { Text = "\U0001f3c6 \u6210\u5c31\u9986", Position = new Vector2(20, 12), Size = new Vector2(400, 32) };
+        title.AddThemeFontSizeOverride("font_size", 22);
         panel.AddChild(title);
 
-        float bestScore = devMgr.CompletedProjects.Count > 0 ? devMgr.CompletedProjects.Max(p => p.FinalScore) : 0;
-        var info = new Label
-        {
-            Text = $"\u5df2\u53d1\u552e: {devMgr.CompletedProjects.Count}\u6b3e  \u6700\u9ad8\u5206: {bestScore:F0}  \u6536\u5165: \u00a5{gm.ResMgr.TotalRevenue:N0}  \u7c89\u4e1d: {Services.FanManager?.TotalFans ?? 0:N0}",
-            Position = new Vector2(20, 50), Size = new Vector2(560, 30)
-        };
+        var (unlocked, total) = achMgr.GetProgress();
+        var info = new Label { Text = $"\u5df2\u89e3\u9501: {unlocked}/{total}", Position = new Vector2(20, 48), Size = new Vector2(200, 20) };
+        info.AddThemeFontSizeOverride("font_size", 13);
+        info.AddThemeColorOverride("font_color", new Color(0.8f, 0.9f, 1f));
         panel.AddChild(info);
 
-        var closeBtn = new Button { Text = "\u5173\u95ed", Position = new Vector2(520, 410) };
+        // Legend
+        string[] legendLabels = { "\u25a0 \u666e\u901a", "\u25a0 \u7a00\u6709", "\u25a0 \u5f69\u86cb", "\u25a0 \u5f69\u86cb\u7a00\u6709" };
+        Color[] legendColors = { new Color(1,1,1), new Color(0.7f,0.4f,1f), new Color(0.3f,0.9f,0.3f), new Color(1f,0.85f,0f) };
+        float lx = 420;
+        for (int li = 0; li < legendLabels.Length; li++)
+        {
+            var leg = new Label { Text = legendLabels[li], Position = new Vector2(lx, 48), Size = new Vector2(100, 20) };
+            leg.AddThemeFontSizeOverride("font_size", 11);
+            leg.AddThemeColorOverride("font_color", legendColors[li]);
+            panel.AddChild(leg);
+            lx += 100;
+        }
+
+        var scroll = new ScrollContainer { Position = new Vector2(12, 72), Size = new Vector2(826, 448) };
+        panel.AddChild(scroll);
+
+        var grid = new GridContainer { Columns = 2, SizeFlagsHorizontal = Control.SizeFlags.ExpandFill };
+        scroll.AddChild(grid);
+
+        foreach (var ach in achMgr.AllAchievements)
+        {
+            bool isUnlocked = achMgr.Unlocked.Contains(ach.Id);
+            bool isEaster = ach.Rarity >= 2;
+
+            var card = new Panel();
+            card.CustomMinimumSize = new Vector2(0, 70);
+            card.SizeFlagsHorizontal = Control.SizeFlags.ExpandFill;
+            card.AddThemeStyleboxOverride("panel", new StyleBoxFlat
+            {
+                BgColor = isUnlocked ? new Color(0.12f, 0.12f, 0.16f) : new Color(0.07f, 0.07f, 0.1f),
+                BorderWidthLeft = 3,
+                BorderWidthTop = 0,
+                BorderWidthRight = 0,
+                BorderWidthBottom = 0,
+                BorderColor = !isUnlocked ? new Color(0.25f, 0.25f, 0.25f)
+                    : ach.Rarity == 3 ? new Color(1f, 0.85f, 0f)
+                    : ach.Rarity == 2 ? new Color(0.3f, 0.9f, 0.3f)
+                    : ach.Rarity == 1 ? new Color(0.7f, 0.4f, 1f)
+                    : new Color(0.5f, 0.6f, 0.8f),
+                CornerRadiusTopLeft = 6, CornerRadiusTopRight = 6,
+                CornerRadiusBottomLeft = 6, CornerRadiusBottomRight = 6,
+            });
+
+            var vc = new VBoxContainer { Position = new Vector2(10, 6), Size = new Vector2(380, 58) };
+            card.AddChild(vc);
+
+            var nameLabel = new Label
+            {
+                Text = ach.Name,
+                SizeFlagsHorizontal = Control.SizeFlags.ExpandFill,
+            };
+            nameLabel.AddThemeFontSizeOverride("font_size", 13);
+            if (!isUnlocked)
+                nameLabel.AddThemeColorOverride("font_color", new Color(0.35f, 0.35f, 0.35f));
+            else if (ach.Rarity == 3)
+                nameLabel.AddThemeColorOverride("font_color", new Color(1f, 0.85f, 0f));
+            else if (ach.Rarity == 2)
+                nameLabel.AddThemeColorOverride("font_color", new Color(0.3f, 0.9f, 0.3f));
+            else if (ach.Rarity == 1)
+                nameLabel.AddThemeColorOverride("font_color", new Color(0.7f, 0.4f, 1f));
+            else
+                nameLabel.AddThemeColorOverride("font_color", new Color(1f, 1f, 1f));
+            vc.AddChild(nameLabel);
+
+            if (!string.IsNullOrEmpty(ach.Desc))
+            {
+                var descLabel = new Label
+                {
+                    Text = (!isUnlocked && isEaster) ? "? ? ? ? ? ? ? ?" : ach.Desc,
+                    SizeFlagsHorizontal = Control.SizeFlags.ExpandFill,
+                };
+                descLabel.AddThemeFontSizeOverride("font_size", 10);
+                descLabel.AddThemeColorOverride("font_color", isUnlocked ? new Color(0.6f, 0.6f, 0.6f) : new Color(0.3f, 0.3f, 0.3f));
+                vc.AddChild(descLabel);
+            }
+
+            grid.AddChild(card);
+        }
+
+        var closeBtn = new Button { Text = "\u5173\u95ed", Position = new Vector2(760, 524) };
         closeBtn.Pressed += () => overlay.QueueFree();
         panel.AddChild(closeBtn);
         overlay.AddChild(panel);

@@ -8,13 +8,20 @@ func OnLoad(game_manager, bridge):
 	if b == null:
 		b = Engine.get_singleton("ModBridge")
 	
-	# Load serene tracks using ModBridge's load_mp3 helper
+	# Load serene tracks (manual FileAccess as fallback)
 	var tracks = []
 	for i in range(1, 5):
+		var loaded = null
 		var path = "res://DLC/serene_music/assets/%d.mp3" % i
-		var s = b.load_mp3(path)
-		if s != null:
-			tracks.append(s)
+		if FileAccess.file_exists(path):
+			var file = FileAccess.open(path, FileAccess.READ)
+			if file != null:
+				var s = AudioStreamMP3.new()
+				s.data = file.get_buffer(file.get_length())
+				file.close()
+				loaded = s
+		if loaded != null:
+			tracks.append(loaded)
 	
 	# Get or create the persistent manager node (namespaced to avoid conflicts)
 	var mgr_name = b.node_name("serene_music", "manager")

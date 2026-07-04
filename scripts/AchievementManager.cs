@@ -16,6 +16,7 @@ public partial class AchievementManager : Node
 
     // ── 彩蛋成就追踪 ──
     private int _rejectedTaskCount;
+    private int _debtZeroMonths;
     private bool _hasNameClash;
     private bool _hasFiredCEO;
     private int _idleMonths;
@@ -2307,43 +2308,43 @@ public partial class AchievementManager : Node
             new() { Id = "all_tech", Name = Loc.Tr("ach.all_tech"), Desc = Loc.Tr("ach.all_tech_desc"), Category = Loc.Tr("ach.cat_milestone") },
             new() { Id = "fan_1m", Name = Loc.Tr("ach.fan_1m"), Desc = Loc.Tr("ach.fan_1m_desc"), Category = Loc.Tr("ach.cat_milestone") },
 
-            // ═══ 挑战成就 ═══
-            new() { Id = "challenge_no_engine", Name = Loc.Tr("ach.challenge_no_engine"), Desc = Loc.Tr("ach.challenge_no_engine_desc"), Category = Loc.Tr("ach.cat_challenge") },
-            new() { Id = "challenge_solo", Name = Loc.Tr("ach.challenge_solo"), Desc = Loc.Tr("ach.challenge_solo_desc"), Category = Loc.Tr("ach.cat_challenge") },
-            new() { Id = "challenge_10in10", Name = Loc.Tr("ach.challenge_10in10"), Desc = Loc.Tr("ach.challenge_10in10_desc"), Category = Loc.Tr("ach.cat_challenge") },
-            new() { Id = "challenge_three_aaa", Name = Loc.Tr("ach.challenge_three_aaa"), Desc = Loc.Tr("ach.challenge_three_aaa_desc"), Category = Loc.Tr("ach.cat_challenge") },
-            new() { Id = "challenge_debt_zero", Name = Loc.Tr("ach.challenge_debt_zero"), Desc = Loc.Tr("ach.challenge_debt_zero_desc"), Category = Loc.Tr("ach.cat_challenge") },
-            new() { Id = "challenge_no_marketing", Name = Loc.Tr("ach.challenge_no_marketing"), Desc = Loc.Tr("ach.challenge_no_marketing_desc"), Category = Loc.Tr("ach.cat_challenge") },
-            new() { Id = "challenge_open_source", Name = Loc.Tr("ach.challenge_open_source"), Desc = Loc.Tr("ach.challenge_open_source_desc"), Category = Loc.Tr("ach.cat_challenge") },
-            new() { Id = "challenge_all_genres", Name = Loc.Tr("ach.challenge_all_genres"), Desc = Loc.Tr("ach.challenge_all_genres_desc"), Category = Loc.Tr("ach.cat_challenge") },
+            // ═══ 挑战成就（稀有）═══
+            new() { Id = "challenge_no_engine", Name = Loc.Tr("ach.challenge_no_engine"), Desc = Loc.Tr("ach.challenge_no_engine_desc"), Category = Loc.Tr("ach.cat_challenge"), Rarity = 1 },
+            new() { Id = "challenge_solo", Name = Loc.Tr("ach.challenge_solo"), Desc = Loc.Tr("ach.challenge_solo_desc"), Category = Loc.Tr("ach.cat_challenge"), Rarity = 1 },
+            new() { Id = "challenge_10in10", Name = Loc.Tr("ach.challenge_10in10"), Desc = Loc.Tr("ach.challenge_10in10_desc"), Category = Loc.Tr("ach.cat_challenge"), Rarity = 1 },
+            new() { Id = "challenge_three_aaa", Name = Loc.Tr("ach.challenge_three_aaa"), Desc = Loc.Tr("ach.challenge_three_aaa_desc"), Category = Loc.Tr("ach.cat_challenge"), Rarity = 1 },
+            new() { Id = "challenge_debt_zero", Name = Loc.Tr("ach.challenge_debt_zero"), Desc = Loc.Tr("ach.challenge_debt_zero_desc"), Category = Loc.Tr("ach.cat_challenge"), Rarity = 1 },
+            new() { Id = "challenge_no_marketing", Name = Loc.Tr("ach.challenge_no_marketing"), Desc = Loc.Tr("ach.challenge_no_marketing_desc"), Category = Loc.Tr("ach.cat_challenge"), Rarity = 1 },
+            new() { Id = "challenge_open_source", Name = Loc.Tr("ach.challenge_open_source"), Desc = Loc.Tr("ach.challenge_open_source_desc"), Category = Loc.Tr("ach.cat_challenge"), Rarity = 1 },
+            new() { Id = "challenge_all_genres", Name = Loc.Tr("ach.challenge_all_genres"), Desc = Loc.Tr("ach.challenge_all_genres_desc"), Category = Loc.Tr("ach.cat_challenge"), Rarity = 1 },
 
             // ═══ 彩蛋成就 ═══
-            new() { Id = "easter_trash", Name = Loc.Tr("ach.easter_trash"), Desc = Loc.Tr("ach.easter_trash_desc"), Category = Loc.Tr("ach.cat_easter") },
-            new() { Id = "easter_bankrupt", Name = Loc.Tr("ach.easter_bankrupt"), Desc = Loc.Tr("ach.easter_bankrupt_desc"), Category = Loc.Tr("ach.cat_easter") },
-            new() { Id = "easter_reject_100", Name = Loc.Tr("ach.easter_reject_100"), Desc = Loc.Tr("ach.easter_reject_100_desc"), Category = Loc.Tr("ach.cat_easter") },
-            new() { Id = "easter_name_clash", Name = Loc.Tr("ach.easter_name_clash"), Desc = Loc.Tr("ach.easter_name_clash_desc"), Category = Loc.Tr("ach.cat_easter") },
-            new() { Id = "easter_fired_ceo", Name = Loc.Tr("ach.easter_fired_ceo"), Desc = Loc.Tr("ach.easter_fired_ceo_desc"), Category = Loc.Tr("ach.cat_easter") },
-            new() { Id = "easter_cease_desist", Name = Loc.Tr("ach.easter_cease_desist"), Desc = Loc.Tr("ach.easter_cease_desist_desc"), Category = Loc.Tr("ach.cat_easter") },
-            new() { Id = "easter_man", Name = Loc.Tr("ach.easter_man"), Desc = Loc.Tr("ach.easter_man_desc"), Category = Loc.Tr("ach.cat_easter") },
-            new() { Id = "easter_bug_feature", Name = Loc.Tr("ach.easter_bug_feature"), Desc = Loc.Tr("ach.easter_bug_feature_desc"), Category = Loc.Tr("ach.cat_easter") },
-            new() { Id = "easter_free_game", Name = Loc.Tr("ach.easter_free_game"), Desc = Loc.Tr("ach.easter_free_game_desc"), Category = Loc.Tr("ach.cat_easter") },
-            new() { Id = "easter_trust_code", Name = Loc.Tr("ach.easter_trust_code"), Desc = Loc.Tr("ach.easter_trust_code_desc"), Category = Loc.Tr("ach.cat_easter") },
-            new() { Id = "easter_996", Name = Loc.Tr("ach.easter_996"), Desc = Loc.Tr("ach.easter_996_desc"), Category = Loc.Tr("ach.cat_easter") },
-            new() { Id = "easter_remaster_king", Name = Loc.Tr("ach.easter_remaster_king"), Desc = Loc.Tr("ach.easter_remaster_king_desc"), Category = Loc.Tr("ach.cat_easter") },
-            new() { Id = "easter_lucky7", Name = Loc.Tr("ach.easter_lucky7"), Desc = Loc.Tr("ach.easter_lucky7_desc"), Category = Loc.Tr("ach.cat_easter") },
-            new() { Id = "easter_company_name", Name = Loc.Tr("ach.easter_company_name"), Desc = Loc.Tr("ach.easter_company_name_desc"), Category = Loc.Tr("ach.cat_easter") },
-            new() { Id = "easter_founder_name", Name = Loc.Tr("ach.easter_founder_name"), Desc = Loc.Tr("ach.easter_founder_name_desc"), Category = Loc.Tr("ach.cat_easter") },
-            new() { Id = "easter_all_in", Name = Loc.Tr("ach.easter_all_in"), Desc = Loc.Tr("ach.easter_all_in_desc"), Category = Loc.Tr("ach.cat_easter") },
-            new() { Id = "easter_next_time", Name = Loc.Tr("ach.easter_next_time"), Desc = Loc.Tr("ach.easter_next_time_desc"), Category = Loc.Tr("ach.cat_easter") },
-            new() { Id = "easter_rival_hater", Name = Loc.Tr("ach.easter_rival_hater"), Desc = Loc.Tr("ach.easter_rival_hater_desc"), Category = Loc.Tr("ach.cat_easter") },
-            new() { Id = "easter_crocodile_tears", Name = Loc.Tr("ach.easter_crocodile_tears"), Desc = Loc.Tr("ach.easter_crocodile_tears_desc"), Category = Loc.Tr("ach.cat_easter") },
-            new() { Id = "easter_regardless", Name = Loc.Tr("ach.easter_regardless"), Desc = Loc.Tr("ach.easter_regardless_desc"), Category = Loc.Tr("ach.cat_easter") },
-            new() { Id = "easter_god_like", Name = Loc.Tr("ach.easter_god_like"), Desc = Loc.Tr("ach.easter_god_like_desc"), Category = Loc.Tr("ach.cat_easter") },
-            new() { Id = "easter_broken", Name = Loc.Tr("ach.easter_broken"), Desc = Loc.Tr("ach.easter_broken_desc"), Category = Loc.Tr("ach.cat_easter") },
-            new() { Id = "easter_lay_flat", Name = Loc.Tr("ach.easter_lay_flat"), Desc = Loc.Tr("ach.easter_lay_flat_desc"), Category = Loc.Tr("ach.cat_easter") },
-            new() { Id = "easter_tanking", Name = Loc.Tr("ach.easter_tanking"), Desc = Loc.Tr("ach.easter_tanking_desc"), Category = Loc.Tr("ach.cat_easter") },
+            new() { Id = "easter_trash", Name = Loc.Tr("ach.easter_trash"), Desc = Loc.Tr("ach.easter_trash_desc"), Category = Loc.Tr("ach.cat_easter"), Rarity = 2 },
+            new() { Id = "easter_bankrupt", Name = Loc.Tr("ach.easter_bankrupt"), Desc = Loc.Tr("ach.easter_bankrupt_desc"), Category = Loc.Tr("ach.cat_easter"), Rarity = 3 },
+            new() { Id = "easter_reject_100", Name = Loc.Tr("ach.easter_reject_100"), Desc = Loc.Tr("ach.easter_reject_100_desc"), Category = Loc.Tr("ach.cat_easter"), Rarity = 2 },
+            new() { Id = "easter_name_clash", Name = Loc.Tr("ach.easter_name_clash"), Desc = Loc.Tr("ach.easter_name_clash_desc"), Category = Loc.Tr("ach.cat_easter"), Rarity = 2 },
+            new() { Id = "easter_fired_ceo", Name = Loc.Tr("ach.easter_fired_ceo"), Desc = Loc.Tr("ach.easter_fired_ceo_desc"), Category = Loc.Tr("ach.cat_easter"), Rarity = 2 },
+            new() { Id = "easter_cease_desist", Name = Loc.Tr("ach.easter_cease_desist"), Desc = Loc.Tr("ach.easter_cease_desist_desc"), Category = Loc.Tr("ach.cat_easter"), Rarity = 2 },
+            new() { Id = "easter_man", Name = Loc.Tr("ach.easter_man"), Desc = Loc.Tr("ach.easter_man_desc"), Category = Loc.Tr("ach.cat_easter"), Rarity = 2 },
+            new() { Id = "easter_bug_feature", Name = Loc.Tr("ach.easter_bug_feature"), Desc = Loc.Tr("ach.easter_bug_feature_desc"), Category = Loc.Tr("ach.cat_easter"), Rarity = 2 },
+            new() { Id = "easter_free_game", Name = Loc.Tr("ach.easter_free_game"), Desc = Loc.Tr("ach.easter_free_game_desc"), Category = Loc.Tr("ach.cat_easter"), Rarity = 2 },
+            new() { Id = "easter_trust_code", Name = Loc.Tr("ach.easter_trust_code"), Desc = Loc.Tr("ach.easter_trust_code_desc"), Category = Loc.Tr("ach.cat_easter"), Rarity = 2 },
+            new() { Id = "easter_996", Name = Loc.Tr("ach.easter_996"), Desc = Loc.Tr("ach.easter_996_desc"), Category = Loc.Tr("ach.cat_easter"), Rarity = 3 },
+            new() { Id = "easter_remaster_king", Name = Loc.Tr("ach.easter_remaster_king"), Desc = Loc.Tr("ach.easter_remaster_king_desc"), Category = Loc.Tr("ach.cat_easter"), Rarity = 2 },
+            new() { Id = "easter_lucky7", Name = Loc.Tr("ach.easter_lucky7"), Desc = Loc.Tr("ach.easter_lucky7_desc"), Category = Loc.Tr("ach.cat_easter"), Rarity = 2 },
+            new() { Id = "easter_company_name", Name = Loc.Tr("ach.easter_company_name"), Desc = Loc.Tr("ach.easter_company_name_desc"), Category = Loc.Tr("ach.cat_easter"), Rarity = 2 },
+            new() { Id = "easter_founder_name", Name = Loc.Tr("ach.easter_founder_name"), Desc = Loc.Tr("ach.easter_founder_name_desc"), Category = Loc.Tr("ach.cat_easter"), Rarity = 2 },
+            new() { Id = "easter_all_in", Name = Loc.Tr("ach.easter_all_in"), Desc = Loc.Tr("ach.easter_all_in_desc"), Category = Loc.Tr("ach.cat_easter"), Rarity = 2 },
+            new() { Id = "easter_next_time", Name = Loc.Tr("ach.easter_next_time"), Desc = Loc.Tr("ach.easter_next_time_desc"), Category = Loc.Tr("ach.cat_easter"), Rarity = 2 },
+            new() { Id = "easter_rival_hater", Name = Loc.Tr("ach.easter_rival_hater"), Desc = Loc.Tr("ach.easter_rival_hater_desc"), Category = Loc.Tr("ach.cat_easter"), Rarity = 2 },
+            new() { Id = "easter_crocodile_tears", Name = Loc.Tr("ach.easter_crocodile_tears"), Desc = Loc.Tr("ach.easter_crocodile_tears_desc"), Category = Loc.Tr("ach.cat_easter"), Rarity = 2 },
+            new() { Id = "easter_regardless", Name = Loc.Tr("ach.easter_regardless"), Desc = Loc.Tr("ach.easter_regardless_desc"), Category = Loc.Tr("ach.cat_easter"), Rarity = 2 },
+            new() { Id = "easter_god_like", Name = Loc.Tr("ach.easter_god_like"), Desc = Loc.Tr("ach.easter_god_like_desc"), Category = Loc.Tr("ach.cat_easter"), Rarity = 3 },
+            new() { Id = "easter_broken", Name = Loc.Tr("ach.easter_broken"), Desc = Loc.Tr("ach.easter_broken_desc"), Category = Loc.Tr("ach.cat_easter"), Rarity = 2 },
+            new() { Id = "easter_lay_flat", Name = Loc.Tr("ach.easter_lay_flat"), Desc = Loc.Tr("ach.easter_lay_flat_desc"), Category = Loc.Tr("ach.cat_easter"), Rarity = 2 },
+            new() { Id = "easter_tanking", Name = Loc.Tr("ach.easter_tanking"), Desc = Loc.Tr("ach.easter_tanking_desc"), Category = Loc.Tr("ach.cat_easter"), Rarity = 2 },
             // DLC 成就
-            new() { Id = "easter_send_off", Name = Loc.Tr("ach.easter_send_off"), Desc = Loc.Tr("ach.easter_send_off_desc"), Category = Loc.Tr("ach.cat_easter") },
+            new() { Id = "easter_send_off", Name = Loc.Tr("ach.easter_send_off"), Desc = Loc.Tr("ach.easter_send_off_desc"), Category = Loc.Tr("ach.cat_easter"), Rarity = 3 },
         };
 
         // 加载 Mod 自定义成就
@@ -2401,7 +2402,6 @@ public partial class AchievementManager : Node
         TryUnlock("challenge_10in10", releasedCount >= 10 && _gm.GameYear <= 10);
         TryUnlock("challenge_three_aaa", teamMgr != null
             && teamMgr.Teams.Count(t => t.CurrentProject != null && t.CurrentProject.Scale > 0.7f) >= 3);
-        TryUnlock("challenge_debt_zero", debtMgr != null && debtMgr.ComputeTotalDebt() == 0 && totalCompleted >= 1);
         TryUnlock("challenge_no_marketing", devMgr.CompletedProjects.Any(p =>
             p.Sales >= 1_000_000 && p.Marketing == MarketingStrategy.LowKey));
         TryUnlock("challenge_all_genres", releasedCount >= 6
@@ -2545,6 +2545,17 @@ public partial class AchievementManager : Node
         // 挑战（长期积累型）
         TryUnlock("challenge_open_source",
             _gm.Engines.Any(e => e.BizModel == EngineBizModel.OpenSource && e.LicenseCount >= 100));
+        // 连续36个月零技术债务
+        var debtMgr2 = _gm.GetNodeOrNull<TechDebtManager>("TechDebtManager");
+        if (debtMgr2 != null && debtMgr2.ComputeTotalDebt() == 0)
+        {
+            _debtZeroMonths++;
+            TryUnlock("challenge_debt_zero", _debtZeroMonths >= 36);
+        }
+        else
+        {
+            _debtZeroMonths = 0;
+        }
 
         // 彩蛋成就（月检）
         TryUnlock("easter_bankrupt", res.Money <= 0 && totalCompleted > 0);
@@ -2609,5 +2620,6 @@ public class Achievement
     public string Id { get; set; }
     public string Name { get; set; }
     public string Desc { get; set; }
-    public string Category { get; set; } // Loc.Tr("ach.cat_milestone") / Loc.Tr("ach.cat_challenge") / Loc.Tr("ach.cat_easter")
+    public string Category { get; set; }
+    public int Rarity { get; set; } // 0=普通白, 1=稀有紫, 2=彩蛋绿(隐藏), 3=稀有彩蛋金(隐藏)
 }
