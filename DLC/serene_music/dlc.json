@@ -1,7 +1,6 @@
 {
     "version": "1.0",
     "author": "官方",
-    "type": "minigame",
-    "scene": "",
-    "scripts": ["scripts/serene_music.gd"]
+    "type": "data"
 }
+
