@@ -7,13 +7,29 @@ public partial class SoundManager : Node
     private AudioStreamPlayer _hoverPlayer;
     private AudioStreamPlayer _bgmPlayer;
     private AudioStreamPlayer _menuPlayer;
+    private int _bgmTrack = 0;
+    private AudioStream[] _bgmTracks = new AudioStream[2];
 
     public override void _Ready()
     {
         _clickPlayer = AddPlayer("Click", "switch6.wav", false);
         _hoverPlayer = AddPlayer("Hover", "rollover1.wav", false);
-        _bgmPlayer = AddPlayer("Bgm", "bgm_默认.wav", true);
+        _bgmPlayer = AddPlayer("Bgm", "", true);
         _menuPlayer = AddPlayer("Menu", "bgm_加载.wav", true);
+        // 加载两首 MP3 交替播放
+        _bgmTracks[0] = ResourceLoader.Load<AudioStream>("res://assets/sounds/Casa Bossa Nova.mp3");
+        _bgmTracks[1] = ResourceLoader.Load<AudioStream>("res://assets/sounds/Thinking Music.mp3");
+        _bgmPlayer.Finished += _SwapBgm;
+    }
+
+    private void _SwapBgm()
+    {
+        _bgmTrack = 1 - _bgmTrack;
+        if (_bgmTracks[_bgmTrack] != null)
+        {
+            _bgmPlayer.Stream = _bgmTracks[_bgmTrack];
+            _bgmPlayer.Play();
+        }
     }
 
     private AudioStreamPlayer AddPlayer(string name, string file, bool loop)

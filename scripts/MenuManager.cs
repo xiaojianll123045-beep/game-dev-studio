@@ -485,6 +485,7 @@ public partial class MenuManager : Node
 			Loc.Tr("about.group"),
 			Loc.Tr("about.github"),
 			Loc.Tr("about.ai_credit"),
+			Loc.Tr("about.music_credit"),
 		};
 		float ly = 44;
 		float editW = pw - 80;
