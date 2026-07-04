@@ -96,8 +96,23 @@ public static class DlcManager
         ScanDlcFrom("res://DLC/");
         LoadEnabled();
         Log("DlcManager", $"DLC scan done, {_loaded.Count} total, {_activeMinigames.Count} minigames, {_enabledDlcIds.Count} enabled");
+        // 执行已启用 DLC 脚本（注册设置项等，不依赖 GameManager）
+        foreach (var dlc in _loaded.Where(d => d.LoadedScript != null && _enabledDlcIds.Contains(d.Id)))
+        {
+            try
+            {
+                var n = new Node { Name = "DLC_" + dlc.Id };
+                n.SetScript(dlc.LoadedScript);
+                // 暂时不加入场景树，只调用 OnLoad 注册设置
+                n.Call("OnLoad", new Variant(), new Variant());
+                n.QueueFree();
+                Log("DLC", $"[{dlc.Name}] script registered");
+            }
+            catch (Exception ex) { GD.PrintErr($"[DLC] script reg error for {dlc.Name}: {ex.Message}"); }
+        }
     }
 
+    /// <summary>游戏启动时执行 DLC 脚本（带 GameManager）</summary>
     public static void ExecuteDlcScripts(Node parent)
     {
         var bridge = parent?.GetNodeOrNull<ModBridge>("ModBridge");

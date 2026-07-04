@@ -15,9 +15,14 @@ func OnLoad(game_manager, bridge):
 			var s = ResourceLoader.load(path)
 			if s != null:
 				serene_tracks.append(s)
-	print("[SereneMusic] DLC loaded ", serene_tracks.size(), " tracks")
-	# 注册自定义设置项
-	b.register_setting("serene_music", "🎵 音乐风格", self._render_setting)
+	# 注册自定义设置项（bridge 可能为 null 时用全局单例）
+	if b == null:
+		b = Engine.get_singleton("ModBridge")
+	if b != null:
+		b.register_setting("serene_music", "🎵 音乐风格", self._render_setting)
+		print("[SereneMusic] setting registered")
+	else:
+		print("[SereneMusic] ModBridge not available, setting not registered")
 
 func _render_setting(root, rowH):
 	var hb = HBoxContainer.new()
@@ -45,6 +50,7 @@ func _render_setting(root, rowH):
 
 func _on_toggle(checked):
 	use_serene = checked
+	if gm == null: return
 	var sm = gm.get_node("SoundManager") if gm else null
 	if sm == null or serene_tracks.size() == 0: return
 	var bgm = sm.get_node("BgmPlayer") if sm else null

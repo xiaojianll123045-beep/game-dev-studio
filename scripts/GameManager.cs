@@ -354,9 +354,8 @@ public partial class GameManager : Node3D
         CardUI.Init(this);
         ModAPI.Init(this);
         ModConsole.CreateNow(); // 预创建控制台（_uiLayer 已就绪）
-        // 执行已启用的 DLC 脚本（此时 Services.GameManager 已可用）
+        // 游戏启动时重新执行 DLC 脚本（带完整 GameManager）
         DlcManager.ExecuteDlcScripts(this);
-
         ModMethodOverride.CallVoid("game_init_nodes_ready", ModMethodOverride.Args(), () => { });
 
         RenderingServer.SetDefaultClearColor(new Color(0.65f, 0.80f, 0.95f));
