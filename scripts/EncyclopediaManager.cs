@@ -152,7 +152,28 @@ public partial class EncyclopediaManager : Node
             if (t.id.Contains(query, comp) || t.name.Contains(query, comp))
                 results.Add(new { type = "tech", id = t.id, name = t.name });
         }
-
+        // Search mechanics sections
+        data.DeserializeItems();
+        foreach (var kv in data.mechanics.Items)
+        {
+            string catId = kv.Key;
+            var cat = kv.Value;
+            // Match category title
+            if (catId.Contains(query, comp) || cat.title.Contains(query, comp))
+            {
+                results.Add(new { type = "mechanics", id = catId, name = cat.title });
+                continue;
+            }
+            // Match section headings/content
+            foreach (var sec in cat.sections)
+            {
+                if (sec.heading.Contains(query, comp) || sec.content.Contains(query, comp))
+                {
+                    results.Add(new { type = "mechanics", id = catId, name = $"{cat.title} > {sec.heading}" });
+                    break;
+                }
+            }
+        }
         return results;
     }
 }

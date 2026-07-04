@@ -295,6 +295,9 @@ public partial class UISystemEx : Node
             if (theme != null) { ShowThemeDetail(itemId); return; }
             var tech = encyMgr.GetTechInfo(itemId);
             if (tech != null) { ShowTechDetail(itemId); return; }
+            // Show mechanics category directly
+            currentCategory = "mechanics";
+            ShowMechanicsDetail(itemId);
         }
 
         searchBox.TextChanged += (text) =>
