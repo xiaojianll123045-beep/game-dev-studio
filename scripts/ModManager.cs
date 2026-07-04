@@ -622,10 +622,34 @@ public static class ModManager
         _modSettings[mod.Id] = dict;
     }
 
-    /// <summary>获取 Mod 设置值</summary>
+    /// <summary>获取 Mod 设置值（带自动加载）</summary>
     public static string GetModSetting(string modId, string key, string fallback = "")
     {
-        return _modSettings.TryGetValue(modId, out var settings) && settings.TryGetValue(key, out var val) ? val : fallback;
+        if (!_modSettings.TryGetValue(modId, out var settings))
+        {
+            // 自动尝试加载文件（菜单时 ModManager.Init 不会调用各 Mod 的 LoadModSettings）
+            string path = $"user://mods/{modId}/settings.json";
+            if (FileAccess.FileExists(path))
+            {
+                using var f = FileAccess.Open(path, FileAccess.ModeFlags.Read);
+                if (f != null)
+                {
+                    var dict = new Dictionary<string, string>();
+                    ParseSimpleJson(dict, f.GetAsText());
+                    _modSettings[modId] = dict;
+                    settings = dict;
+                }
+            }
+        }
+        return settings != null && settings.TryGetValue(key, out var val) ? val : fallback;
+    }
+
+    /// <summary>获取布尔型设置</summary>
+    public static bool GetModSettingBool(string modId, string key, bool fallback = false)
+    {
+        var v = GetModSetting(modId, key, null);
+        if (v == null) return fallback;
+        return v == "true" || v == "1" || v == "yes";
     }
 
     /// <summary>保存 Mod 设置到 settings.json</summary>
@@ -634,7 +658,10 @@ public static class ModManager
         if (!_modSettings.ContainsKey(modId))
             _modSettings[modId] = new Dictionary<string, string>();
         _modSettings[modId][key] = value;
-        string path = $"user://mods/{modId}/settings.json";
+        string dir = $"user://mods/{modId}";
+        string path = $"{dir}/settings.json";
+        if (!DirAccess.DirExistsAbsolute(ProjectSettings.GlobalizePath(dir)))
+            DirAccess.MakeDirRecursiveAbsolute(ProjectSettings.GlobalizePath(dir));
         using var f = FileAccess.Open(path, FileAccess.ModeFlags.Write);
         if (f != null)
         {

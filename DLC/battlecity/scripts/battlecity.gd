@@ -77,7 +77,8 @@ func OnLoad(_gm, bridge):
 	var st = Timer.new()
 	st.wait_time = 0.05; st.one_shot = false
 	st.timeout.connect(func(): if not game_over and not won and Input.is_key_pressed(KEY_SPACE): _player_shoot())
-	add_child(st); st.start()
+	add_child(st)
+	if is_inside_tree(): st.start()
 	start_game()
 
 func start_game():
@@ -89,7 +90,6 @@ func start_game():
 func _build_ui():
 	if panel != null: panel.queue_free()
 	var pw = GRID_W + 160; var ph = GRID_H + 60
-	var vp = get_viewport().get_visible_rect().size
 	panel = Panel.new()
 	panel.anchor_left = 0.5; panel.anchor_top = 0.5
 	panel.offset_left = -pw/2; panel.offset_top = -ph/2
@@ -219,7 +219,7 @@ func next_wave():
 	_draw_player(); _update_ui()
 
 func _process(delta):
-	if game_over or won: return
+	if panel == null or game_over or won: return
 	shoot_timer -= delta
 	move_timer -= delta
 	if player != null and move_timer <= 0:

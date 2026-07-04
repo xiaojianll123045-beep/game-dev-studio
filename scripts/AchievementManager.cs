@@ -2342,6 +2342,8 @@ public partial class AchievementManager : Node
             new() { Id = "easter_broken", Name = Loc.Tr("ach.easter_broken"), Desc = Loc.Tr("ach.easter_broken_desc"), Category = Loc.Tr("ach.cat_easter") },
             new() { Id = "easter_lay_flat", Name = Loc.Tr("ach.easter_lay_flat"), Desc = Loc.Tr("ach.easter_lay_flat_desc"), Category = Loc.Tr("ach.cat_easter") },
             new() { Id = "easter_tanking", Name = Loc.Tr("ach.easter_tanking"), Desc = Loc.Tr("ach.easter_tanking_desc"), Category = Loc.Tr("ach.cat_easter") },
+            // DLC 成就
+            new() { Id = "easter_send_off", Name = Loc.Tr("ach.easter_send_off"), Desc = Loc.Tr("ach.easter_send_off_desc"), Category = Loc.Tr("ach.cat_easter") },
         };
 
         // 加载 Mod 自定义成就

@@ -4,13 +4,20 @@
 
 | 参数 | 类型 | 说明 |
 |------|------|------|
-| `gm` | `GameManager` (Node3D) | 游戏主管理器节点 |
-| `bridge` | `ModBridge` (Node) | **蛇形命名的 C# API 封装 —— 用这个** |
+| `gm` | `GameManager` (Node3D) | 游戏主管理器节点（菜单时为 null） |
+| `bridge` | `ModBridge` (Node) | **已废弃**，始终为 null。请使用全局单例 `ModBridge` |
 
-也可以在任意时刻通过节点路径获取 bridge：
+获取 bridge 的方式（推荐）：
+```gdscript
+var b = Engine.get_singleton("ModBridge")
+```
+
+也可以通过节点路径获取（仅游戏运行时有效，菜单时为 null）：
 ```gdscript
 var b = get_node("/root/GameManager/ModBridge")
 ```
+
+**注意：** `OnLoad` 的 `bridge` 参数始终为 null，请改为使用全局单例 `ModBridge`。
 
 ---
 
@@ -97,8 +104,9 @@ var b = get_node("/root/GameManager/ModBridge")
 | `b.unregister_minigame("名称")` | 取消注册小游戏 |
 在 `OnLoad` 中注册，`Callable` 会在用户点击启动时调用。示例：
 ```gdscript
+var b = Engine.get_singleton("ModBridge")
 func OnLoad(gm, bridge):
-	bridge.register_minigame("我的小游戏", self._my_minigame)
+	b.register_minigame("我的小游戏", self._my_minigame)
 func _my_minigame():
 	print("小游戏启动！")
 	# 在这里创建你的游戏 UI
@@ -111,6 +119,16 @@ func _my_minigame():
 | `b.unregister_key(KEY_F1)` | 取消注册按键 |
 在 `OnLoad` 中注册，按键会在游戏处理之前触发回调，不会被其他 UI 拦截。
 
+### 📻 音源加载（绕过导入系统）
+| GDScript 调用 | 说明 |
+|----------|------|
+| `b.load_mp3("res://path.mp3")` | 从 MP3 文件直接创建 AudioStream（不用 import） |
+
+### 📛 节点命名空间（避免命名冲突）
+| GDScript 调用 | 说明 |
+|----------|------|
+| `b.node_name("mod_id", "suffix")` | 返回 `Mod_modId_suffix`，确保不与其他 Mod 冲突 |
+
 ### ⚙ 自定义设置项
 | GDScript 调用 | 说明 |
 |----------|------|
@@ -118,8 +136,9 @@ func _my_minigame():
 | `b.unregister_setting("id")` | 移除自定义设置项 |
 `Callable` 接收两个参数：`(VBoxContainer root, float rowH)`，你可以在 `root` 中添加 UI 控件（CheckBox、OptionButton 等）。示例：
 ```gdscript
+var b = Engine.get_singleton("ModBridge")
 func OnLoad(gm, bridge):
-	bridge.register_setting("my_setting", "我的设置", self._render)
+	b.register_setting("my_setting", "我的设置", self._render)
 
 func _render(root, rowH):
 	var hb = HBoxContainer.new()
@@ -159,7 +178,7 @@ extends Node
 var b = null
 
 func OnLoad(gm, bridge):
-	b = bridge
+	b = Engine.get_singleton("ModBridge")
 	b.log("Mod 已加载！")
 	b.add_money(500000)
 	b.unlock_tech("3d_v1")
@@ -186,3 +205,5 @@ var _f1 = false
 - Godot 4 中没有 `Input.is_key_just_pressed()`。请用 `_process` + `is_key_pressed` + 防抖标志。
 - C# 静态类（`ModAPI`、`TechTreeData`）**无法从 GDScript 访问**。始终使用 `bridge.*`。
 - Mod 文件必须放在 `res://mods/你的Mod名字/` 下，并包含 `mod.json` 清单文件。
+- **调试日志**：游戏中按 F9 查看 Mod 日志。日志会自动保存到 `user://mod_log.txt`，打包后用户可将此文件发给 Mod 作者。
+- **控制台**：按 `~` 或 F12 打开 ModConsole，输入 `help` 查看命令，用 `mod_log` 查看日志，`save_log` 保存日志到文件。

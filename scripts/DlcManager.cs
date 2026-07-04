@@ -97,7 +97,7 @@ public static class DlcManager
         LoadEnabled();
         Log("DlcManager", $"DLC scan done, {_loaded.Count} total, {_activeMinigames.Count} minigames, {_enabledDlcIds.Count} enabled");
         // 执行已启用 DLC 脚本（注册设置项等，不依赖 GameManager）
-        foreach (var dlc in _loaded.Where(d => d.LoadedScript != null && _enabledDlcIds.Contains(d.Id)))
+        foreach (var dlc in _loaded.Where(d => d.LoadedScript != null && _enabledDlcIds.Contains(d.Id) && d.Type != "minigame"))
         {
             try
             {
@@ -117,7 +117,7 @@ public static class DlcManager
     {
         var bridge = parent?.GetNodeOrNull<ModBridge>("ModBridge");
         if (parent == null || bridge == null) return;
-        foreach (var dlc in _loaded.Where(d => d.LoadedScript != null && _enabledDlcIds.Contains(d.Id)))
+        foreach (var dlc in _loaded.Where(d => d.LoadedScript != null && _enabledDlcIds.Contains(d.Id) && d.Type != "minigame"))
         {
             try
             {
@@ -125,7 +125,7 @@ public static class DlcManager
                 n.SetScript(dlc.LoadedScript);
                 parent.AddChild(n);
                 MarkRunning(dlc.Id, n);
-                n.Call("OnLoad", parent, bridge);
+                n.Call("OnLoad", parent, new Variant());
                 Log("DLC", $"[{dlc.Name}] script executed");
             }
             catch (Exception ex) { GD.PrintErr($"[DLC] script exec error for {dlc.Name}: {ex.Message}"); }
@@ -307,7 +307,7 @@ public static class DlcManager
             _runningDlcIds.Add(dlc.Id);
             n.TreeExited += () => { _runningDlcIds.Remove(dlc.Id); };
             var bridge = gm.GetNodeOrNull<ModBridge>("ModBridge");
-            try { n.Call("OnLoad", gm, bridge); } catch (Exception ex) { GD.PrintErr($"[DLC] OnLoad error: {ex.Message}"); }
+            try { n.Call("OnLoad", gm, new Variant()); } catch (Exception ex) { GD.PrintErr($"[DLC] OnLoad error: {ex.Message}"); }
             return n;
         }
         if (dlc.LoadedScene != null)
@@ -321,15 +321,37 @@ public static class DlcManager
     }
 
     private static string _logText = "=== Mod Log ===\n";
+    private static string _logPath = "user://mod_log.txt";
     public static void Log(string source, string message)
     {
         string line = $"[{DateTime.Now:HH:mm:ss}] [{source}] {message}";
         GD.Print(line);
         _logText += line + "\n";
+        // 持久化到文件，打包后 Mod 作者可通过用户分享此文件调试
+        try
+        {
+            using var f = FileAccess.Open(_logPath, FileAccess.ModeFlags.ReadWrite);
+            if (f != null)
+            {
+                f.Seek(f.GetLength());
+                f.StoreString(line + "\n");
+            }
+            else
+            {
+                using var f2 = FileAccess.Open(_logPath, FileAccess.ModeFlags.Write);
+                f2?.StoreString(line + "\n");
+            }
+        }
+        catch { /* 不阻塞游戏 */ }
     }
 
     public static string ReadLog() => _logText;
-    public static void ClearLog() { _logText = "=== Mod Log ===\n"; Log("DlcManager", "Log cleared"); }
+    public static void ClearLog()
+    {
+        _logText = "=== Mod Log ===\n";
+        FileAccess.Open(_logPath, FileAccess.ModeFlags.Write)?.StoreString(_logText);
+        Log("DlcManager", "Log cleared");
+    }
 
     private static string GetStr(JsonElement e, string key, string fallback) =>
         e.TryGetProperty(key, out var v) ? v.GetString() ?? fallback : fallback;

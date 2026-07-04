@@ -227,11 +227,13 @@ public partial class GameManager : Node3D
     {
         UIScale = GlobalSettings.UIScale;
         // Mod 桥接（必须先于 ApplyAll，供 GDScript Mod 使用）
+        // 注册为 GDScript 全局单例，Mod 可直接用 ModBridge.add_money() 调用
         _modBridge = new ModBridge { Name = "ModBridge" };
         AddChild(_modBridge);
         _modBridge.Init(this);
-        // 注册为 GDScript 全局单例，Mod 可直接用 ModBridge.add_money() 调用
-        Engine.RegisterSingleton("ModBridge", _modBridge);
+        // 菜单已注册过单例，跳过重复注册避免警告
+        if (!Engine.HasSingleton("ModBridge"))
+            Engine.RegisterSingleton("ModBridge", _modBridge);
 
         // Mod 系统初始化
         ModManager.Init();

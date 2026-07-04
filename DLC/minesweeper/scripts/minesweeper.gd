@@ -43,8 +43,6 @@ var bottom_bar: HBoxContainer
 
 func OnLoad(_gm, bridge):
 	gm = _gm
-	StartGame()
-	# 全屏遮罩 + IsAnyModalOpen（和游戏内弹窗一致，阻止 3D 场景输入）
 	if gm != null:
 		var uilayer = gm.get("UiLayer")
 		if uilayer != null:
@@ -54,7 +52,7 @@ func OnLoad(_gm, bridge):
 			_modal_overlay.set_anchors_and_offsets_preset(15)
 			uilayer.add_child(_modal_overlay)
 		gm.set("IsAnyModalOpen", true)
-	# 用 Timer 代替 _Process，避免暂停影响
+	StartGame()
 	var t = Timer.new()
 	t.wait_time = 0.5; t.one_shot = false
 	t.timeout.connect(func(): 
@@ -63,7 +61,7 @@ func OnLoad(_gm, bridge):
 			timer_label.text = "⏱ " + str(int(timer))
 	)
 	add_child(t)
-	t.start()
+	if is_inside_tree(): t.start()
 
 func StartGame():
 	StartNew(9, 9, 10)
@@ -88,7 +86,6 @@ func StartNew(nr: int, nc: int, nm: int):
 			ch.queue_free()
 		panel.queue_free()
 
-	var vp = get_viewport().get_visible_rect().size
 	panel = Panel.new()
 	panel.anchor_left = 0.5; panel.anchor_top = 0.5
 	panel.offset_left = -pw/2; panel.offset_top = -ph/2

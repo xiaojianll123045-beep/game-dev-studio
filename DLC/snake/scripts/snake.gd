@@ -49,7 +49,6 @@ func start_game():
 func _build_ui():
 	if panel != null: panel.queue_free()
 	var pw = GRID_W + 160; var ph = GRID_H + 60
-	var vp = get_viewport().get_visible_rect().size
 	panel = Panel.new()
 	panel.anchor_left = 0.5; panel.anchor_top = 0.5
 	panel.offset_left = -pw/2; panel.offset_top = -ph/2
@@ -154,7 +153,7 @@ func _unhandled_input(ev):
 			KEY_SPACE: move_interval = 0.15
 
 func _process(delta):
-	if game_over or won: return
+	if panel == null or game_over or won: return
 	move_timer -= delta
 	if move_timer > 0: return
 	move_timer = move_interval

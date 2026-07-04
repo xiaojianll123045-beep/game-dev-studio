@@ -209,6 +209,20 @@ public partial class ModConsole : Control
             DlcManager.ClearLog();
             Print("  Mod 状态已重置");
         });
+
+        // ── 日志类 ──
+        RegisterCommand("mod_log", "显示完整 Mod 日志", "mod_log", (args) => {
+            var log = DlcManager.ReadLog();
+            if (log.Length > 3000) log = log[^3000..];
+            Print($"━━━ Mod 日志 (最近3000字) ━━━");
+            foreach (var line in log.Split('\n'))
+                if (!string.IsNullOrEmpty(line))
+                    Print($"  {line}");
+        });
+        RegisterCommand("save_log", "保存日志到 user://mod_log.txt", "save_log", (args) => {
+            Print($"  📁 日志已保存到: user://mod_log.txt");
+            Print("  可在文件管理器中找到此文件并分享给 Mod 作者");
+        });
     }
 
     // ── 控制台 UI 构建 ──

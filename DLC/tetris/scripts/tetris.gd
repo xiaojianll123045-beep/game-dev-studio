@@ -79,7 +79,6 @@ func _build_ui():
 		panel.queue_free()
 	var pw = COLS * CELL + 180
 	var ph = ROWS * CELL + 60
-	var vp = get_viewport().get_visible_rect().size
 	panel = Panel.new()
 	panel.anchor_left = 0.5; panel.anchor_top = 0.5
 	panel.offset_left = -pw/2; panel.offset_top = -ph/2

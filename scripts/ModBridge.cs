@@ -189,6 +189,31 @@ public partial class ModBridge : Node
     /// <summary>供设置面板读取</summary>
     public static System.Collections.Generic.IReadOnlyList<(string id, string label, Callable render)> GetCustomSettings() => _customSettings.AsReadOnly();
 
+    // ═══════════════ 音源加载 ═══════════════
+    /// <summary>从文件加载 MP3 流（绕过 Godot 导入系统）</summary>
+    public AudioStreamMP3 load_mp3(string path)
+    {
+        if (!FileAccess.FileExists(path)) { GD.PrintErr($"[ModBridge] file not found: {path}"); return null; }
+        using var f = FileAccess.Open(path, FileAccess.ModeFlags.Read);
+        if (f == null) return null;
+        var s = new AudioStreamMP3();
+        s.Data = f.GetBuffer((long)f.GetLength());
+        return s;
+    }
+
+    // ═══════════════ 节点命名空间 ═══════════════
+    /// <summary>生成带 Mod 前缀的唯一节点名，避免命名冲突</summary>
+    public string node_name(string mod_id, string suffix = "")
+    {
+        string name = "Mod_" + mod_id;
+        if (!string.IsNullOrEmpty(suffix)) name += "_" + suffix;
+        return name;
+    }
+
+    // ═══════════════ 成就 ═══════════════
+    /// <summary>解锁成就（需先在 AchievementManager 注册 ID）</summary>
+    public void unlock_achievement(string id) => ModAPI.UnlockAchievement(id);
+
     // ═══════════════ 日志 ═══════════════
     public void log(string msg) => GD.Print($"[Mod] {msg}");
     public void log_err(string msg) => GD.PrintErr($"[Mod] {msg}");

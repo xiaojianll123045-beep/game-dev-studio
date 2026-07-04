@@ -5,7 +5,7 @@ var b = null   # bridge
 var panel = null
 var ui = null
 func OnLoad(game_manager, bridge):
-	gm = game_manager; b = bridge
+	gm = game_manager; b = Engine.get_singleton("ModBridge")
 	b.register_key(KEY_F3, func():
 		if panel == null or not is_instance_valid(panel): _open()
 		else: _close()

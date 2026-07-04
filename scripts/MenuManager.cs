@@ -24,17 +24,18 @@ public partial class MenuManager : Node
 
 	public override void _Ready()
 	{
-		// 预注册 ModBridge 单例让 DLC 脚本能在菜单时注册设置项
-		if (Engine.HasSingleton("ModBridge") == false)
-		{
-			var tempBridge = new ModBridge();
-			Engine.RegisterSingleton("ModBridge", tempBridge);
-		}
 		_canvas = new CanvasLayer();
 		AddChild(_canvas);
 		_ui = new Control();
 		_ui.SetAnchorsAndOffsetsPreset(Control.LayoutPreset.FullRect);
 		_canvas.AddChild(_ui);
+		// 预注册 ModBridge 单例让 DLC 脚本能在菜单时注册设置项
+		if (Engine.HasSingleton("ModBridge") == false)
+		{
+			var tempBridge = new ModBridge();
+			Engine.RegisterSingleton("ModBridge", tempBridge);
+			_canvas.AddChild(tempBridge);  // 加入场景树让子节点能启动 Timer
+		}
 		GlobalSettings.Load();
 
 		Loc.Init();

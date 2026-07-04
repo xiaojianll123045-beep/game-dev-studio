@@ -4,13 +4,20 @@ Your GDScript mod receives two parameters in `OnLoad(gm, bridge)`:
 
 | Param | Type | Access |
 |-------|------|--------|
-| `gm` | `GameManager` (Node3D) | Root game manager node |
-| `bridge` | `ModBridge` (Node) | **Snake_case API to C# — use this** |
+| `gm` | `GameManager` (Node3D) | Root game manager node (null at menu) |
+| `bridge` | `ModBridge` (Node) | **Deprecated**, always null. Use the global singleton `ModBridge` instead |
 
-You can also access the bridge directly anytime:
+Recommended way to access the bridge:
+```gdscript
+var b = Engine.get_singleton("ModBridge")
+```
+
+You can also reach it by node path (in-game only, null at menu):
 ```gdscript
 var b = get_node("/root/GameManager/ModBridge")
 ```
+
+**Note:** The `bridge` parameter in `OnLoad` is always null. Use the `ModBridge` singleton instead.
 
 ---
 
@@ -97,8 +104,9 @@ var b = get_node("/root/GameManager/ModBridge")
 | `b.unregister_minigame("name")` | Unregister a minigame |
 Register in `OnLoad`. The `Callable` is called when the user launches it. Example:
 ```gdscript
+var b = Engine.get_singleton("ModBridge")
 func OnLoad(gm, bridge):
-	bridge.register_minigame("My Minigame", self._my_minigame)
+	b.register_minigame("My Minigame", self._my_minigame)
 func _my_minigame():
 	print("Minigame launched!")
 	# Create your game UI here
@@ -110,6 +118,16 @@ func _my_minigame():
 | `b.register_key(KEY_F1, Callable)` | Register a key callback (key = Godot Key enum value) |
 | `b.unregister_key(KEY_F1)` | Unregister a key callback |
 Register in `OnLoad`. The callback fires before normal game input processing, so it cannot be intercepted by other UI.
+
+### 📻 Audio Loading (bypass import system)
+| GDScript | Description |
+|----------|-------------|
+| `b.load_mp3("res://path.mp3")` | Create AudioStream directly from MP3 file (no import needed) |
+
+### 📛 Node Namespacing (avoid name conflicts)
+| GDScript | Description |
+|----------|-------------|
+| `b.node_name("mod_id", "suffix")` | Returns `Mod_modId_suffix`, guaranteed unique across mods |
 
 ### 📋 Logging & Settings
 | GDScript | Description |
@@ -130,7 +148,7 @@ extends Node
 var b = null
 
 func OnLoad(gm, bridge):
-	b = bridge
+	b = Engine.get_singleton("ModBridge")
 	b.log("My mod loaded!")
 	b.add_money(500000)
 	b.unlock_tech("3d_v1")
@@ -157,3 +175,5 @@ Balance tweaks go in `data/balance.json`. See `mod_examples/03_balance_tweaker/`
 - `Input.is_key_just_pressed()` does NOT exist in Godot 4. Use `_process` + `is_key_pressed` + debounce flag.
 - C# static classes (`ModAPI`, `TechTreeData`) are NOT accessible from GDScript. Always use `bridge.*`.
 - The mod file must be in `res://mods/your_mod_name/` with a `mod.json` manifest.
+- **Debug logging**: Press F9 in-game to view the Mod log. The log is automatically saved to `user://mod_log.txt` — packaged game users can share this file with mod authors for debugging.
+- **Console**: Press `~` or F12 to open the ModConsole. Type `help` for commands, `mod_log` to view logs, `save_log` to export the log to a file.

@@ -1019,6 +1019,8 @@
   "ach.easter_broken_desc": "All employees have satisfaction < 20",
   "ach.easter_tanking": "🗑️ Tanking",
   "ach.easter_tanking_desc": "3 consecutive games score < 40",
+  "ach.easter_send_off": "🎵 Farewell",
+  "ach.easter_send_off_desc": "Listen to 5 consecutive rounds of serene music without interruption",
   "ach.easter_lay_flat": "🛌 Lying Flat",
   "ach.easter_lay_flat_desc": "No development activity for 10 years",
   "ach.easter_founder_name": "🎬 Legend Tribute",
