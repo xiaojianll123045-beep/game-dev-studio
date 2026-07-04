@@ -88,6 +88,7 @@ public partial class GameManager : Node3D
     public float UIScale = 1.0f;
     public Control UiLayer => _uiLayer;
     private Control _uiLayer;
+    private Control _uiBg;
     private Panel _bottomNav;
     private List<Button> _tabButtons = new();
     private Panel _hoverTooltipPanel;
@@ -292,10 +293,17 @@ public partial class GameManager : Node3D
         _loadingOverlay = loadOverlay;
 
         // UI 层提前创建，供 BuildFounderCreationScreen 使用
+        // _uiLayer: 缩放层（所有交互组件在此，Scale = UIScale）
         _uiLayer = new Control();
         _uiLayer.SetAnchorsAndOffsetsPreset(Control.LayoutPreset.FullRect);
         _uiLayer.MouseFilter = Control.MouseFilterEnum.Ignore;
+        _uiLayer.Scale = new Vector2(UIScale, UIScale);
         AddChild(_uiLayer);
+        // _uiBg: 背景层（全屏遮罩、弹窗背景等不缩放元素）
+        _uiBg = new Control();
+        _uiBg.SetAnchorsAndOffsetsPreset(Control.LayoutPreset.FullRect);
+        _uiBg.MouseFilter = Control.MouseFilterEnum.Pass;
+        AddChild(_uiBg);
 
         // 节点引用必须在 _Ready 同步获取
         _res = GetNode<ResourceManager>("ResourceManager");
