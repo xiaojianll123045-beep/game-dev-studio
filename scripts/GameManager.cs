@@ -232,7 +232,9 @@ public partial class GameManager : Node3D
         _modBridge = new ModBridge { Name = "ModBridge" };
         AddChild(_modBridge);
         _modBridge.Init(this);
-        // 覆盖菜单注册的旧单例（会打印警告但功能正常）
+        // 始终注册（覆盖菜单释放后可能已悬挂的旧单例）
+        if (Engine.HasSingleton("ModBridge"))
+            Engine.UnregisterSingleton("ModBridge");
         Engine.RegisterSingleton("ModBridge", _modBridge);
 
         // Mod 系统初始化

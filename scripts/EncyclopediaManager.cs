@@ -153,7 +153,7 @@ public partial class EncyclopediaManager : Node
                 results.Add(new { type = "tech", id = t.id, name = t.name });
         }
         // Search mechanics sections
-        data.DeserializeItems();
+        data.mechanics.DeserializeItems();
         foreach (var kv in data.mechanics.Items)
         {
             string catId = kv.Key;
