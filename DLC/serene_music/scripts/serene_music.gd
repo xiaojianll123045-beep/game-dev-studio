@@ -3,21 +3,24 @@ extends Node
 var gm = null
 var b = null
 var use_serene = false
-var serene_stream = null
-var original_streams = []
+var serene_tracks = []
 var _sound_mgr = null
+var _track_idx = 0
 
 func OnLoad(game_manager, bridge):
 	gm = game_manager; b = bridge
-	# 加载哀乐音乐
-	var path = "res://DLC/serene_music/assets/funeral_music.mp3"
-	if ResourceLoader.exists(path):
-		var s = ResourceLoader.load(path)
-		if s != null:
-			serene_stream = s
-			print("[SereneMusic] loaded funeral music")
-	else:
-		print("[SereneMusic] no funeral music found at ", path)
+	# 加载哀乐（4首.m4a轮播）
+	for i in range(1, 5):
+		var path = "res://DLC/serene_music/assets/%d.m4a" % i
+		if ResourceLoader.exists(path):
+			var s = ResourceLoader.load(path)
+			if s != null:
+				serene_tracks.append(s)
+				print("[SereneMusic] loaded track ", i)
+			else:
+				print("[SereneMusic] failed to load ", path)
+		else:
+			print("[SereneMusic] file not found: ", path)
 	# 注册设置项
 	b.register_setting("serene_music", "🎵 音乐风格", self._render_setting)
 
@@ -52,40 +55,35 @@ func _render_setting(root, rowH):
 
 func _on_toggle(checked):
 	use_serene = checked
-	# 找 SoundManager
 	if _sound_mgr == null:
 		_sound_mgr = gm.get_node("SoundManager")
-	if _sound_mgr == null:
+	if _sound_mgr == null or serene_tracks.size() == 0:
 		return
-	# 根据模式切换 BGM
-	if use_serene and serene_stream != null:
-		# 切换到哀乐
-		_swap_bgm(serene_stream)
+	var bgm = _sound_mgr.get_node("BgmPlayer") if _sound_mgr else null
+	if bgm == null:
+		return
+	if use_serene:
+		# 切换到哀乐轮播（断开原 Finished 信号，用自己的）
+		if bgm.finished.is_connected(_restore_bgm):
+			bgm.finished.disconnect(_restore_bgm)
+		if not bgm.finished.is_connected(_play_next_serene):
+			bgm.finished.connect(_play_next_serene)
+		_track_idx = 0
+		bgm.stream = serene_tracks[0]
+		bgm.play()
 	else:
-		# 切换回原版
-		_restore_bgm()
-	# 更新复选框文字
-	for ch in get_tree().root.get_children():
-		_update_checkboxes()
-
-func _update_checkboxes():
-	# 通过场景树找到设置面板的复选框更新文字
-	pass  # 复选框更新较复杂，留给用户反馈
-
-func _swap_bgm(new_stream):
-	# 保存原版流并切换
-	var player = _sound_mgr.get_node("BgmPlayer") if _sound_mgr else null
-	if player == null:
-		return
-	if not player.playing:
-		return
-	player.stream = new_stream
-	player.play()
-
-func _restore_bgm():
-	# 重载 SoundManager 重新播放原版
-	if _sound_mgr != null and _sound_mgr.has_method("PlayGameBgm"):
+		# 切回原版
+		if bgm.finished.is_connected(_play_next_serene):
+			bgm.finished.disconnect(_play_next_serene)
 		_sound_mgr.PlayGameBgm()
+
+func _play_next_serene():
+	if serene_tracks.size() == 0: return
+	var bgm = _sound_mgr.get_node("BgmPlayer") if _sound_mgr else null
+	if bgm == null: return
+	_track_idx = (_track_idx + 1) % serene_tracks.size()
+	bgm.stream = serene_tracks[_track_idx]
+	bgm.play()
 
 func OnUnload():
 	b.unregister_setting("serene_music")
