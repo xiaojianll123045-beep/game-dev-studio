@@ -173,6 +173,12 @@ public partial class ModBridge : Node
 
     // ═══════════════ 自定义设置 ═══════════════
     private static List<(string id, string label, Callable render)> _customSettings = new();
+    /// <summary>静态注册（GDScript 可直接调用，无需实例）</summary>
+    public static void StaticRegisterSetting(string id, string label, Callable render_fn)
+    {
+        _customSettings.RemoveAll(s => s.id == id);
+        _customSettings.Add((id, label, render_fn));
+    }
     /// <summary>注册自定义设置项（显示在音乐设置下方）</summary>
     public void register_setting(string id, string label, Callable render_fn)
     {

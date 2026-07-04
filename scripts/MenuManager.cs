@@ -24,6 +24,12 @@ public partial class MenuManager : Node
 
 	public override void _Ready()
 	{
+		// 预注册 ModBridge 单例让 DLC 脚本能在菜单时注册设置项
+		if (Engine.HasSingleton("ModBridge") == false)
+		{
+			var tempBridge = new ModBridge();
+			Engine.RegisterSingleton("ModBridge", tempBridge);
+		}
 		_canvas = new CanvasLayer();
 		AddChild(_canvas);
 		_ui = new Control();
