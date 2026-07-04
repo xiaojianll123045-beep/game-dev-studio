@@ -5,6 +5,8 @@ var gm = null
 var use_serene = false
 var serene_tracks = []
 var _track_idx = 0
+var _rb_original = null
+var _rb_serene = null
 
 func OnLoad(game_manager, bridge):
 	gm = game_manager; b = bridge
@@ -32,27 +34,27 @@ func _render_setting(root, rowH):
 	label.custom_minimum_size = Vector2(0, rowH)
 	root.add_child(label)
 	# 原版 - 默认选中
-	var rb1 = CheckBox.new()
-	rb1.text = "安静祥和的音乐"
-	rb1.button_pressed = not use_serene
-	rb1.add_theme_font_size_override("font_size", 11)
-	rb1.add_theme_color_override("font_color", Color(0, 0, 0))
-	rb1.add_theme_color_override("font_hover_color", Color(0.4, 0.4, 0.4))
-	rb1.add_theme_color_override("font_pressed_color", Color(0, 0, 0))
-	rb1.add_theme_color_override("font_focus_color", Color(0, 0, 0))
-	rb1.toggled.connect(func(on): if on: _on_toggle(false))
-	root.add_child(rb1)
+	_rb_original = CheckBox.new()
+	_rb_original.text = "安静祥和的音乐"
+	_rb_original.button_pressed = not use_serene
+	_rb_original.add_theme_font_size_override("font_size", 11)
+	_rb_original.add_theme_color_override("font_color", Color(0, 0, 0))
+	_rb_original.add_theme_color_override("font_hover_color", Color(0.4, 0.4, 0.4))
+	_rb_original.add_theme_color_override("font_pressed_color", Color(0, 0, 0))
+	_rb_original.add_theme_color_override("font_focus_color", Color(0, 0, 0))
+	_rb_original.toggled.connect(func(on): if on: _rb_serene.button_pressed = false; _on_toggle(false))
+	root.add_child(_rb_original)
 	# 哀乐
-	var rb2 = CheckBox.new()
-	rb2.text = "安详的音乐"
-	rb2.button_pressed = use_serene
-	rb2.add_theme_font_size_override("font_size", 11)
-	rb2.add_theme_color_override("font_color", Color(0, 0, 0))
-	rb2.add_theme_color_override("font_hover_color", Color(0.4, 0.4, 0.4))
-	rb2.add_theme_color_override("font_pressed_color", Color(0, 0, 0))
-	rb2.add_theme_color_override("font_focus_color", Color(0, 0, 0))
-	rb2.toggled.connect(func(on): if on: _on_toggle(true))
-	root.add_child(rb2)
+	_rb_serene = CheckBox.new()
+	_rb_serene.text = "安详的音乐"
+	_rb_serene.button_pressed = use_serene
+	_rb_serene.add_theme_font_size_override("font_size", 11)
+	_rb_serene.add_theme_color_override("font_color", Color(0, 0, 0))
+	_rb_serene.add_theme_color_override("font_hover_color", Color(0.4, 0.4, 0.4))
+	_rb_serene.add_theme_color_override("font_pressed_color", Color(0, 0, 0))
+	_rb_serene.add_theme_color_override("font_focus_color", Color(0, 0, 0))
+	_rb_serene.toggled.connect(func(on): if on: _rb_original.button_pressed = false; _on_toggle(true))
+	root.add_child(_rb_serene)
 
 func _on_toggle(checked):
 	use_serene = checked
