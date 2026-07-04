@@ -14,29 +14,13 @@ func OnLoad(game_manager, bridge):
 	if dlc_folder != null and dlc_folder != "":
 		base_path = dlc_folder
 	
-	# Load serene tracks (WAV with explicit PCM, avoids AudioStreamMP3 decoder issues)
+	# Load serene tracks (MP3 via C# AudioStreamMP3.Data which works)
 	var tracks = []
 	for i in range(1, 5):
 		var loaded = null
-		var path = base_path + "/assets/%d.wav" % i
-		if FileAccess.file_exists(path):
-			var file = FileAccess.open(path, FileAccess.READ)
-			if file != null:
-				var bytes = file.get_buffer(file.get_length())
-				file.close()
-				# Find "data" chunk to extract raw PCM
-				var data_idx = -1
-				for j in range(0, min(bytes.size() - 8, 1024)):
-					if bytes[j] == 0x64 and bytes[j+1] == 0x61 and bytes[j+2] == 0x74 and bytes[j+3] == 0x61:
-						data_idx = j + 8
-						break
-				if data_idx > 0:
-					var s = AudioStreamWAV.new()
-					s.format = AudioStreamWAV.FORMAT_16_BITS
-					s.mix_rate = 44100
-					s.stereo = true
-					s.data = bytes.slice(data_idx)
-					loaded = s
+		var path = base_path + "/assets/%d.mp3" % i
+		if b != null:
+			loaded = b.load_mp3(path)
 		if loaded != null:
 			tracks.append(loaded)
 	
