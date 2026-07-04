@@ -354,6 +354,8 @@ public partial class GameManager : Node3D
         CardUI.Init(this);
         ModAPI.Init(this);
         ModConsole.CreateNow(); // 预创建控制台（_uiLayer 已就绪）
+        // 执行已启用的 DLC 脚本（此时 Services.GameManager 已可用）
+        DlcManager.ExecuteDlcScripts(this);
 
         ModMethodOverride.CallVoid("game_init_nodes_ready", ModMethodOverride.Args(), () => { });
 
