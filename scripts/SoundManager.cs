@@ -21,7 +21,7 @@ public partial class SoundManager : Node
         _bgmTracks[0] = ResourceLoader.Load<AudioStream>("res://assets/sounds/Casa Bossa Nova.mp3");
         _bgmTracks[1] = ResourceLoader.Load<AudioStream>("res://assets/sounds/Thinking Music.mp3");
         GD.Print($"Loaded BGM0={_bgmTracks[0] != null} BGM1={_bgmTracks[1] != null}");
-        if (_bgmTracks[0] != null) _bgmPlayer.Stream = _bgmTracks[0];
+        if (_bgmTracks[0] != null) { _bgmPlayer.Stream = _bgmTracks[0]; _bgmPlayer.VolumeDb = 0f; _bgmPlayer.Play(); }
         _bgmPlayer.Finished += _SwapBgm;
     }
 
