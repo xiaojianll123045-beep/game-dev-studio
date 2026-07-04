@@ -226,6 +226,7 @@ public partial class GameManager : Node3D
     public override void _Ready()
     {
         UIScale = GlobalSettings.UIScale;
+        DlcManager.Log("DLC", "=== GameManager._Ready START ===");
 
         // Mod 桥接（必须先于 ApplyAll，供 GDScript Mod 使用）
         _modBridge = new ModBridge { Name = "ModBridge" };
