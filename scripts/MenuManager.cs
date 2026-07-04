@@ -43,10 +43,10 @@ public partial class MenuManager : Node
 		GlobalSettings.ApplyAll();
 		BuildUI();
 
-		// 主菜单 BGM
+		// 主菜单 BGM（受全局音乐设置控制）
 		_menuMusic = new AudioStreamPlayer { Name = "MenuMusic", VolumeDb = -6f, Bus = "Master" };
 		AddChild(_menuMusic);
-		_menuMusic.Finished += () => _menuMusic.Play();
+		_menuMusic.Finished += () => { if (GlobalSettings.MusicEnabled) _menuMusic.Play(); };
 		var stream = ResourceLoader.Load<AudioStream>("res://assets/sounds/bgm_加载.wav");
 		if (stream != null) {
 			_menuMusic.Stream = stream;
@@ -59,13 +59,12 @@ public partial class MenuManager : Node
 		_musicFrames++;
 		if (_musicFrames == 3)
 		{
-			// Enable autoplay via engine and force play
-			_menuMusic.Play();
-			GD.Print("MenuMusic: play at frame 3");
+			if (GlobalSettings.MusicEnabled) { _menuMusic.Play(); GD.Print("MenuMusic: play at frame 3"); }
+			else GD.Print("MenuMusic: skipped (MusicEnabled=false)");
 		}
 		if (_musicFrames == 10)
 		{
-			if (!_menuMusic.Playing)
+			if (GlobalSettings.MusicEnabled && !_menuMusic.Playing)
 			{
 				_menuMusic.Play();
 				GD.Print("MenuMusic: retry at frame 10");
