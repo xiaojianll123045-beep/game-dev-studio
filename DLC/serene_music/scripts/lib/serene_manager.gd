@@ -79,10 +79,13 @@ func _on_toggled(on, is_serene):
 	use_serene = is_serene
 	if b != null:
 		b.set_setting("serene_music", "use_serene", "true" if is_serene else "false")
+		b.log("serene: saved use_serene=" + ("true" if is_serene else "false"))
 	if is_serene:
+		b.log("serene: starting...")
 		_start_serene()
 		if _gm == null:
 			_override_menu_music()
+		b.log("serene: started ok")
 	else:
 		_stop_serene()
 
