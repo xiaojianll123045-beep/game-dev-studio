@@ -371,11 +371,13 @@ public partial class UISystemEx : Node
     public void ShowAchievementGallery()
     {
         var achMgr = Services.AchievementManager;
+        var canvas = new CanvasLayer { Layer = 128 };
         var overlay = new ColorRect { Color = new Color(0, 0, 0, 0.6f) };
         overlay.SetAnchorsAndOffsetsPreset(Control.LayoutPreset.FullRect);
         overlay.MouseFilter = Control.MouseFilterEnum.Stop;
         _gm.IsAnyModalOpen = true;
         overlay.TreeExiting += () => _gm.IsAnyModalOpen = false;
+        canvas.AddChild(overlay);
 
         var panel = new Panel();
         panel.SetAnchorsAndOffsetsPreset(Control.LayoutPreset.Center);
@@ -472,10 +474,10 @@ public partial class UISystemEx : Node
         }
 
         var closeBtn = new Button { Text = "\u5173\u95ed", Position = new Vector2(760, 524) };
-        closeBtn.Pressed += () => overlay.QueueFree();
+        closeBtn.Pressed += () => canvas.QueueFree();
         panel.AddChild(closeBtn);
         overlay.AddChild(panel);
-        _uiLayer.AddChild(overlay);
+        _uiLayer.AddChild(canvas);
     }
 
     // ── 快捷工具栏（由 GameManager.BuildHUD 直接创建按钮） ──
