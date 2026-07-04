@@ -96,6 +96,9 @@ func _start_serene():
 		add_child(_lock_timer)
 	if is_inside_tree():
 		_lock_timer.start()
+	else:
+		# Manager not in tree yet (e.g. early call during init), retry
+		call_deferred("_start_serene")
 	_force_serene()
 
 func _stop_serene():
@@ -126,9 +129,13 @@ func _stop_serene():
 func _force_serene():
 	if not use_serene or _gm == null or serene_tracks.size() == 0: return
 	var sm = _gm.get_node("SoundManager") if _gm else null
-	if sm == null: return
+	if sm == null:
+		call_deferred("_force_serene")
+		return
 	var bgm = sm.get_node("BgmPlayer") if sm else null
-	if bgm == null: return
+	if bgm == null:
+		call_deferred("_force_serene")
+		return
 	# Detect interruption: BGM was changed or stopped by game
 	var interrupted = false
 	if bgm.stream != serene_tracks[_track_idx]:
