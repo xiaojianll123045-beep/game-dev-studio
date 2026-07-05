@@ -316,10 +316,10 @@
   "menu.exit": "Exit",
   "menu.esc_hint": "Press ESC to close panel  ·  Godot 4.7  ·  C#",
   "menu.esc_close": "Press ESC to close",
-  "about.github": "🌐 Source: https://github.com/xiaojianll123045-beep/game-dev-studio",
+  "about.github": "🌐 [url=https://github.com/xiaojianll123045-beep/game-dev-studio]Source[/url]",
   "about.thanks": "— Special Thanks —",
 
-  "about.ai_credit": "🧠 This game was developed with assistance from DeepSeek",
+  "about.ai_credit": "🧠 This game was developed with assistance from [url=https://deepseek.com]DeepSeek[/url]",
   "about.music_credit": "🎵 Music: Kevin MacLeod (incompetech.com)  Licensed under CC-BY",
   "about.devotion": "This game has no DRM or anti-crack measures\nSource code & mod system are open source for mod developers\nIf you have mod ideas, go wild, no restrictions\nPlease don't judge my code\nCrack groups and modders: please keep my contact info in the about page\nHave fun ❤️\nAlso follow Neuro-sama, thanks meow",
   "menu.about_content1": "Business Sim / Sandbox Strategy",

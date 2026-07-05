@@ -517,13 +517,15 @@ public partial class MenuManager : Node
 			lbl.Text = "[center]" + line + "[/center]";
 			lbl.AddThemeFontSizeOverride("font_size", 14);
 			lbl.AddThemeColorOverride("default_color", new Color(0, 0, 0));
-			lbl.AddThemeColorOverride("selection_color", new Color(0.6f, 0.7f, 0.9f, 0.3f));
-			lbl.SelectionEnabled = true;
+		lbl.AddThemeColorOverride("selection_color", new Color(0.6f, 0.7f, 0.9f, 0.3f));
+		lbl.AddThemeColorOverride("meta_color", new Color(0.2f, 0.4f, 0.8f));
+		lbl.SelectionEnabled = true;
 			lbl.FocusMode = Control.FocusModeEnum.Click;
 			lbl.MouseFilter = Control.MouseFilterEnum.Stop;
-			var focusStyle = new StyleBoxFlat { BgColor = new Color(1, 1, 1, 0.05f), BorderWidthLeft = 1, BorderWidthTop = 1, BorderWidthRight = 1, BorderWidthBottom = 1, BorderColor = new Color(0, 0, 0, 0.3f) };
-			lbl.AddThemeStyleboxOverride("focus", focusStyle);
-			_aboutPanel.AddChild(lbl);
+		var focusStyle = new StyleBoxFlat { BgColor = new Color(1, 1, 1, 0.05f), BorderWidthLeft = 1, BorderWidthTop = 1, BorderWidthRight = 1, BorderWidthBottom = 1, BorderColor = new Color(0, 0, 0, 0.3f) };
+		lbl.AddThemeStyleboxOverride("focus", focusStyle);
+		lbl.MetaClicked += (meta) => OS.ShellOpen(meta.ToString());
+		_aboutPanel.AddChild(lbl);
 			ly += 34;
 		}
 
