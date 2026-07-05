@@ -698,6 +698,57 @@ must do so under the terms of the GPL v3.
 Mods placed in the `mods/` directory or loaded via the game's mod
 system are explicitly covered by this exception.
 
+=== SANDBOX EXCEPTION ===
+
+The "Sandbox System" (defined below) is released under a permissive
+exception to the GPL v3, similar in spirit to the Mod Exception above
+but even more permissive. You may extract, copy, modify, and use the
+Sandbox System in any project — proprietary, open source, commercial,
+or otherwise — WITHOUT being required to open source that project or
+license it under the GPL.
+
+The "Sandbox System" consists of the following files and any code
+within them:
+
+  - scripts/ModSandbox.cs
+  - extensions/mod_sandbox_native/mod_sandbox_hook.cpp
+  - extensions/mod_sandbox_native/build.bat
+  - Any future files placed in the extensions/mod_sandbox_native/ directory
+
+All other game source files remain under the full terms of the GPL v3.
+
+CONDITIONS (the only requirements):
+
+  1. ATTRIBUTION — If you distribute a project that includes the
+     Sandbox System (in whole or in part), you MUST include the
+     following attribution in a location clearly visible to end users
+     (e.g., an "About" page, "Credits" section, or similar):
+
+       "Sandbox system originally from GameDevStudio
+        by 小坚来了 — https://github.com/xiaojianll123045-beep/game-dev-studio"
+
+     This credit must be displayed within the software itself (not
+     just in source code comments or documentation files).
+
+  2. REPOSITORY LINK — The URL to the original repository
+     (https://github.com/xiaojianll123045-beep/game-dev-studio) must
+     also be present alongside the attribution.
+
+Beyond these two attribution requirements, there are NO other
+restrictions. You do NOT need to:
+  - Open-source your project
+  - Release your project under GPL (or any copyleft license)
+  - Share your modifications to the Sandbox System
+  - Obtain permission or pay any fees
+  - Include the full GPLv3 license text (attribution is enough)
+
+Open-sourcing your project is always appreciated, but NOT required
+when you only take the Sandbox System. Attribution is MANDATORY.
+
+This exception applies ONLY to the Sandbox System files listed above.
+If you also copy other parts of the game's source code, those parts
+remain under the full GPL v3.
+
 === NEURO-SAMA CREDIT REQUIREMENT ===
 
 As an additional term under GPLv3 Section 7(b), if you distribute
