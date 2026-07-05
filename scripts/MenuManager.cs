@@ -798,7 +798,7 @@ public partial class MenuManager : Node
 			renameBtn.AddThemeColorOverride("font_color", new Color(0.5f, 0.5f, 0.5f));
 			renameBtn.AddThemeColorOverride("font_hover_color", new Color(0.35f, 0.35f, 0.35f));
 			string capPath = path;
-			renameBtn.Pressed += () => { ShowRenameSlotDialog(capPath); RebuildLoadPanel(); };
+			renameBtn.Pressed += () => { RebuildLoadPanel(); ShowRenameSlotDialog(capPath); };
 			_loadPanel.AddChild(renameBtn);
 
 			var loadBtn = new Button { Text = Loc.Tr("ui.load_btn"), Position = new(leftX + 390, rowY), Size = new(55, 24), Flat = true };
