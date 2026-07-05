@@ -65,10 +65,10 @@ public static class ModUIPatch
         var panel = CreateFromJson(json, modId);
         if (panel == null) return null;
 
-        // 包裹在半透明遮罩中
+        // 包裹在半透明遮罩中（使用锚点填满视口，适配分辨率）
         var overlay = new Panel
         {
-            Size = _gm?.GetViewport()?.GetVisibleRect().Size ?? new Vector2(1920, 1080),
+            AnchorLeft = 0, AnchorTop = 0, AnchorRight = 1, AnchorBottom = 1,
             MouseFilter = Control.MouseFilterEnum.Pass,
         };
         var style = new StyleBoxFlat { BgColor = new Color(0, 0, 0, 0.5f) };
@@ -126,10 +126,41 @@ public static class ModUIPatch
         if (el.TryGetProperty("tooltip", out var tip))
             ctrl.TooltipText = tip.GetString() ?? "";
 
-        if (el.TryGetProperty("x", out var x)) ctrl.Position = new Vector2(x.GetSingle(), ctrl.Position.Y);
-        if (el.TryGetProperty("y", out var y)) ctrl.Position = new Vector2(ctrl.Position.X, y.GetSingle());
+        // 锚点布局（0~1 比例，覆盖硬坐标，适配分辨率）
+        if (el.TryGetProperty("anchor_left", out var al)) ctrl.AnchorLeft = al.GetSingle();
+        if (el.TryGetProperty("anchor_top", out var at)) ctrl.AnchorTop = at.GetSingle();
+        if (el.TryGetProperty("anchor_right", out var ar)) ctrl.AnchorRight = ar.GetSingle();
+        if (el.TryGetProperty("anchor_bottom", out var ab)) ctrl.AnchorBottom = ab.GetSingle();
+        // 锚点偏移（px）
+        if (el.TryGetProperty("offset_left", out var ol)) ctrl.OffsetLeft = ol.GetSingle();
+        if (el.TryGetProperty("offset_top", out var ot)) ctrl.OffsetTop = ot.GetSingle();
+        if (el.TryGetProperty("offset_right", out var or_)) ctrl.OffsetRight = or_.GetSingle();
+        if (el.TryGetProperty("offset_bottom", out var ob)) ctrl.OffsetBottom = ob.GetSingle();
+        // 边距（offset 简写）
+        if (el.TryGetProperty("margin", out var m)) { float mv = m.GetSingle(); ctrl.OffsetLeft = mv; ctrl.OffsetTop = mv; ctrl.OffsetRight = -mv; ctrl.OffsetBottom = -mv; }
+
+        // 硬坐标（仅当未设置锚点时作为回退）
+        if (!el.TryGetProperty("anchor_left", out _) && !el.TryGetProperty("offset_left", out _))
+        {
+            if (el.TryGetProperty("x", out var x)) ctrl.Position = new Vector2(x.GetSingle(), ctrl.Position.Y);
+            if (el.TryGetProperty("y", out var y)) ctrl.Position = new Vector2(ctrl.Position.X, y.GetSingle());
+        }
         if (el.TryGetProperty("w", out var w)) ctrl.Size = new Vector2(w.GetSingle(), ctrl.Size.Y);
         if (el.TryGetProperty("h", out var h)) ctrl.Size = new Vector2(ctrl.Size.X, h.GetSingle());
+
+        // size_flags（弹性布局）
+        if (el.TryGetProperty("expand_h", out var eh) && eh.GetBoolean())
+            ctrl.SizeFlagsHorizontal |= Control.SizeFlags.ExpandFill;
+        if (el.TryGetProperty("expand_v", out var ev) && ev.GetBoolean())
+            ctrl.SizeFlagsVertical |= Control.SizeFlags.ExpandFill;
+        if (el.TryGetProperty("shrink_center", out var sc) && sc.GetBoolean())
+        {
+            ctrl.SizeFlagsHorizontal = Control.SizeFlags.ShrinkCenter;
+            ctrl.SizeFlagsVertical = Control.SizeFlags.ShrinkCenter;
+        }
+        // 容器间距
+        if (el.TryGetProperty("separation", out var sep) && ctrl is Container cnt)
+            cnt.AddThemeConstantOverride("separation", sep.GetInt32());
 
         if (el.TryGetProperty("color", out var color))
         {
@@ -167,8 +198,8 @@ public static class ModUIPatch
                 var childCtrl = BuildControl(child, modId, ctrl);
                 if (childCtrl != null)
                 {
-                    if (ctrl is Container container)
-                        container.AddChild(childCtrl);
+                    if (ctrl is Container c)
+                        c.AddChild(childCtrl);
                     else
                         ctrl.AddChild(childCtrl);
                 }
