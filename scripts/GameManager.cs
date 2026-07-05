@@ -3141,6 +3141,67 @@ public partial class GameManager : Node3D
         popTween.Parallel().TweenProperty(_toastPanel, "scale", Vector2.One, 0.2f);
     }
 
+    /// <summary>沙箱权限请求弹窗 — Mod 请求文件系统权限时显示</summary>
+    public void ShowSandboxPermissionDialog(string modId, string modName, string path, string typeName, Callable onAllow, Callable onDeny)
+    {
+        if (_uiLayer == null) return;
+        var vp = GetViewport().GetVisibleRect().Size;
+        var S = (Func<float, float>)(v => v * UIScale);
+        float pw = S(420), ph = S(200);
+
+        var overlay = new ColorRect { Color = new Color(0, 0, 0, 0.4f), MouseFilter = Control.MouseFilterEnum.Stop };
+        overlay.SetAnchorsAndOffsetsPreset(Control.LayoutPreset.FullRect);
+        _uiLayer.AddChild(overlay);
+
+        var dlg = new Panel { Position = new((vp.X - pw) / 2, (vp.Y - ph) / 2), Size = new(pw, ph), MouseFilter = Control.MouseFilterEnum.Stop };
+        dlg.AddThemeStyleboxOverride("panel", new StyleBoxFlat
+        {
+            BgColor = Colors.White,
+            BorderWidthLeft = 2, BorderWidthTop = 2, BorderWidthRight = 2, BorderWidthBottom = 2,
+            BorderColor = new Color(0.9f, 0.5f, 0.2f, 0.8f),
+            CornerRadiusTopLeft = 8, CornerRadiusTopRight = 8, CornerRadiusBottomLeft = 8, CornerRadiusBottomRight = 8
+        });
+        _uiLayer.AddChild(dlg);
+
+        var title = new Label { Text = Loc.Tr("sandbox.perm_title"), Position = new(S(16), S(12)), Size = new(pw - S(32), S(24)) };
+        title.AddThemeFontSizeOverride("font_size", 16);
+        title.AddThemeColorOverride("font_color", new Color(0.9f, 0.5f, 0.1f));
+        dlg.AddChild(title);
+
+        string msg = Loc.TrF("sandbox.perm_msg", modName, typeName, path);
+        var msgLabel = new Label { Text = msg, Position = new(S(16), S(44)), Size = new(pw - S(32), S(60)), AutowrapMode = TextServer.AutowrapMode.Word };
+        msgLabel.AddThemeFontSizeOverride("font_size", 12);
+        msgLabel.AddThemeColorOverride("font_color", new Color(0.15f, 0.18f, 0.22f));
+        dlg.AddChild(msgLabel);
+
+        float btnY = ph - S(42);
+
+        var allowBtn = new Button { Text = Loc.Tr("sandbox.allow"), Position = new(pw / 2 + S(8), btnY), Size = new(S(90), S(32)), Flat = true };
+        allowBtn.AddThemeFontSizeOverride("font_size", 13);
+        allowBtn.AddThemeColorOverride("font_color", Colors.White);
+        allowBtn.AddThemeStyleboxOverride("normal", new StyleBoxFlat { BgColor = new Color(0.2f, 0.6f, 0.3f), CornerRadiusTopLeft = 4, CornerRadiusTopRight = 4, CornerRadiusBottomLeft = 4, CornerRadiusBottomRight = 4 });
+        allowBtn.Pressed += () =>
+        {
+            ModSandbox.GrantPermission(modId, path);
+            overlay.QueueFree(); dlg.QueueFree();
+        };
+        dlg.AddChild(allowBtn);
+
+        var denyBtn = new Button { Text = Loc.Tr("sandbox.deny"), Position = new(pw / 2 - S(98), btnY), Size = new(S(90), S(32)), Flat = true };
+        denyBtn.AddThemeFontSizeOverride("font_size", 13);
+        denyBtn.AddThemeColorOverride("font_color", new Color(0.15f, 0.18f, 0.22f));
+        denyBtn.AddThemeStyleboxOverride("normal", new StyleBoxFlat { BgColor = new Color(0.90f, 0.89f, 0.86f), CornerRadiusTopLeft = 4, CornerRadiusTopRight = 4, CornerRadiusBottomLeft = 4, CornerRadiusBottomRight = 4, BorderWidthLeft = 1, BorderWidthTop = 1, BorderWidthRight = 1, BorderWidthBottom = 1, BorderColor = new Color(0.45f, 0.5f, 0.55f, 0.3f) });
+        denyBtn.Pressed += () =>
+        {
+            ModSandbox.DenyPermission(modId, path);
+            overlay.QueueFree(); dlg.QueueFree();
+        };
+        dlg.AddChild(denyBtn);
+    }
+
+    private void _CallOnAllow(Callable cb) { try { cb.Call(); } catch { } }
+    private void _CallOnDeny(Callable cb) { try { cb.Call(); } catch { } }
+
     /// <summary>带A/B选择的事件弹窗 — 屏幕中央，自适应高度，暂停时间。
     /// 按钮文本过长时自动切换为纵向排列。</summary>
     public void ShowChoicePopup(string title, string message, string optA, string optB, Action onA, Action onB, Color titleColor)
@@ -6884,6 +6945,20 @@ public partial class GameManager : Node3D
             var slider = new HSlider { MinValue = 0, MaxValue = 100, Value = GlobalSettings.MusicVolume, SizeFlagsHorizontal = Control.SizeFlags.ExpandFill, CustomMinimumSize = new(0, rowH) };
             slider.ValueChanged += (v) => { GlobalSettings.MusicVolume = (float)v; _soundMgr?.RefreshVolume(); GlobalSettings.Save(); };
             AddRow(Loc.Tr("set.music_volume"), slider);
+        }
+        // ── Mod 沙箱模式 ──
+        {
+            root.AddChild(new ColorRect { Color = new Color(0.70f, 0.72f, 0.75f, 0.25f), CustomMinimumSize = new(0, 1) });
+            string[] modes = { Loc.Tr("sandbox.mode_open"), Loc.Tr("sandbox.mode_strict"), Loc.Tr("sandbox.mode_absolute") };
+            int selMode = (int)ModSandbox.Mode;
+            var sandboxOpt = new OptionButton();
+            foreach (var m in modes) sandboxOpt.AddItem(m);
+            sandboxOpt.Selected = selMode;
+            sandboxOpt.AddThemeFontSizeOverride("font_size", 11);
+            sandboxOpt.AddThemeColorOverride("font_color", Colors.White);
+            sandboxOpt.AddThemeStyleboxOverride("normal", new StyleBoxFlat { BgColor = new Color(0.15f, 0.18f, 0.22f), CornerRadiusTopLeft = 4, CornerRadiusTopRight = 4, CornerRadiusBottomLeft = 4, CornerRadiusBottomRight = 4 });
+            sandboxOpt.ItemSelected += (long i) => { ModSandbox.Mode = (ModSandbox.SandboxMode)(int)i; };
+            AddRow(Loc.Tr("sandbox.mode_label"), sandboxOpt);
         }
         // ── Mod 自定义设置项 ──
         foreach (var cs in ModBridge.GetCustomSettings())

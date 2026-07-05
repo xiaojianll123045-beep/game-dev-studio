@@ -31,8 +31,10 @@ public static class ModManager
     /// <summary>扫描并加载所有 Mod（由 GameManager 在启动时调用）</summary>
     public static void Init()
     {
+        ModSandbox.Init();
         LoadEnabledConfig();
         ScanMods();
+        ModSandbox.RegisterConsoleCommands();
     }
 
     private static void ScanMods()
@@ -214,9 +216,9 @@ public static class ModManager
     /// <summary>应用单个 Mod</summary>
     public static void ApplyMod(ModManifest mod, GameManager gm)
     {
-        if (mod.IsLanguage) ApplyLanguageMod(mod, gm);
-        else if (mod.IsData) ApplyDataMod(mod, gm);
-        else if (mod.HasScripts) ApplyScriptMod(mod, gm);
+        if (mod.IsLanguage) { ModSandbox.RegisterMod(mod.Id, mod.Name); ApplyLanguageMod(mod, gm); }
+        else if (mod.IsData) { ModSandbox.RegisterMod(mod.Id, mod.Name); ApplyDataMod(mod, gm); }
+        else if (mod.HasScripts) { ModSandbox.RegisterMod(mod.Id, mod.Name); ApplyScriptMod(mod, gm); }
 
         // 从 Mod 文件夹加载程序集
         string asmDir = mod.Folder + "/assemblies";

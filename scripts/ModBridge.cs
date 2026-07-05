@@ -235,4 +235,41 @@ public partial class ModBridge : Node
     {
         _registeredKeys.Remove((Key)key);
     }
+
+    // ═══════════════ 沙箱安全 API ═══════════════
+    /// <summary>通过沙箱安全读取文件（自动重定向到 Mod 沙箱目录）</summary>
+    public string sandbox_safe_read(string mod_id, string path)
+    {
+        string redirect = ModSandbox.RedirectPath(mod_id, path);
+        if (redirect == null) return "";
+        if (!FileAccess.FileExists(redirect)) return "";
+        using var f = FileAccess.Open(redirect, FileAccess.ModeFlags.Read);
+        return f?.GetAsText() ?? "";
+    }
+
+    /// <summary>通过沙箱安全写入文件（自动重定向到 Mod 沙箱目录）</summary>
+    public bool sandbox_safe_write(string mod_id, string path, string data)
+    {
+        string redirect = ModSandbox.RedirectPath(mod_id, path);
+        if (redirect == null) return false;
+        string dir = System.IO.Path.GetDirectoryName(redirect);
+        if (!string.IsNullOrEmpty(dir) && !System.IO.Directory.Exists(dir))
+            System.IO.Directory.CreateDirectory(dir);
+        using var f = FileAccess.Open(redirect, FileAccess.ModeFlags.Write);
+        if (f == null) return false;
+        f.StoreString(data);
+        return true;
+    }
+
+    /// <summary>获取 Mod 的专属沙箱目录</summary>
+    public string sandbox_get_dir(string mod_id) => ModSandbox.GetModSandboxDir(mod_id) ?? "";
+
+    /// <summary>请求文件系统权限（触发 UI 弹窗）</summary>
+    public bool request_permission(string mod_id, string path, int permission_type)
+    {
+        return ModSandbox.RequestFilePermission(mod_id, path, (ModSandbox.PermissionType)permission_type);
+    }
+
+    /// <summary>检查某路径是否已被授予权限</summary>
+    public bool is_path_allowed(string mod_id, string path) => ModSandbox.IsPathWhitelisted(mod_id, path);
 }
