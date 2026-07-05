@@ -279,6 +279,7 @@
   "misc.game_score_fmt": "{0}pts",
   "set.title": "⚙ Settings",
   "set.display": "Display",
+  "set.display_hint": "⚠ Borderless may flicker with IME input, use Windowed or Fullscreen",
   "set.resolution": "Resolution",
   "set.fps": "FPS Cap",
   "set.vsync": "VSync",

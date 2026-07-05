@@ -1608,6 +1608,7 @@
     "set.borderless":  "无边框窗口",
     "set.cancel":  "取消",
     "set.display":  "显示模式",
+    "set.display_hint":  "⚠ 无边框窗口下输入中文可能导致闪屏，建议使用窗口或全屏",
     "set.display_mode":  "显示模式",
     "set.example_path":  "例: C:\\存档\\save.json 或 user://my_save.json",
     "set.fps":  "帧率限制",

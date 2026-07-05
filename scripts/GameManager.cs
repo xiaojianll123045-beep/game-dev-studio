@@ -6779,8 +6779,8 @@ public partial class GameManager : Node3D
             foreach (var n in names) opt.AddItem(n);
             opt.Selected = sel;
             opt.AddThemeFontSizeOverride("font_size", 11);
-            opt.AddThemeColorOverride("font_color", new Color(0.15f, 0.18f, 0.22f));
-            opt.AddThemeColorOverride("font_hover_color", new Color(0.15f, 0.18f, 0.22f));
+            opt.AddThemeColorOverride("font_color", Colors.White);
+            opt.AddThemeStyleboxOverride("normal", new StyleBoxFlat { BgColor = new Color(0.15f, 0.18f, 0.22f), CornerRadiusTopLeft = 4, CornerRadiusTopRight = 4, CornerRadiusBottomLeft = 4, CornerRadiusBottomRight = 4 });
             return opt;
         }
         void AddRow(string label, Control widget)
@@ -6803,10 +6803,14 @@ public partial class GameManager : Node3D
             opt.AddItem(Loc.Tr("set.fullscreen"));
             opt.Selected = GlobalSettings.DisplayMode;
             opt.AddThemeFontSizeOverride("font_size", 11);
-            opt.AddThemeColorOverride("font_color", new Color(0.15f, 0.18f, 0.22f));
-            opt.AddThemeColorOverride("font_hover_color", new Color(0.15f, 0.18f, 0.22f));
+            opt.AddThemeColorOverride("font_color", Colors.White);
+            opt.AddThemeStyleboxOverride("normal", new StyleBoxFlat { BgColor = new Color(0.15f, 0.18f, 0.22f), CornerRadiusTopLeft = 4, CornerRadiusTopRight = 4, CornerRadiusBottomLeft = 4, CornerRadiusBottomRight = 4 });
             opt.ItemSelected += (long i) => { GlobalSettings.DisplayMode = (int)i; GlobalSettings.ApplyAll(); };
             AddRow(Loc.Tr("set.display"), opt);
+            var hint = new Label { Text = Loc.Tr("set.display_hint"), CustomMinimumSize = new(0, 18) };
+            hint.AddThemeFontSizeOverride("font_size", 10);
+            hint.AddThemeColorOverride("font_color", new Color(0.6f, 0.3f, 0.3f));
+            { var hb = new HBoxContainer { SizeFlagsHorizontal = Control.SizeFlags.ExpandFill }; hb.AddThemeConstantOverride("separation", 8); hb.Add(new Control { CustomMinimumSize = new(138, 0) }); hb.Add(hint); root.AddChild(hb); }
         }
 
         // 分辨率

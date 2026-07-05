@@ -309,6 +309,10 @@ public partial class MenuManager : Node
 		_modeBtn = MkOpt(new[] { Loc.Tr("set.window"), Loc.Tr("set.borderless"), Loc.Tr("set.fullscreen") }, _modeIdx);
 		_modeBtn.ItemSelected += (long i) => ApplyDisplayMode((int)i);
 		AddSettingRowLayout(root, Loc.Tr("set.display"), _modeBtn, rowH);
+		var hint = new Label { Text = Loc.Tr("set.display_hint"), CustomMinimumSize = new(0, 18), MouseFilter = Control.MouseFilterEnum.Ignore };
+		hint.AddThemeFontSizeOverride("font_size", 10);
+		hint.AddThemeColorOverride("font_color", new Color(0.6f, 0.3f, 0.3f));
+		{ var hb = RowHBox(18); hb.Add(new Control { CustomMinimumSize = new(16, 0) }); hb.Add(hint); root.AddChild(hb); }
 
 		_resBtn = MkOpt(GlobalSettings.ResNames, _resIdx);
 		_resBtn.ItemSelected += (long i) => ApplyResolution((int)i);
@@ -477,7 +481,8 @@ public partial class MenuManager : Node
 		foreach (var n in names) opt.AddItem(n);
 		opt.Selected = selected;
 		opt.AddThemeFontSizeOverride("font_size", 11);
-		opt.AddThemeColorOverride("font_color", new Color(0.15f, 0.18f, 0.22f));
+		opt.AddThemeColorOverride("font_color", Colors.White);
+		opt.AddThemeStyleboxOverride("normal", new StyleBoxFlat { BgColor = new Color(0.15f, 0.18f, 0.22f), CornerRadiusTopLeft = 4, CornerRadiusTopRight = 4, CornerRadiusBottomLeft = 4, CornerRadiusBottomRight = 4 });
 		opt.CustomMinimumSize = new(200, 26);
 		return opt;
 	}
