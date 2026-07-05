@@ -1015,7 +1015,6 @@ public partial class MenuManager : Node
 	private void ShowModSandboxPanel(Control parent, string modId, string modName)
 	{
 		float pw = 360, ph = 320;
-		float S(float v) => v; // no scaling here
 		var vp = GetViewport().GetVisibleRect().Size;
 		var dp = new DragPanel { Position = new((vp.X - pw) / 2, (vp.Y - ph) / 2), Size = new(pw, ph) };
 		dp.AddThemeStyleboxOverride("panel", new StyleBoxFlat
