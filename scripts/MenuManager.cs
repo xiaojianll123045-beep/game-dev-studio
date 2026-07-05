@@ -982,6 +982,14 @@ public partial class MenuManager : Node
 				};
 				dp.AddChild(toggle);
 
+				// 沙箱配置按钮（齿轮图标）
+				var sandBtn = new Button { Text = "🔧", Position = new(pw - 88, y + 4), Size = new(26, 26), Flat = true };
+				sandBtn.AddThemeFontSizeOverride("font_size", 12);
+				sandBtn.AddThemeColorOverride("font_color", new Color(0.4f, 0.45f, 0.55f));
+				string mId = m.Id;
+				sandBtn.Pressed += () => ShowModSandboxPanel(dp, mId, m.Name);
+				dp.AddChild(sandBtn);
+
 				if (!string.IsNullOrEmpty(m.Description))
 				{
 					var desc = LUI.Label(m.Description, 9, new Color(0.4f, 0.45f, 0.55f));
@@ -1001,6 +1009,69 @@ public partial class MenuManager : Node
 		botClose.AddThemeColorOverride("font_color", Colors.Black);
 		botClose.Pressed += () => dp.QueueFree();
 		dp.AddChild(botClose);
+	}
+
+	/// <summary>弹出 Mod 沙箱配置面板</summary>
+	private void ShowModSandboxPanel(Control parent, string modId, string modName)
+	{
+		float pw = 320, ph = 250;
+		var dp = new DragPanel { Position = new((GetViewport().GetVisibleRect().Size.X - pw) / 2, (GetViewport().GetVisibleRect().Size.Y - ph) / 2), Size = new(pw, ph) };
+		dp.AddThemeStyleboxOverride("panel", new StyleBoxFlat { BgColor = Colors.White, CornerRadiusTopLeft = 8, CornerRadiusTopRight = 8, CornerRadiusBottomLeft = 8, CornerRadiusBottomRight = 8 });
+		_ui.AddChild(dp);
+
+		var title = new Label { Text = Loc.Tr("sandbox.per_mod_title") + ": " + modName, Position = new(16, 10), Size = new(pw - 32, 24) };
+		title.AddThemeFontSizeOverride("font_size", 14);
+		title.AddThemeColorOverride("font_color", new Color(0.10f, 0.14f, 0.22f));
+		dp.AddChild(title);
+
+		var modeLabel = new Label { Text = Loc.Tr("sandbox.mode_label"), Position = new(16, 42), Size = new(pw - 32, 20) };
+		modeLabel.AddThemeFontSizeOverride("font_size", 11);
+		dp.AddChild(modeLabel);
+
+		var cfg = ModSandbox.GetModConfig(modId);
+		string[] modes = { Loc.Tr("sandbox.mode_open"), Loc.Tr("sandbox.mode_strict"), Loc.Tr("sandbox.mode_absolute") };
+		var modeOpt = new OptionButton();
+		foreach (var m in modes) modeOpt.AddItem(m);
+		modeOpt.Selected = (int)cfg.Mode;
+		modeOpt.Position = new(16, 62);
+		modeOpt.Size = new(pw - 32, 26);
+		modeOpt.AddThemeFontSizeOverride("font_size", 11);
+		modeOpt.AddThemeColorOverride("font_color", Colors.White);
+		modeOpt.AddThemeStyleboxOverride("normal", new StyleBoxFlat { BgColor = new Color(0.15f, 0.18f, 0.22f), CornerRadiusTopLeft = 4, CornerRadiusTopRight = 4, CornerRadiusBottomLeft = 4, CornerRadiusBottomRight = 4 });
+		dp.AddChild(modeOpt);
+
+		var wlLabel = new Label { Text = Loc.Tr("sandbox.whitelist"), Position = new(16, 98), Size = new(pw - 32, 20) };
+		wlLabel.AddThemeFontSizeOverride("font_size", 11);
+		dp.AddChild(wlLabel);
+
+		var wlEdit = new LineEdit { Text = string.Join(", ", cfg.Whitelist), Position = new(16, 118), Size = new(pw - 32, 26), PlaceholderText = Loc.Tr("sandbox.whitelist_hint") };
+		wlEdit.AddThemeFontSizeOverride("font_size", 11);
+		dp.AddChild(wlEdit);
+
+		float btnY = ph - 44;
+		var saveBtn = new Button { Text = Loc.Tr("sandbox.save"), Position = new(pw / 2 - 60, btnY), Size = new(120, 30), Flat = true };
+		saveBtn.AddThemeFontSizeOverride("font_size", 13);
+		saveBtn.AddThemeColorOverride("font_color", Colors.White);
+		saveBtn.AddThemeStyleboxOverride("normal", new StyleBoxFlat { BgColor = new Color(0.2f, 0.55f, 0.3f), CornerRadiusTopLeft = 4, CornerRadiusTopRight = 4, CornerRadiusBottomLeft = 4, CornerRadiusBottomRight = 4 });
+		saveBtn.Pressed += () =>
+		{
+			cfg.Mode = (ModSandbox.SandboxMode)modeOpt.Selected;
+			cfg.Whitelist.Clear();
+			foreach (var p in wlEdit.Text.Split(','))
+			{
+				string trimmed = p.Trim();
+				if (!string.IsNullOrEmpty(trimmed)) cfg.Whitelist.Add(trimmed);
+			}
+			ModSandbox.SaveModConfig(modId);
+			dp.QueueFree();
+		};
+		dp.AddChild(saveBtn);
+
+		var closeBtn = new Button { Text = "✕", Position = new(pw - 40, 6), Size = new(30, 28), Flat = true };
+		closeBtn.AddThemeFontSizeOverride("font_size", 16);
+		closeBtn.AddThemeColorOverride("font_color", new Color(0.8f, 0.3f, 0.3f));
+		closeBtn.Pressed += () => dp.QueueFree();
+		dp.AddChild(closeBtn);
 	}
 
 	private void ShowDlcList()

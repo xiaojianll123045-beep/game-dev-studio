@@ -38,6 +38,68 @@ public static class ModSandbox
 	public static string GetModSandboxDir(string modId) =>
 		_modSandboxDirs.TryGetValue(modId, out var d) ? d : null;
 
+	// ── 每 Mod 沙箱配置 ──
+	public class ModSandboxConfig
+	{
+		public string ModId;
+		public SandboxMode Mode = SandboxMode.Strict;
+		public List<string> Whitelist = new();
+	}
+	private static readonly Dictionary<string, ModSandboxConfig> _modConfigs = new();
+	private const string ConfigFile = "user://mods_sandbox_config.json";
+
+	public static ModSandboxConfig GetModConfig(string modId)
+	{
+		if (_modConfigs.TryGetValue(modId, out var cfg)) return cfg;
+		var ncfg = new ModSandboxConfig { ModId = modId, Mode = Mode };
+		_modConfigs[modId] = ncfg;
+		return ncfg;
+	}
+
+	public static void SaveModConfig(string modId)
+	{
+		try
+		{
+			var list = new List<Dictionary<string, object>>();
+			foreach (var kv in _modConfigs)
+			{
+				list.Add(new Dictionary<string, object>
+				{
+					["modId"] = kv.Key,
+					["mode"] = (int)kv.Value.Mode,
+					["whitelist"] = kv.Value.Whitelist
+				});
+			}
+			using var f = FileAccess.Open(ConfigFile, FileAccess.ModeFlags.Write);
+			f.StoreString(JsonSerializer.Serialize(list));
+		}
+		catch { }
+	}
+
+	private static void LoadModConfigs()
+	{
+		try
+		{
+			if (!FileAccess.FileExists(ConfigFile)) return;
+			using var f = FileAccess.Open(ConfigFile, FileAccess.ModeFlags.Read);
+			var doc = JsonDocument.Parse(f.GetAsText());
+			foreach (var item in doc.RootElement.EnumerateArray())
+			{
+				var cfg = new ModSandboxConfig
+				{
+					ModId = item.GetProperty("modId").GetString(),
+					Mode = (SandboxMode)item.GetProperty("mode").GetInt32(),
+					Whitelist = new List<string>()
+				};
+				if (item.TryGetProperty("whitelist", out var wl))
+					foreach (var p in wl.EnumerateArray())
+						cfg.Whitelist.Add(p.GetString());
+				_modConfigs[cfg.ModId] = cfg;
+			}
+		}
+		catch { }
+	}
+
 	// ── 权限系统 ──
 	private const string PermissionsFile = "user://mods_permissions.json";
 	private static readonly Dictionary<string, HashSet<string>> _permissions = new(); // modId → allowed paths
@@ -65,6 +127,7 @@ public static class ModSandbox
 
         LoadPermissions();
         LoadGlobalWhitelist();
+        LoadModConfigs();
         RegisterConsoleCommands();
         GD.Print($"[Sandbox] 已初始化，模式: {Mode}, 权限: {_permissions.Count} mods");
     }
@@ -93,10 +156,11 @@ public static class ModSandbox
 	/// <summary>将 Mod 请求的路径重定向到沙箱目录</summary>
 	public static string RedirectPath(string modId, string originalPath)
 	{
-		if (Mode == SandboxMode.Open) return originalPath;
+		// 判断使用哪个沙箱模式（先查 Mod 专属配置，再回退全局）
+		var cfg = modId != null && _modConfigs.TryGetValue(modId, out var mc) ? mc : null;
+		SandboxMode effectiveMode = cfg != null ? cfg.Mode : Mode;
 
-		// 绝对开放：玩家承担风险
-		if (Mode == SandboxMode.Open) return originalPath;
+		if (effectiveMode == SandboxMode.Open) return originalPath;
 
 		// 检查白名单（全局 + Mod 专属）
 		if (IsPathWhitelisted(modId, originalPath))
