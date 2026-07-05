@@ -61,7 +61,10 @@ public partial class MenuManager : Node
 		var stream = ResourceLoader.Load<AudioStream>("res://assets/sounds/bgm_加载.wav");
 		if (stream != null) {
 			_menuMusic.Stream = stream;
-		} else GD.PrintErr("MenuMusic: load failed");
+		} 		else GD.PrintErr("MenuMusic: load failed");
+
+		// 原生 Hook 激活（主菜单全部就绪，在用户加载 Mod 之前）
+		ModSandbox.ActivateNativeHooks();
 	}
 
 	public override void _Process(double delta)
