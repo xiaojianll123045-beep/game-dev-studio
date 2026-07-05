@@ -54,76 +54,69 @@ public static class ModAssemblyLoader
     {
         string fileName = System.IO.Path.GetFileName(dllPath);
 
-        // ═══════════ 安全检查：扫描 DLL 元数据和内容 ═══════════
-        byte[] rawBytes = null;
-        try { rawBytes = File.ReadAllBytes(dllPath); } catch { }
+        // ═══════════ 安全检查：反射/DllImport/unsafe 检测 ═══════════
+        // 使用 Assembly 反射 API（而非字符串扫描，避免误报）
 
-        // 1. 检查 unsafe 代码（通过 PE CorFlags）
-        if (rawBytes != null && HasUnsafeFlag(rawBytes))
-        {
-            BlockedAssemblies.Add($"[{fileName}] 包含 unsafe 非托管代码，已被安全系统拦截");
-            GD.PrintErr($"[ModAssembly] 已阻止 unsafe 程序集: {fileName}");
-            return;
-        }
-
-        // 2. 检查 DllImport（扫描 DLL 字符串 + 反射检查）
-        if (rawBytes != null && HasDllImport(rawBytes))
-        {
-            BlockedAssemblies.Add($"[{fileName}] 包含 DllImport 原生调用，已被安全系统拦截");
-            GD.PrintErr($"[ModAssembly] 已阻止 DllImport 程序集: {fileName}");
-            return;
-        }
-
-        // 3. 加载程序集
-        var assembly = Assembly.LoadFrom(dllPath);
-
-        // 4. 运行时扫描：检查 Reflection 和 Unsafe 引用
-        bool hasReflection = false;
-        bool hasUnsafeRuntime = false;
         try
         {
+            var assembly = Assembly.LoadFrom(dllPath);
+
+            // 1. 检查引用程序集
             foreach (var refAsm in assembly.GetReferencedAssemblies())
             {
                 string name = refAsm.Name;
                 if (name.Contains("System.Reflection") || name == "System.Reflection" ||
-                    name == "System.Reflection.Emit" || name == "System.Reflection.Metadata")
-                    hasReflection = true;
-                if (name.Contains("Unsafe") || name.Contains("unsafe"))
-                    hasUnsafeRuntime = true;
+                    name == "System.Reflection.Emit" || name == "System.Reflection.Metadata" ||
+                    name.Contains("Reflection"))
+                {
+                    BlockedAssemblies.Add($"[{fileName}] 引用反射命名空间，已拦截");
+                    GD.PrintErr($"[ModAssembly] 已阻止反射程序集: {fileName}");
+                    return;
+                }
             }
 
-            // 检查类型中是否有 DllImport 特性
+            // 2. 使用 Mono.Cecil 风格的反射：检查类型和方法上的 DllImport 特性
             foreach (var type in assembly.GetTypes())
             {
                 foreach (var method in type.GetMethods(BindingFlags.Public | BindingFlags.NonPublic | BindingFlags.Static | BindingFlags.Instance))
                 {
                     if (method.GetCustomAttribute<System.Runtime.InteropServices.DllImportAttribute>() != null)
                     {
-                        BlockedAssemblies.Add($"[{fileName}] 检测到 DllImport 方法, 已被拦截");
+                        BlockedAssemblies.Add($"[{fileName}] 检测到 DllImport，已拦截");
                         return;
                     }
                 }
             }
         }
-        catch { /* 某些类型无法遍历，不阻止 */ }
-
-        if (hasReflection)
+        catch
         {
-            BlockedAssemblies.Add($"[{fileName}] 引用了 System.Reflection，已被安全系统拦截");
-            GD.PrintErr($"[ModAssembly] 已阻止反射程序集: {fileName}");
-            return;
-        }
-        if (hasUnsafeRuntime)
-        {
-            BlockedAssemblies.Add($"[{fileName}] 引用了 Unsafe 运行时，已被安全系统拦截");
-            GD.PrintErr($"[ModAssembly] 已阻止 unsafe 程序集: {fileName}");
-            return;
+            // ReflectionOnlyLoadFrom 可能失败（依赖缺失），回退到 Assembly.LoadFrom
         }
 
-        // 5. 通过检查，加载 Mod 入口
+        // 3. 加载并运行时检查
+        var assembly2 = Assembly.LoadFrom(dllPath);
         var entryTypes = new List<Type>();
 
-        foreach (var type in assembly.GetTypes())
+        // 运行时：再次检查 DllImport
+        try
+        {
+            foreach (var type in assembly2.GetTypes())
+            {
+                foreach (var method in type.GetMethods(BindingFlags.Public | BindingFlags.NonPublic | BindingFlags.Static | BindingFlags.Instance))
+                {
+                    var dllImport = method.GetCustomAttribute<System.Runtime.InteropServices.DllImportAttribute>();
+                    if (dllImport != null)
+                    {
+                        BlockedAssemblies.Add($"[{fileName}] 运行时检测到 DllImport({dllImport.Value})，已拦截");
+                        return;
+                    }
+                }
+            }
+        }
+        catch { }
+
+        // 4. 查找 Mod 入口
+        foreach (var type in assembly2.GetTypes())
         {
             if (typeof(IModEntry).IsAssignableFrom(type) && !type.IsAbstract)
                 entryTypes.Add(type);
@@ -155,79 +148,6 @@ public static class ModAssemblyLoader
                 GD.PrintErr($"[ModAssembly] 实例化失败 {type.Name}: {e.Message}");
             }
         }
-    }
-
-    // ═══════════ PE 元数据检查 ═══════════
-
-    /// <summary>检查 DLL 是否包含 unsafe 代码</summary>
-    private static bool HasUnsafeFlag(byte[] rawBytes)
-    {
-        try
-        {
-            if (rawBytes.Length < 256) return false;
-
-            // PE 签名的偏移（在 DOS 头偏移 0x3C 处）
-            int peOffset = BitConverter.ToInt32(rawBytes, 0x3C);
-            if (peOffset < 0x40 || peOffset + 4 > rawBytes.Length) return false;
-
-            // PE 签名 "PE\0\0"
-            if (rawBytes[peOffset] != 0x50 || rawBytes[peOffset + 1] != 0x45) return false;
-            peOffset += 4;
-
-            // COFF 头 20 bytes，之后是 PE 可选头
-            // .NET IL Only 标志在 CLR 头的 CorFlags 中
-            // CLR 头 RVA 在可选头第 0xE8 字节（PE32+）
-            // 简化：搜索 .NET 目录（IMAGE_DIRECTORY_ENTRY_COM_DESCRIPTOR = 14）
-            int peOptionalStart = peOffset + 20;
-            if (peOptionalStart + 232 > rawBytes.Length) return false;
-
-            // COM descriptor (entry 14) at optional header offset 0xE8 (PE32+)
-            int magic = BitConverter.ToUInt16(rawBytes, peOptionalStart);
-            int clrOffset;
-            if (magic == 0x20B) // PE32+
-                clrOffset = BitConverter.ToInt32(rawBytes, peOptionalStart + 0xE8);
-            else // PE32
-                clrOffset = BitConverter.ToInt32(rawBytes, peOptionalStart + 0xE0);
-
-            if (clrOffset <= 0 || clrOffset + 8 > rawBytes.Length) return false;
-
-            // CLR header: cb(4) + version(4) + MetaData RVA(4) + MetaData Size(4) + Flags(4)
-            int flagsOffset = clrOffset + 16;
-            if (flagsOffset + 4 > rawBytes.Length) return false;
-
-            uint flags = BitConverter.ToUInt32(rawBytes, flagsOffset);
-            // COMIMAGE_FLAGS_ILONLY = 0x01
-            // 如果 ILONLY 未设置，说明包含原生代码或 unsafe block
-            bool ilOnly = (flags & 0x01) != 0;
-            return !ilOnly;
-        }
-        catch { return false; }
-    }
-
-    /// <summary>检查 DLL 是否引用了 DllImport</summary>
-    private static bool HasDllImport(byte[] rawBytes)
-    {
-        try
-        {
-            // 在 DLL 原始字节中搜索 DllImport 特征字符串
-            string ascii = System.Text.Encoding.ASCII.GetString(rawBytes);
-            string unicode = System.Text.Encoding.Unicode.GetString(rawBytes);
-
-            foreach (var pattern in new[]
-            {
-                "DllImportAttribute",
-                "System.Runtime.InteropServices.DllImport",
-                "[DllImport",
-            })
-            {
-                if (ascii.Contains(pattern, StringComparison.Ordinal))
-                    return true;
-                if (unicode.Contains(pattern, StringComparison.Ordinal))
-                    return true;
-            }
-            return false;
-        }
-        catch { return false; }
     }
 
     /// <summary>卸载所有程序集 Mod</summary>

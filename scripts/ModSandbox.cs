@@ -182,12 +182,18 @@ public static class ModSandbox
 		return null;
 	}
 
-	/// <summary>将目标路径映射到沙箱内</summary>
+	/// <summary>将目标路径映射到沙箱内（含目录遍历防护）</summary>
 	private static string MapToSandbox(string sandboxDir, string originalPath)
 	{
 		string normalized = originalPath.Replace("\\", "/");
 
-		// res:// 和 user:// 映射到沙箱对应子目录
+		// 目录遍历攻击防护
+		if (normalized.Contains("../") || normalized.Contains("..\\") || normalized.Contains("/..") || normalized.Contains("\\.."))
+		{
+			string safe = System.Convert.ToBase64String(System.Text.Encoding.UTF8.GetBytes(normalized));
+			return sandboxDir + "/external/" + safe;
+		}
+
 		if (normalized.StartsWith("res://"))
 		{
 			string relative = normalized["res://".Length..].TrimStart('/');
@@ -199,58 +205,44 @@ public static class ModSandbox
 			return sandboxDir + "/user/" + relative;
 		}
 
-		// 绝对路径 → 映射到 sandbox/external/
 		string safeName = normalized.Replace(":", "_").Replace("/", "_").Replace("\\", "_");
 		return sandboxDir + "/external/" + safeName;
 	}
 
-	// ══════════════════ 权限系统 ══════════════════
+	// ══════════════════ 权限系统（前缀匹配 + 预授权） ══════════════════
 
-	/// <summary>判断路径是否被允许（白名单 + 已授权）</summary>
+	/// <summary>判断路径是否被允许（前缀匹配白名单/已授权路径）</summary>
 	public static bool IsPathWhitelisted(string modId, string path)
 	{
-		if (_globalWhitelist.Contains(path)) return true;
+		string norm = NormalizePath(path);
+		foreach (var wl in _globalWhitelist)
+			if (norm.StartsWith(NormalizePath(wl), StringComparison.OrdinalIgnoreCase)) return true;
 		if (_permissions.TryGetValue(modId, out var modPerms))
-			return modPerms.Contains(path);
+			foreach (var p in modPerms)
+				if (norm.StartsWith(NormalizePath(p), StringComparison.OrdinalIgnoreCase)) return true;
 		return false;
 	}
 
-	/// <summary>请求文件权限（由沙箱拦截器调用）</summary>
+	private static string NormalizePath(string p)
+	{
+		if (string.IsNullOrEmpty(p)) return "";
+		return p.Replace("\\", "/").TrimEnd('/') + "/";
+	}
+
+	/// <summary>预授权模式——不在白名单里的路径直接拒绝，永不弹窗</summary>
 	public static bool RequestFilePermission(string modId, string path, PermissionType type)
 	{
-		if (_permissions.TryGetValue(modId, out var perms) && perms.Contains(path))
-			return true;
-		if (_globalWhitelist.Contains(path)) return true;
-
-		// 触发 UI 弹窗（由 GameManager 接管）
-		var mgr = ModAPI.GameManager;
-		if (mgr == null) return false;
-
-		string modName = ModManager.LoadedMods.Find(m => m.Id == modId)?.Name ?? modId;
-		string typeName = type switch
-		{
-			PermissionType.Read => Loc.Tr("sandbox.perm_read"),
-			PermissionType.Write => Loc.Tr("sandbox.perm_write"),
-			_ => Loc.Tr("sandbox.perm_readwrite")
-		};
-
-		// 显示模态弹窗（对话框内部已处理 Grant/Deny）
-		mgr.CallDeferred(nameof(GameManager.ShowSandboxPermissionDialog),
-			modId, modName, path, typeName,
-			new Callable(), new Callable());
-
-		// 注意：这里需要同步等待，但 Godot 不支持在非主线程等待
-		// 实际方案：挂起 Mod 线程需要更复杂的实现（见方案B）
-		// 当前版本：直接拒绝（严格模式），鼓励 Mod 作者用 Bridge API
+		if (IsPathWhitelisted(modId, path)) return true;
+		LogAccess(modId, $"权限被拒绝({type})", path, "DENY");
 		return false;
 	}
 
-	/// <summary>授予权限（玩家通过 UI 确认后调用）</summary>
+	/// <summary>授予权限</summary>
 	public static void GrantPermission(string modId, string path)
 	{
 		if (!_permissions.ContainsKey(modId))
 			_permissions[modId] = new HashSet<string>(StringComparer.OrdinalIgnoreCase);
-		_permissions[modId].Add(path);
+		_permissions[modId].Add(NormalizePath(path));
 		SavePermissions();
 		LogAccess(modId, "权限已授予", path, "GRANT");
 	}
