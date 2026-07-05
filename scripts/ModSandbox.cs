@@ -140,9 +140,14 @@ public static class ModSandbox
 	private static readonly Dictionary<string, NetworkQuota> _networkQuotas = new();
 	private class NetworkQuota { public int BytesSent; public float WindowStart; }
 
-	/// <summary>沙箱初始化（在 ModManager.Init 后、ApplyAll 前调用）</summary>
+    /// <summary>沙箱初始化（必须在所有系统之前、同步执行、仅执行一次）</summary>
+    private static bool _initialized = false;
+
     public static void Init()
     {
+        if (_initialized) return;
+        _initialized = true;
+
         _sandboxRoot = ProjectSettings.GlobalizePath("user://mods_sandbox");
         if (!DirAccess.DirExistsAbsolute("user://mods_sandbox"))
             DirAccess.MakeDirAbsolute("user://mods_sandbox");
@@ -154,6 +159,7 @@ public static class ModSandbox
         LoadPermissions();
         LoadGlobalWhitelist();
         InitNativeHooks();
+        RegisterConsoleCommands();
         GD.Print($"[Sandbox] 已初始化，模式: {Mode}, NativeHook: {_nativeHooksActive}, 权限: {_permissions.Count} mods");
     }
 

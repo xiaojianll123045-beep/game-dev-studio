@@ -24,6 +24,9 @@ public partial class MenuManager : Node
 
 	public override void _Ready()
 	{
+		// ═══════════ 沙箱—必须第一个初始化，在所有系统之前 ═══════════
+		ModSandbox.Init();
+
 		_canvas = new CanvasLayer();
 		AddChild(_canvas);
 		_ui = new Control();

@@ -31,10 +31,8 @@ public static class ModManager
     /// <summary>扫描并加载所有 Mod（由 GameManager 在启动时调用）</summary>
     public static void Init()
     {
-        ModSandbox.Init();
         LoadEnabledConfig();
         ScanMods();
-        ModSandbox.RegisterConsoleCommands();
     }
 
     private static void ScanMods()

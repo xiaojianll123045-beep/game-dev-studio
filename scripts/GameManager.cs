@@ -226,6 +226,9 @@ public partial class GameManager : Node3D
 
     public override void _Ready()
     {
+        // ═══════════ 沙箱—必须第一个初始化，在所有系统之前 ═══════════
+        ModSandbox.Init();
+
         UIScale = 1.0f; // UI 缩放已隐藏，强制 1.0
         // Mod 桥接（必须先于 ApplyAll，供 GDScript Mod 使用）
         // 注册为 GDScript 全局单例，Mod 可直接用 ModBridge.add_money() 调用
