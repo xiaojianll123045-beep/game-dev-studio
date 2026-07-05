@@ -6,3 +6,5 @@ build/
 *.import
 *.tmp
 .vs/
+
+mod_sandbox_hook.dll
