@@ -145,7 +145,8 @@ public static class ModSandbox
         LoadPermissions();
         LoadGlobalWhitelist();
         RegisterConsoleCommands();
-        GD.Print($"[Sandbox] C# 层已初始化，模式: {Mode}, 权限: {_permissions.Count} mods");
+        ActivateNativeHooks();
+        GD.Print($"[Sandbox] 已初始化，模式: {Mode}, NativeHook: {_nativeHooksActive}, 权限: {_permissions.Count} mods");
     }
 
     /// <summary>激活 Native Hook 层（在 Godot 引擎完全就绪后调用）</summary>

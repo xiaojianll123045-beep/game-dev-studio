@@ -62,8 +62,6 @@ public partial class MenuManager : Node
 		if (stream != null) {
 			_menuMusic.Stream = stream;
 		} 		else GD.PrintErr("MenuMusic: load failed");
-
-		ModSandbox.ActivateNativeHooks();
 	}
 
 	public override void _Process(double delta)

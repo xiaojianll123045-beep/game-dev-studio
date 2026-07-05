@@ -240,9 +240,6 @@ public partial class GameManager : Node3D
             Engine.UnregisterSingleton("ModBridge");
         Engine.RegisterSingleton("ModBridge", _modBridge);
 
-        // 原生 Hook 激活（在任何 Mod/DLC 代码执行之前）
-        ModSandbox.ActivateNativeHooks();
-
         // Mod 系统初始化
         ModManager.Init();
 

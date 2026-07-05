@@ -204,6 +204,10 @@ HANDLE WINAPI HookCreateFileW(
     LPSECURITY_ATTRIBUTES lpSecurityAttributes, DWORD dwCreationDisposition,
     DWORD dwFlagsAndAttributes, HANDLE hTemplateFile)
 {
+    // 快速路径：非绝对严格模式 + 没有 Mod 在运行 → 零开销透传
+    if (g_Mode != MODE_ABSOLUTE && g_CurrentMod[0] == 0)
+        return TrueCreateFileW(lpFileName, dwDesiredAccess, dwShareMode, lpSecurityAttributes, dwCreationDisposition, dwFlagsAndAttributes, hTemplateFile);
+
     if (!g_Initialized || g_InHook) return TrueCreateFileW(lpFileName, dwDesiredAccess, dwShareMode, lpSecurityAttributes, dwCreationDisposition, dwFlagsAndAttributes, hTemplateFile);
     g_InHook = true;
 
@@ -227,6 +231,7 @@ HANDLE WINAPI HookCreateFileW(
 }
 
 BOOL WINAPI HookDeleteFileW(LPCWSTR lpFileName) {
+    if (g_Mode != MODE_ABSOLUTE && g_CurrentMod[0] == 0) return TrueDeleteFileW(lpFileName);
     if (!g_Initialized || !lpFileName || g_InHook) return TrueDeleteFileW(lpFileName);
     g_InHook = true;
 
@@ -242,6 +247,7 @@ BOOL WINAPI HookDeleteFileW(LPCWSTR lpFileName) {
 }
 
 BOOL WINAPI HookCreateDirectoryW(LPCWSTR lpPathName, LPSECURITY_ATTRIBUTES lpSecurityAttributes) {
+    if (g_Mode != MODE_ABSOLUTE && g_CurrentMod[0] == 0) return TrueCreateDirectoryW(lpPathName, lpSecurityAttributes);
     if (!g_Initialized || !lpPathName || g_InHook) return TrueCreateDirectoryW(lpPathName, lpSecurityAttributes);
     g_InHook = true;
 
@@ -257,6 +263,7 @@ BOOL WINAPI HookCreateDirectoryW(LPCWSTR lpPathName, LPSECURITY_ATTRIBUTES lpSec
 }
 
 BOOL WINAPI HookRemoveDirectoryW(LPCWSTR lpPathName) {
+    if (g_Mode != MODE_ABSOLUTE && g_CurrentMod[0] == 0) return TrueRemoveDirectoryW(lpPathName);
     if (!g_Initialized || !lpPathName || g_InHook) return TrueRemoveDirectoryW(lpPathName);
     g_InHook = true;
 
