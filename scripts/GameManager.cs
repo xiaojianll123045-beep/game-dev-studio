@@ -6810,7 +6810,7 @@ public partial class GameManager : Node3D
             var hint = new Label { Text = Loc.Tr("set.display_hint"), CustomMinimumSize = new(0, 18) };
             hint.AddThemeFontSizeOverride("font_size", 10);
             hint.AddThemeColorOverride("font_color", new Color(0.6f, 0.3f, 0.3f));
-            { var hb = new HBoxContainer { SizeFlagsHorizontal = Control.SizeFlags.ExpandFill }; hb.AddThemeConstantOverride("separation", 8); hb.Add(new Control { CustomMinimumSize = new(138, 0) }); hb.Add(hint); root.AddChild(hb); }
+            { var hb = new HBoxContainer { SizeFlagsHorizontal = Control.SizeFlags.ExpandFill }; hb.AddThemeConstantOverride("separation", 8); hb.AddChild(new Control { CustomMinimumSize = new(138, 0) }); hb.AddChild(hint); root.AddChild(hb); }
         }
 
         // 分辨率
