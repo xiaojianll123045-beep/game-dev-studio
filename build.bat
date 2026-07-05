@@ -19,7 +19,7 @@ if errorlevel 1 (
 )
 
 echo [2/2] Exporting (Godot packs PCK with excluded dirs)
-%ENG% --path "%~dp0." --export-release "Windows Desktop"
+%ENG% --headless --path "%~dp0." --export-release "Windows Desktop"
 if errorlevel 1 (
     echo === Export FAILED ===
     pause
