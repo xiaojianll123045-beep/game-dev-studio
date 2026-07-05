@@ -33,9 +33,17 @@ static int g_WhitelistCount = 0;
 // 重入保护标志（线程局部，防止 Hook 内部触发自身导致无限递归）
 static thread_local bool g_InHook = false;
 
-// user:// 目录的绝对路径（只拦截此路径下的操作，减少开销）
+// user:// 目录的绝对路径（只拦截此路径下的操作）
 static wchar_t g_UserRoot[512] = {0};
 static size_t g_UserRootLen = 0;
+
+// 线程局部当前 Mod 上下文（有值时说明正在执行 Mod 代码，游戏自己的操作为空直接放行）
+static thread_local char g_CurrentMod[64] = {0};
+
+// 每个 Mod 的沙箱目录
+static wchar_t g_ModSandboxes[64][512];
+static char g_ModIds[64][64];
+static int g_ModCount = 0;
 
 // ──────────────────── 路径工具 ────────────────────
 
@@ -67,33 +75,55 @@ static bool IsWhitelisted(const wchar_t* path) {
     return false;
 }
 
-// 应用拦截规则（不重定向，只判断是否允许/阻止）
-// true  = 阻止这次文件操作
-// false = 放行
-static bool ApplyBlock(const wchar_t* input) {
+// 应用拦截规则
+// 返回 true 表示需要阻止，output 存放重定向后的路径（如需重定向）
+static bool ApplyBlock(const wchar_t* input, wchar_t* output, size_t outputSize) {
     if (g_Mode == MODE_OPEN) return false;
 
-    // 只管辖 user:// 目录，其他路径一律放行（不干扰 Godot / 系统 / 项目文件）
+    // 非 user:// 路径一律放行
     if (g_UserRootLen == 0 || wcsncmp(input, g_UserRoot, g_UserRootLen) != 0)
         return false;
 
-    // 严格模式：放行，由 C# 层 ModBridge 处理沙箱逻辑
-    if (g_Mode == MODE_STRICT) return false;
+    // 没有当前 Mod 上下文 = 游戏自己的操作，直接放行
+    if (g_CurrentMod[0] == 0) return false;
 
-    // 绝对严格模式：只放行白名单路径，其余全部阻止
-    wchar_t lower[1024];
-    ToLowerW(lower, input);
-    if (IsWhitelisted(lower)) return false;
+    // 严格模式：重定向到当前 Mod 的沙箱目录
+    if (g_Mode == MODE_STRICT || g_Mode == MODE_ABSOLUTE) {
+        // 在当前 Mod 的沙箱目录内 → 放行
+        for (int i = 0; i < g_ModCount; i++) {
+            if (strcmp(g_CurrentMod, g_ModIds[i]) == 0) {
+                size_t sandboxLen = wcslen(g_ModSandboxes[i]);
+                if (wcsncmp(input, g_ModSandboxes[i], sandboxLen) == 0)
+                    return false; // 已在沙箱内，放行
+                // 重定向到沙箱目录
+                if (output && outputSize > sandboxLen + wcslen(input)) {
+                    wcscpy(output, g_ModSandboxes[i]);
+                    wcscat(output, L"\\");
+                    // 去掉 user:// 前缀部分，保留相对路径
+                    const wchar_t* relative = input + g_UserRootLen;
+                    while (*relative == L'\\') relative++;
+                    wcscat(output, relative);
+                }
+                return false; // 已重定向，不阻止
+            }
+        }
+    }
 
-    return true; // 阻止
+    // 绝对严格模式且不在任何 Mod 沙箱内 → 阻止
+    if (g_Mode == MODE_ABSOLUTE) return true;
+
+    return false;
 }
 
-// ──────────────────── Hook 基础设施（x64 14字节间接跳转） ────────────────────
+// ──────────────────── Hook 基础设施（x64 16字节对齐间接跳转） ────────────────────
+// 16 字节对齐确保不会截断 x64 指令（多数 API 函数前 3 条指令共 15 字节）
+
+static const int HOOK_SIZE = 16;
 
 struct HookData {
     void* target;
     void* hook;
-    BYTE  origBytes[14];
+    BYTE  origBytes[16];
     void* trampoline;
     bool  installed;
 };
@@ -107,33 +137,34 @@ static bool InstallHook(void* targetFunc, void* hookFunc) {
     h.target = targetFunc;
     h.hook = hookFunc;
 
-    // x64: FF 25 00 00 00 00 xx xx xx xx xx xx xx xx
-    //       jmp [rip+0]   followed by absolute address
-    BYTE hookCode[14];
+    // x64: FF 25 00 00 00 00 [8-byte addr] 90 90  (16 bytes total)
+    BYTE hookCode[16];
     hookCode[0] = 0xFF;
     hookCode[1] = 0x25;
     *(DWORD*)(hookCode + 2) = 0;
     *(void**)(hookCode + 6) = hookFunc;
+    hookCode[14] = 0x90;  // NOP
+    hookCode[15] = 0x90;  // NOP
 
     DWORD oldProt;
-    if (!VirtualProtect(targetFunc, 14, PAGE_EXECUTE_READWRITE, &oldProt))
+    if (!VirtualProtect(targetFunc, HOOK_SIZE, PAGE_EXECUTE_READWRITE, &oldProt))
         return false;
 
-    memcpy(h.origBytes, targetFunc, 14);
-    memcpy(targetFunc, hookCode, 14);
+    memcpy(h.origBytes, targetFunc, HOOK_SIZE);
+    memcpy(targetFunc, hookCode, HOOK_SIZE);
 
-    VirtualProtect(targetFunc, 14, oldProt, &oldProt);
+    VirtualProtect(targetFunc, HOOK_SIZE, oldProt, &oldProt);
 
     // 分配跳板（原指令 + 跳回）
-    h.trampoline = VirtualAlloc(NULL, 32, MEM_COMMIT | MEM_RESERVE, PAGE_EXECUTE_READWRITE);
+    h.trampoline = VirtualAlloc(NULL, 48, MEM_COMMIT | MEM_RESERVE, PAGE_EXECUTE_READWRITE);
     if (!h.trampoline) return false;
 
-    memcpy(h.trampoline, h.origBytes, 14);
-    BYTE* trampEnd = (BYTE*)h.trampoline + 14;
+    memcpy(h.trampoline, h.origBytes, HOOK_SIZE);
+    BYTE* trampEnd = (BYTE*)h.trampoline + HOOK_SIZE;
     trampEnd[0] = 0xFF;
     trampEnd[1] = 0x25;
     *(DWORD*)(trampEnd + 2) = 0;
-    *(void**)(trampEnd + 6) = (BYTE*)targetFunc + 14;
+    *(void**)(trampEnd + 6) = (BYTE*)targetFunc + HOOK_SIZE;
 
     h.installed = true;
     return true;
@@ -143,9 +174,9 @@ static void UninstallAllHooks() {
     for (int i = 0; i < g_HookCount; i++) {
         if (!g_Hooks[i].installed) continue;
         DWORD oldProt;
-        VirtualProtect(g_Hooks[i].target, 14, PAGE_EXECUTE_READWRITE, &oldProt);
-        memcpy(g_Hooks[i].target, g_Hooks[i].origBytes, 14);
-        VirtualProtect(g_Hooks[i].target, 14, oldProt, &oldProt);
+        VirtualProtect(g_Hooks[i].target, HOOK_SIZE, PAGE_EXECUTE_READWRITE, &oldProt);
+        memcpy(g_Hooks[i].target, g_Hooks[i].origBytes, HOOK_SIZE);
+        VirtualProtect(g_Hooks[i].target, HOOK_SIZE, oldProt, &oldProt);
         VirtualFree(g_Hooks[i].trampoline, 0, MEM_RELEASE);
         g_Hooks[i].installed = false;
     }
@@ -176,10 +207,18 @@ HANDLE WINAPI HookCreateFileW(
     if (!g_Initialized || g_InHook) return TrueCreateFileW(lpFileName, dwDesiredAccess, dwShareMode, lpSecurityAttributes, dwCreationDisposition, dwFlagsAndAttributes, hTemplateFile);
     g_InHook = true;
 
-    if (lpFileName && wcslen(lpFileName) < 1000 && ApplyBlock(lpFileName)) {
-        g_InHook = false;
-        SetLastError(ERROR_ACCESS_DENIED);
-        return INVALID_HANDLE_VALUE;
+    if (lpFileName && wcslen(lpFileName) < 1000) {
+        wchar_t redirected[1024] = {0};
+        if (ApplyBlock(lpFileName, redirected, 1024)) {
+            g_InHook = false;
+            SetLastError(ERROR_ACCESS_DENIED);
+            return INVALID_HANDLE_VALUE;
+        }
+        if (redirected[0] != 0) {
+            HANDLE result = TrueCreateFileW(redirected, dwDesiredAccess, dwShareMode, lpSecurityAttributes, dwCreationDisposition, dwFlagsAndAttributes, hTemplateFile);
+            g_InHook = false;
+            return result;
+        }
     }
 
     HANDLE result = TrueCreateFileW(lpFileName, dwDesiredAccess, dwShareMode, lpSecurityAttributes, dwCreationDisposition, dwFlagsAndAttributes, hTemplateFile);
@@ -191,10 +230,10 @@ BOOL WINAPI HookDeleteFileW(LPCWSTR lpFileName) {
     if (!g_Initialized || !lpFileName || g_InHook) return TrueDeleteFileW(lpFileName);
     g_InHook = true;
 
-    if (wcslen(lpFileName) < 1000 && ApplyBlock(lpFileName)) {
-        g_InHook = false;
-        SetLastError(ERROR_ACCESS_DENIED);
-        return FALSE;
+    if (wcslen(lpFileName) < 1000) {
+        wchar_t redirected[1024] = {0};
+        if (ApplyBlock(lpFileName, redirected, 1024)) { g_InHook = false; SetLastError(ERROR_ACCESS_DENIED); return FALSE; }
+        if (redirected[0] != 0) { BOOL ret = TrueDeleteFileW(redirected); g_InHook = false; return ret; }
     }
 
     BOOL ret = TrueDeleteFileW(lpFileName);
@@ -206,10 +245,10 @@ BOOL WINAPI HookCreateDirectoryW(LPCWSTR lpPathName, LPSECURITY_ATTRIBUTES lpSec
     if (!g_Initialized || !lpPathName || g_InHook) return TrueCreateDirectoryW(lpPathName, lpSecurityAttributes);
     g_InHook = true;
 
-    if (wcslen(lpPathName) < 1000 && ApplyBlock(lpPathName)) {
-        g_InHook = false;
-        SetLastError(ERROR_ACCESS_DENIED);
-        return FALSE;
+    if (wcslen(lpPathName) < 1000) {
+        wchar_t redirected[1024] = {0};
+        if (ApplyBlock(lpPathName, redirected, 1024)) { g_InHook = false; SetLastError(ERROR_ACCESS_DENIED); return FALSE; }
+        if (redirected[0] != 0) { BOOL ret = TrueCreateDirectoryW(redirected, lpSecurityAttributes); g_InHook = false; return ret; }
     }
 
     BOOL ret = TrueCreateDirectoryW(lpPathName, lpSecurityAttributes);
@@ -221,10 +260,10 @@ BOOL WINAPI HookRemoveDirectoryW(LPCWSTR lpPathName) {
     if (!g_Initialized || !lpPathName || g_InHook) return TrueRemoveDirectoryW(lpPathName);
     g_InHook = true;
 
-    if (wcslen(lpPathName) < 1000 && ApplyBlock(lpPathName)) {
-        g_InHook = false;
-        SetLastError(ERROR_ACCESS_DENIED);
-        return FALSE;
+    if (wcslen(lpPathName) < 1000) {
+        wchar_t redirected[1024] = {0};
+        if (ApplyBlock(lpPathName, redirected, 1024)) { g_InHook = false; SetLastError(ERROR_ACCESS_DENIED); return FALSE; }
+        if (redirected[0] != 0) { BOOL ret = TrueRemoveDirectoryW(redirected); g_InHook = false; return ret; }
     }
 
     BOOL ret = TrueRemoveDirectoryW(lpPathName);
@@ -283,9 +322,43 @@ __declspec(dllexport) void sandbox_set_user_root(const wchar_t* root) {
     LeaveCriticalSection(&g_Lock);
 }
 
-__declspec(dllexport) void sandbox_clear_rules() {
-    // 不再使用重定向规则，保留接口兼容
+__declspec(dllexport) void sandbox_set_current_mod(const char* modId) {
+    // 线程局部，无需加锁
+    if (modId && modId[0]) {
+        strncpy(g_CurrentMod, modId, 63);
+        g_CurrentMod[63] = 0;
+    } else {
+        g_CurrentMod[0] = 0;
+    }
 }
+
+__declspec(dllexport) void sandbox_register_mod(const char* modId, const wchar_t* sandboxDir) {
+    EnterCriticalSection(&g_Lock);
+    if (g_ModCount < 64) {
+        strncpy(g_ModIds[g_ModCount], modId, 63);
+        wcscpy(g_ModSandboxes[g_ModCount], sandboxDir);
+        NormalizeW(g_ModSandboxes[g_ModCount], sandboxDir);
+        g_ModCount++;
+    }
+    LeaveCriticalSection(&g_Lock);
+}
+
+__declspec(dllexport) void sandbox_unregister_mod(const char* modId) {
+    EnterCriticalSection(&g_Lock);
+    for (int i = 0; i < g_ModCount; i++) {
+        if (strcmp(g_ModIds[i], modId) == 0) {
+            g_ModCount--;
+            if (i < g_ModCount) {
+                memcpy(g_ModIds[i], g_ModIds[g_ModCount], 64);
+                memcpy(g_ModSandboxes[i], g_ModSandboxes[g_ModCount], 512 * sizeof(wchar_t));
+            }
+            break;
+        }
+    }
+    LeaveCriticalSection(&g_Lock);
+}
+
+__declspec(dllexport) void sandbox_clear_rules() { /* 兼容旧接口 */ }
 
 __declspec(dllexport) void sandbox_add_whitelist(const wchar_t* path) {
     EnterCriticalSection(&g_Lock);
@@ -305,7 +378,8 @@ __declspec(dllexport) void sandbox_clear_whitelist() {
 }
 
 __declspec(dllexport) int sandbox_is_blocked(const wchar_t* path) {
-    return ApplyBlock(path) ? 1 : 0;
+    wchar_t dummy[1024];
+    return ApplyBlock(path, dummy, 1024) ? 1 : 0;
 }
 
 } // extern "C"

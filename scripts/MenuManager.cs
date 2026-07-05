@@ -63,7 +63,6 @@ public partial class MenuManager : Node
 			_menuMusic.Stream = stream;
 		} 		else GD.PrintErr("MenuMusic: load failed");
 
-		// 原生 Hook 激活（主菜单全部就绪，在用户加载 Mod 之前）
 		ModSandbox.ActivateNativeHooks();
 	}
 

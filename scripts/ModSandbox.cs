@@ -31,8 +31,14 @@ public static class ModSandbox
     [DllImport("mod_sandbox_hook.dll", CallingConvention = CallingConvention.Cdecl, CharSet = CharSet.Unicode)]
     private static extern void sandbox_add_whitelist(string path);
 
-    [DllImport("mod_sandbox_hook.dll", CallingConvention = CallingConvention.Cdecl)]
-    private static extern void sandbox_clear_whitelist();
+    [DllImport("mod_sandbox_hook.dll", CallingConvention = CallingConvention.Cdecl, CharSet = CharSet.Ansi)]
+    private static extern void sandbox_set_current_mod(string modId);
+
+    [DllImport("mod_sandbox_hook.dll", CallingConvention = CallingConvention.Cdecl, CharSet = CharSet.Unicode)]
+    private static extern void sandbox_register_mod(string modId, string sandboxDir);
+
+    [DllImport("mod_sandbox_hook.dll", CallingConvention = CallingConvention.Cdecl, CharSet = CharSet.Ansi)]
+    private static extern void sandbox_unregister_mod(string modId);
 
     [DllImport("mod_sandbox_hook.dll", CallingConvention = CallingConvention.Cdecl, CharSet = CharSet.Unicode)]
     private static extern int sandbox_is_blocked(string path);
@@ -69,7 +75,6 @@ public static class ModSandbox
     private static void SyncWhitelistToNative()
     {
         if (!_nativeHooksActive) return;
-        sandbox_clear_whitelist();
         foreach (var path in _globalWhitelist)
             sandbox_add_whitelist(path.Replace("/", "\\"));
         // 系统关键路径绝对放行
@@ -152,16 +157,30 @@ public static class ModSandbox
             GD.Print($"[Sandbox] Native Hook 层已激活，模式: {Mode}");
     }
 
-	/// <summary>为 Mod 注册沙箱上下文（在 ModManager.ApplyMod 之前调用）</summary>
-	public static void RegisterMod(string modId, string modName)
-	{
-		if (_modSandboxDirs.ContainsKey(modId)) return;
-		string sandboxDir = _sandboxRoot + "/" + SanitizeId(modId);
-		if (!Directory.Exists(sandboxDir)) Directory.CreateDirectory(sandboxDir);
+    /// <summary>为 Mod 注册沙箱上下文（在 ModManager.ApplyMod 之前调用）</summary>
+    public static void RegisterMod(string modId, string modName)
+    {
+        if (_modSandboxDirs.ContainsKey(modId)) return;
+        string sandboxDir = _sandboxRoot + "/" + SanitizeId(modId);
+        if (!Directory.Exists(sandboxDir)) Directory.CreateDirectory(sandboxDir);
         _modSandboxDirs[modId] = sandboxDir;
         if (!_permissions.ContainsKey(modId)) _permissions[modId] = new HashSet<string>(StringComparer.OrdinalIgnoreCase);
+        // 同步到原生 DLL
+        if (_nativeHooksActive) sandbox_register_mod(modId, sandboxDir.Replace("/", "\\"));
         GD.Print($"[Sandbox] Mod 已注册: {modId} → {sandboxDir}");
-	}
+    }
+
+    /// <summary>设置当前线程的 Mod 上下文（在调用 Mod 代码之前设置）</summary>
+    public static void SetCurrentMod(string modId)
+    {
+        if (_nativeHooksActive) sandbox_set_current_mod(modId ?? "");
+    }
+
+    /// <summary>清除当前线程的 Mod 上下文</summary>
+    public static void ClearCurrentMod()
+    {
+        if (_nativeHooksActive) sandbox_set_current_mod("");
+    }
 
 	/// <summary>清理 Mod 沙箱（卸载时调用）</summary>
 	public static void UnregisterMod(string modId)

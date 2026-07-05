@@ -240,11 +240,11 @@ public partial class GameManager : Node3D
             Engine.UnregisterSingleton("ModBridge");
         Engine.RegisterSingleton("ModBridge", _modBridge);
 
+        // 原生 Hook 激活（在任何 Mod/DLC 代码执行之前）
+        ModSandbox.ActivateNativeHooks();
+
         // Mod 系统初始化
         ModManager.Init();
-
-        // ═══════════ 原生 Hook 激活（Godot 引擎已就绪，Mod 代码即将执行）═══════════
-        ModSandbox.ActivateNativeHooks();
 
         ModManager.ApplyAll(this);
 
@@ -6964,7 +6964,12 @@ public partial class GameManager : Node3D
             sandboxOpt.AddThemeFontSizeOverride("font_size", 11);
             sandboxOpt.AddThemeColorOverride("font_color", Colors.White);
             sandboxOpt.AddThemeStyleboxOverride("normal", new StyleBoxFlat { BgColor = new Color(0.15f, 0.18f, 0.22f), CornerRadiusTopLeft = 4, CornerRadiusTopRight = 4, CornerRadiusBottomLeft = 4, CornerRadiusBottomRight = 4 });
-            sandboxOpt.ItemSelected += (long i) => { ModSandbox.Mode = (ModSandbox.SandboxMode)(int)i; };
+            sandboxOpt.ItemSelected += (long i) => {
+                var mode = (ModSandbox.SandboxMode)(int)i;
+                ModSandbox.Mode = mode;
+                if (mode == ModSandbox.SandboxMode.AbsoluteStrict)
+                    ModSandbox.ActivateNativeHooks();
+            };
             AddRow(Loc.Tr("sandbox.mode_label"), sandboxOpt);
         }
         // ── Mod 自定义设置项 ──
