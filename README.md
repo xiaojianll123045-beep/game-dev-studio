@@ -21,12 +21,17 @@ This game is open source. You are free to:
 
 游戏核心代码以 **GNU General Public License v3 (GPL v3)** 发布。
 
-**但 Mod 不受限：** 你为本游戏制作的 Mod（包括脚本、数据包、资源包、插件等）**不需要开源**，可以用任何你喜欢的许可证发布。详见 `LICENSE` 文件中的 Mod Exception 条款。
+**Mod 例外：** 为本游戏制作的 Mod（脚本、数据包、资源包、插件等）**不需要开源**，可以用任何许可证发布。
 
-**附加要求：** 如果你分发本游戏或基于它的衍生作品，必须在用户可见的位置（如关于页、致谢列表）显示 "Neuro-sama"。Mod 不受此限。
+**沙箱例外：** 沙箱系统（`ModSandbox.cs` 及 `extensions/mod_sandbox_native/`）可被任何人单独拿走使用，**无需开源你的项目**。唯一要求是在用户可见的位置（关于页/致谢）署名并附上本仓库地址。详见 `LICENSE`。
+
+**附加要求：** 分发本游戏或其衍生作品时，必须在用户可见位置显示 "Neuro-sama"。Mod 不受此限。
 
 The game's core source code is licensed under **GPL v3**.
-However, **Mods are exempt**: any Mod you create (scripts, data packs, assets, plugins) does **not** need to be open source. See the Mod Exception in `LICENSE`.
+
+**Mod Exception:** Mods you create do not need to be open source. Use any license.
+
+**Sandbox Exception:** The sandbox system (`ModSandbox.cs` + `extensions/mod_sandbox_native/`) can be taken and used in any project without open-sourcing. Only attribution + repo link required. See `LICENSE`.
 
 **Additional requirement:** If you distribute this game or derivative works, you must display "Neuro-sama" in a visible location (e.g., About page, Credits). Mods are exempt.
 

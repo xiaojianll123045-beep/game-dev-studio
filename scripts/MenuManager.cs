@@ -39,8 +39,6 @@ public partial class MenuManager : Node
 			Engine.RegisterSingleton("ModBridge", tempBridge);
 			_canvas.AddChild(tempBridge);  // 加入场景树让子节点能启动 Timer
 		}
-		// Native Hook 激活（ModBridge 已就绪，在 DLC/Mod 代码执行之前）
-		ModSandbox.ActivateNativeHooks();
 
 		GlobalSettings.Load();
 
