@@ -23,8 +23,8 @@ static CRITICAL_SECTION g_Lock;
 static bool g_Initialized = false;
 
 // 沙箱模式
-enum SandboxMode { OPEN = 0, STRICT = 1, ABSOLUTE = 2 };
-static int g_Mode = STRICT;
+enum SandboxMode { MODE_OPEN = 0, MODE_STRICT = 1, MODE_ABSOLUTE = 2 };
+static int g_Mode = MODE_STRICT;
 
 // 重定向规则：前缀匹配 → 替换前缀
 struct RedirectRule {
@@ -40,7 +40,7 @@ static wchar_t g_Whitelist[128][512];
 static int g_WhitelistCount = 0;
 
 // 当前重定向目标（线程局部，用于 CreateFileW 返回后让外部读取）
-static __declspec(thread) wchar_t g_LastRedirected[1024] = {0};
+static thread_local wchar_t g_LastRedirected[1024] = {0};
 
 // ──────────────────── 路径工具 ────────────────────
 
@@ -74,7 +74,7 @@ static bool IsWhitelisted(const wchar_t* path) {
 
 // 应用重定向规则
 static bool ApplyRedirect(wchar_t* output, const wchar_t* input) {
-    if (g_Mode == OPEN) return false;
+    if (g_Mode == MODE_OPEN) return false;
 
     wchar_t normalized[1024];
     NormalizeW(normalized, input);
@@ -177,7 +177,7 @@ static FindFirstFileW_t    TrueFindFirstFileW = NULL;
 // ──────────────────── Hook 函数实现 ────────────────────
 
 static bool ShouldBlock(const wchar_t* path) {
-    if (g_Mode != ABSOLUTE) return false;
+    if (g_Mode != MODE_ABSOLUTE) return false;
     // 绝对严格模式：只允许沙箱目录和系统目录
     if (wcsstr(path, L"mods_sandbox")) return false;
     if (wcsstr(path, L"Windows") || wcsstr(path, L"Program Files")) return false;
