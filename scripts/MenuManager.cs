@@ -986,6 +986,7 @@ public partial class MenuManager : Node
 				var sandBtn = new Button { Text = "🔧", Position = new(pw - 88, y + 4), Size = new(26, 26), Flat = true };
 				sandBtn.AddThemeFontSizeOverride("font_size", 12);
 				sandBtn.AddThemeColorOverride("font_color", new Color(0.4f, 0.45f, 0.55f));
+				sandBtn.AddThemeColorOverride("font_hover_color", new Color(0.2f, 0.25f, 0.35f));
 				string mId = m.Id;
 				sandBtn.Pressed += () => ShowModSandboxPanel(dp, mId, m.Name);
 				dp.AddChild(sandBtn);
@@ -1037,6 +1038,7 @@ public partial class MenuManager : Node
 		var closeBtn = new Button { Text = "✕", Position = new(pw - 36, 5), Size = new(28, 28), Flat = true };
 		closeBtn.AddThemeFontSizeOverride("font_size", 16);
 		closeBtn.AddThemeColorOverride("font_color", new Color(0.8f, 0.3f, 0.3f));
+		closeBtn.AddThemeColorOverride("font_hover_color", new Color(0.5f, 0.1f, 0.1f));
 		closeBtn.Pressed += () => dp.QueueFree();
 		dp.AddChild(closeBtn);
 
@@ -1053,6 +1055,7 @@ public partial class MenuManager : Node
 		// 各模式对应的颜色
 		Color[] modeColors = { new Color(0.3f, 0.7f, 0.35f), new Color(0.15f, 0.4f, 0.7f), new Color(0.85f, 0.3f, 0.2f) };
 		Color[] modeBgColors = { new Color(0.25f, 0.55f, 0.3f), new Color(0.15f, 0.18f, 0.22f), new Color(0.65f, 0.2f, 0.15f) };
+		Color[] modeHoverColors = { new Color(0.35f, 0.65f, 0.4f), new Color(0.25f, 0.28f, 0.32f), new Color(0.75f, 0.3f, 0.25f) };
 
 		// 颜色指示条
 		var colorBar = new ColorRect { Color = modeColors[(int)cfg.Mode], Position = new(16, y), Size = new(4, 26) };
@@ -1066,7 +1069,10 @@ public partial class MenuManager : Node
 		modeOpt.Size = new(pw - 40, 26);
 		modeOpt.AddThemeFontSizeOverride("font_size", 11);
 		modeOpt.AddThemeColorOverride("font_color", Colors.White);
+		modeOpt.AddThemeColorOverride("font_hover_color", new Color(0.9f, 0.9f, 0.95f));
+		modeOpt.AddThemeColorOverride("font_hover_pressed_color", new Color(0.9f, 0.9f, 0.95f));
 		modeOpt.AddThemeStyleboxOverride("normal", new StyleBoxFlat { BgColor = modeBgColors[(int)cfg.Mode], CornerRadiusTopLeft = 4, CornerRadiusTopRight = 4, CornerRadiusBottomLeft = 4, CornerRadiusBottomRight = 4 });
+		modeOpt.AddThemeStyleboxOverride("hover", new StyleBoxFlat { BgColor = modeHoverColors[(int)cfg.Mode], CornerRadiusTopLeft = 4, CornerRadiusTopRight = 4, CornerRadiusBottomLeft = 4, CornerRadiusBottomRight = 4 });
 		dp.AddChild(modeOpt);
 		y += 30;
 
@@ -1123,10 +1129,13 @@ public partial class MenuManager : Node
 		var addBtn = new Button { Text = "+", Position = new(pw - 88, y), Size = new(28, 24), Flat = true };
 		addBtn.AddThemeFontSizeOverride("font_size", 14);
 		addBtn.AddThemeColorOverride("font_color", new Color(0.2f, 0.55f, 0.3f));
+		addBtn.AddThemeColorOverride("font_hover_color", new Color(0.4f, 0.4f, 0.4f));
+		addBtn.AddThemeStyleboxOverride("normal", new StyleBoxFlat { BgColor = Colors.White, CornerRadiusTopLeft = 4, CornerRadiusTopRight = 4, CornerRadiusBottomLeft = 4, CornerRadiusBottomRight = 4, BorderWidthLeft = 1, BorderWidthTop = 1, BorderWidthRight = 1, BorderWidthBottom = 1, BorderColor = new Color(0.5f, 0.5f, 0.5f, 0.3f) });
 		dp.AddChild(addBtn);
 		var clearBtn = new Button { Text = Loc.Tr("sandbox.clear_all"), Position = new(pw - 56, y), Size = new(40, 24), Flat = true };
 		clearBtn.AddThemeFontSizeOverride("font_size", 9);
 		clearBtn.AddThemeColorOverride("font_color", new Color(0.8f, 0.3f, 0.3f));
+		clearBtn.AddThemeColorOverride("font_hover_color", new Color(0.4f, 0.4f, 0.4f));
 		dp.AddChild(clearBtn);
 
 		// ── 按钮逻辑 ──
@@ -1163,8 +1172,9 @@ public partial class MenuManager : Node
 		};
 		saveBtn.AddThemeFontSizeOverride("font_size", 13);
 		saveBtn.AddThemeColorOverride("font_color", Colors.White);
+		saveBtn.AddThemeColorOverride("font_hover_color", Colors.White);
 		saveBtn.AddThemeStyleboxOverride("normal", new StyleBoxFlat { BgColor = new Color(0.2f, 0.55f, 0.3f), CornerRadiusTopLeft = 4, CornerRadiusTopRight = 4, CornerRadiusBottomLeft = 4, CornerRadiusBottomRight = 4 });
-		saveBtn.AddThemeStyleboxOverride("hover", new StyleBoxFlat { BgColor = new Color(0.15f, 0.45f, 0.25f), CornerRadiusTopLeft = 4, CornerRadiusTopRight = 4, CornerRadiusBottomLeft = 4, CornerRadiusBottomRight = 4 });
+		saveBtn.AddThemeStyleboxOverride("hover", new StyleBoxFlat { BgColor = new Color(0.25f, 0.65f, 0.35f), CornerRadiusTopLeft = 4, CornerRadiusTopRight = 4, CornerRadiusBottomLeft = 4, CornerRadiusBottomRight = 4 });
 		saveBtn.Pressed += () => { ModSandbox.SaveModConfig(modId); dp.QueueFree(); };
 		dp.AddChild(saveBtn);
 	}

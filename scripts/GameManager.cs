@@ -6955,16 +6955,21 @@ public partial class GameManager : Node3D
             root.AddChild(new ColorRect { Color = new Color(0.70f, 0.72f, 0.75f, 0.25f), CustomMinimumSize = new(0, 1) });
             string[] modes = { Loc.Tr("sandbox.mode_open"), Loc.Tr("sandbox.mode_strict"), Loc.Tr("sandbox.mode_absolute") };
             Color[] gmc = { new Color(0.25f, 0.55f, 0.3f), new Color(0.15f, 0.18f, 0.22f), new Color(0.65f, 0.2f, 0.15f) };
+            Color[] gmh = { new Color(0.35f, 0.65f, 0.4f), new Color(0.25f, 0.28f, 0.32f), new Color(0.75f, 0.3f, 0.25f) };
             int selMode = (int)ModSandbox.Mode;
             var sandboxOpt = new OptionButton();
             foreach (var m in modes) sandboxOpt.AddItem(m);
             sandboxOpt.Selected = selMode;
             sandboxOpt.AddThemeFontSizeOverride("font_size", 11);
             sandboxOpt.AddThemeColorOverride("font_color", Colors.White);
+            sandboxOpt.AddThemeColorOverride("font_hover_color", new Color(0.9f, 0.9f, 0.95f));
+            sandboxOpt.AddThemeColorOverride("font_hover_pressed_color", new Color(0.9f, 0.9f, 0.95f));
             sandboxOpt.AddThemeStyleboxOverride("normal", new StyleBoxFlat { BgColor = gmc[selMode], CornerRadiusTopLeft = 4, CornerRadiusTopRight = 4, CornerRadiusBottomLeft = 4, CornerRadiusBottomRight = 4 });
+            sandboxOpt.AddThemeStyleboxOverride("hover", new StyleBoxFlat { BgColor = gmh[selMode], CornerRadiusTopLeft = 4, CornerRadiusTopRight = 4, CornerRadiusBottomLeft = 4, CornerRadiusBottomRight = 4 });
             sandboxOpt.ItemSelected += (long i) => {
                 ModSandbox.Mode = (ModSandbox.SandboxMode)(int)i;
                 sandboxOpt.AddThemeStyleboxOverride("normal", new StyleBoxFlat { BgColor = gmc[(int)i], CornerRadiusTopLeft = 4, CornerRadiusTopRight = 4, CornerRadiusBottomLeft = 4, CornerRadiusBottomRight = 4 });
+                sandboxOpt.AddThemeStyleboxOverride("hover", new StyleBoxFlat { BgColor = gmh[(int)i], CornerRadiusTopLeft = 4, CornerRadiusTopRight = 4, CornerRadiusBottomLeft = 4, CornerRadiusBottomRight = 4 });
             };
             AddRow(Loc.Tr("sandbox.mode_label"), sandboxOpt);
         }
