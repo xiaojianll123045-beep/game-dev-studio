@@ -501,7 +501,7 @@ public static class ModSandbox
 			});
 	}
 
-	/// <summary>沙箱化 Mod 上下文——C# Mod 通过此接口读写文件，路径自动重定向</summary>
+	/// <summary>沙箱化 Mod 上下文——C# Mod 通过此接口读写文件，路径自动重定向到沙箱目录</summary>
 	public class ModContext : IModContext
 	{
 		public string ModId { get; }
