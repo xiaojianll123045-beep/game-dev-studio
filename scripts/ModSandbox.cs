@@ -500,4 +500,64 @@ public static class ModSandbox
 					ModConsole.Print("未找到该 Mod 的权限记录");
 			});
 	}
+
+	/// <summary>沙箱化 Mod 上下文——C# Mod 通过此接口读写文件，路径自动重定向</summary>
+	public class ModContext : IModContext
+	{
+		public string ModId { get; }
+		public IModFileSystem FileSystem { get; }
+		public IModNetwork Network { get; }
+		public GameManager GameManager => ModAPI.GameManager;
+
+		private class SandboxFileSystem : IModFileSystem
+		{
+			private string _modId;
+			public SandboxFileSystem(string modId) { _modId = modId; }
+			public string ReadAllText(string path)
+			{
+				string redirect = RedirectPath(_modId, path);
+				if (redirect == null) return "";
+				if (!FileAccess.FileExists(redirect)) return "";
+				using var f = FileAccess.Open(redirect, FileAccess.ModeFlags.Read);
+				return f?.GetAsText() ?? "";
+			}
+			public bool WriteAllText(string path, string content)
+			{
+				string redirect = RedirectPath(_modId, path);
+				if (redirect == null) return false;
+				string dir = System.IO.Path.GetDirectoryName(redirect);
+				if (!string.IsNullOrEmpty(dir) && !System.IO.Directory.Exists(dir))
+					System.IO.Directory.CreateDirectory(dir);
+				using var f = FileAccess.Open(redirect, FileAccess.ModeFlags.Write);
+				if (f == null) return false;
+				f.StoreString(content);
+				return true;
+			}
+			public bool FileExists(string path)
+			{
+				string redirect = RedirectPath(_modId, path);
+				return redirect != null && FileAccess.FileExists(redirect);
+			}
+			public string GetSandboxDir() => GetModSandboxDir(_modId) ?? "";
+		}
+
+		private class SandboxNetwork : IModNetwork
+		{
+			public bool HttpGet(string url, out string response)
+			{
+				response = "";
+				if (!CheckNetworkAccess("", url, 0)) return false;
+				if (!url.StartsWith("https://") && !url.StartsWith("http://")) return false;
+				try { using var client = new System.Net.Http.HttpClient(); response = client.GetStringAsync(url).Result; return true; }
+				catch { return false; }
+			}
+		}
+
+		public ModContext(string modId)
+		{
+			ModId = modId;
+			FileSystem = new SandboxFileSystem(modId);
+			Network = new SandboxNetwork();
+		}
+	}
 }

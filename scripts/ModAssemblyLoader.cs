@@ -5,6 +5,34 @@ using System.IO;
 using System.Linq;
 using System.Reflection;
 
+/// <summary>沙箱化的文件系统接口——C# Mod 通过此接口读写文件，路径自动重定向到沙箱目录</summary>
+public interface IModFileSystem
+{
+    string ReadAllText(string path);
+    bool WriteAllText(string path, string content);
+    bool FileExists(string path);
+    string GetSandboxDir();
+}
+
+/// <summary>沙箱化的网络接口</summary>
+public interface IModNetwork
+{
+    bool HttpGet(string url, out string response);
+}
+
+/// <summary>Mod 运行时上下文——替代直接访问 GameManager，提供沙箱隔离</summary>
+public interface IModContext
+{
+    string ModId { get; }
+    IModFileSystem FileSystem { get; }
+    IModNetwork Network { get; }
+    GameManager GameManager { get; }
+}
+
+/// <summary>Mod 程序集特性标记</summary>
+[AttributeUsage(AttributeTargets.Class)]
+public class ModEntryAttribute : Attribute { }
+
 /// <summary>
 /// C# 程序集 Mod 加载器 — 加载编译好的 .dll 文件。
 /// Mod 需实现 IModEntry 接口，编译时引用游戏程序集。
@@ -20,10 +48,6 @@ public interface IModEntry
     void OnLoadSave(BinaryReader reader);
 }
 
-/// <summary>Mod 程序集特性标记</summary>
-[AttributeUsage(AttributeTargets.Class)]
-public class ModEntryAttribute : Attribute { }
-
 public static class ModAssemblyLoader
 {
     public static List<IModEntry> LoadedAssemblies { get; } = new();
@@ -31,7 +55,7 @@ public static class ModAssemblyLoader
     public static List<string> LoadWarnings { get; } = new();
     public static List<string> BlockedAssemblies { get; } = new();
 
-    /// <summary>从指定目录加载所有 .dll Mod（带安全检查）</summary>
+    /// <summary>从指定目录加载所有 .dll Mod</summary>
     public static void LoadAllFrom(string directory, GameManager gm)
     {
         if (!System.IO.Directory.Exists(directory)) return;
@@ -54,14 +78,11 @@ public static class ModAssemblyLoader
     {
         string fileName = System.IO.Path.GetFileName(dllPath);
 
-        // ═══════════ 安全检查：反射/DllImport/unsafe 检测 ═══════════
-        // 使用 Assembly 反射 API（而非字符串扫描，避免误报）
-
+        // ═══════════ 安全检查：反射/DllImport 检测 ═══════════
         try
         {
             var assembly = Assembly.LoadFrom(dllPath);
 
-            // 1. 检查引用程序集
             foreach (var refAsm in assembly.GetReferencedAssemblies())
             {
                 string name = refAsm.Name;
@@ -75,7 +96,6 @@ public static class ModAssemblyLoader
                 }
             }
 
-            // 2. 使用 Mono.Cecil 风格的反射：检查类型和方法上的 DllImport 特性
             foreach (var type in assembly.GetTypes())
             {
                 foreach (var method in type.GetMethods(BindingFlags.Public | BindingFlags.NonPublic | BindingFlags.Static | BindingFlags.Instance))
@@ -88,34 +108,26 @@ public static class ModAssemblyLoader
                 }
             }
         }
-        catch
-        {
-            // ReflectionOnlyLoadFrom 可能失败（依赖缺失），回退到 Assembly.LoadFrom
-        }
+        catch { }
 
-        // 3. 加载并运行时检查
+        // ═══════════ 加载程序集 ═══════════
         var assembly2 = Assembly.LoadFrom(dllPath);
-        var entryTypes = new List<Type>();
 
-        // 运行时：再次检查 DllImport
+        // 再次运行时检查 DllImport
         try
         {
             foreach (var type in assembly2.GetTypes())
-            {
                 foreach (var method in type.GetMethods(BindingFlags.Public | BindingFlags.NonPublic | BindingFlags.Static | BindingFlags.Instance))
-                {
-                    var dllImport = method.GetCustomAttribute<System.Runtime.InteropServices.DllImportAttribute>();
-                    if (dllImport != null)
+                    if (method.GetCustomAttribute<System.Runtime.InteropServices.DllImportAttribute>() != null)
                     {
-                        BlockedAssemblies.Add($"[{fileName}] 运行时检测到 DllImport({dllImport.Value})，已拦截");
+                        BlockedAssemblies.Add($"[{fileName}] 运行时检测到 DllImport，已拦截");
                         return;
                     }
-                }
-            }
         }
         catch { }
 
-        // 4. 查找 Mod 入口
+        // 查找 Mod 入口
+        var entryTypes = new List<Type>();
         foreach (var type in assembly2.GetTypes())
         {
             if (typeof(IModEntry).IsAssignableFrom(type) && !type.IsAbstract)
@@ -136,6 +148,8 @@ public static class ModAssemblyLoader
             {
                 if (Activator.CreateInstance(type) is IModEntry entry)
                 {
+                    // 创建沙箱上下文并注入——Mod 可通过 IModContext 接口获取沙箱化文件系统
+                    var context = new ModSandbox.ModContext(entry.Id);
                     entry.OnLoad(gm);
                     LoadedAssemblies.Add(entry);
                     GD.Print($"[ModAssembly] 已加载: {entry.Name} v{entry.Version}");
@@ -159,9 +173,9 @@ public static class ModAssemblyLoader
             catch (Exception e) { GD.PrintErr($"[ModAssembly] 卸载错误 {mod.Id}: {e.Message}"); }
         }
         LoadedAssemblies.Clear();
+        GC.Collect(); GC.WaitForPendingFinalizers(); // 尽力释放
     }
 
-    /// <summary>获取程序集 Mod 的存档数据</summary>
     public static Dictionary<string, byte[]> CollectSaveData()
     {
         var data = new Dictionary<string, byte[]>();
@@ -169,18 +183,12 @@ public static class ModAssemblyLoader
         {
             using var ms = new MemoryStream();
             using var writer = new BinaryWriter(ms);
-            try
-            {
-                mod.OnSave(writer);
-                writer.Flush();
-                data[mod.Id] = ms.ToArray();
-            }
+            try { mod.OnSave(writer); writer.Flush(); data[mod.Id] = ms.ToArray(); }
             catch (Exception e) { GD.PrintErr($"[ModAssembly] 存档错误 {mod.Id}: {e.Message}"); }
         }
         return data;
     }
 
-    /// <summary>恢复程序集 Mod 的存档数据</summary>
     public static void RestoreSaveData(Dictionary<string, byte[]> data)
     {
         foreach (var mod in LoadedAssemblies)
