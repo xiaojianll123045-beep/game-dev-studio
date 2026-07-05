@@ -1050,19 +1050,27 @@ public partial class MenuManager : Node
 		dp.AddChild(modeTitle);
 		y += 22;
 
+		// 各模式对应的颜色
+		Color[] modeColors = { new Color(0.3f, 0.7f, 0.35f), new Color(0.15f, 0.4f, 0.7f), new Color(0.85f, 0.3f, 0.2f) };
+		Color[] modeBgColors = { new Color(0.25f, 0.55f, 0.3f), new Color(0.15f, 0.18f, 0.22f), new Color(0.65f, 0.2f, 0.15f) };
+
+		// 颜色指示条
+		var colorBar = new ColorRect { Color = modeColors[(int)cfg.Mode], Position = new(16, y), Size = new(4, 26) };
+		dp.AddChild(colorBar);
+
 		string[] modeLabels = { Loc.Tr("sandbox.mode_open"), Loc.Tr("sandbox.mode_strict"), Loc.Tr("sandbox.mode_absolute") };
 		var modeOpt = new OptionButton();
 		foreach (var m in modeLabels) modeOpt.AddItem(m);
 		modeOpt.Selected = (int)cfg.Mode;
-		modeOpt.Position = new(16, y);
-		modeOpt.Size = new(pw - 32, 26);
+		modeOpt.Position = new(24, y);
+		modeOpt.Size = new(pw - 40, 26);
 		modeOpt.AddThemeFontSizeOverride("font_size", 11);
 		modeOpt.AddThemeColorOverride("font_color", Colors.White);
-		modeOpt.AddThemeStyleboxOverride("normal", new StyleBoxFlat { BgColor = new Color(0.15f, 0.18f, 0.22f), CornerRadiusTopLeft = 4, CornerRadiusTopRight = 4, CornerRadiusBottomLeft = 4, CornerRadiusBottomRight = 4 });
+		modeOpt.AddThemeStyleboxOverride("normal", new StyleBoxFlat { BgColor = modeBgColors[(int)cfg.Mode], CornerRadiusTopLeft = 4, CornerRadiusTopRight = 4, CornerRadiusBottomLeft = 4, CornerRadiusBottomRight = 4 });
 		dp.AddChild(modeOpt);
 		y += 30;
 
-		// 模式说明
+		// 模式说明（颜色匹配）
 		string[] modeDescs = {
 			Loc.Tr("sandbox.mode_open_desc"),
 			Loc.Tr("sandbox.mode_strict_desc"),
@@ -1070,13 +1078,16 @@ public partial class MenuManager : Node
 		};
 		var descLabel = new Label { Text = modeDescs[(int)cfg.Mode], Position = new(24, y), Size = new(pw - 40, 28) };
 		descLabel.AddThemeFontSizeOverride("font_size", 9);
-		descLabel.AddThemeColorOverride("font_color", new Color(0.5f, 0.55f, 0.6f));
+		descLabel.AddThemeColorOverride("font_color", modeColors[(int)cfg.Mode]);
 		descLabel.AutowrapMode = TextServer.AutowrapMode.Word;
 		dp.AddChild(descLabel);
 		modeOpt.ItemSelected += (long i) =>
 		{
 			cfg.Mode = (ModSandbox.SandboxMode)(int)i;
 			descLabel.Text = modeDescs[(int)i];
+			descLabel.AddThemeColorOverride("font_color", modeColors[(int)i]);
+			colorBar.Color = modeColors[(int)i];
+			modeOpt.AddThemeStyleboxOverride("normal", new StyleBoxFlat { BgColor = modeBgColors[(int)i], CornerRadiusTopLeft = 4, CornerRadiusTopRight = 4, CornerRadiusBottomLeft = 4, CornerRadiusBottomRight = 4 });
 		};
 		y += 32;
 
