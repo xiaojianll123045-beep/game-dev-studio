@@ -242,6 +242,10 @@ public partial class GameManager : Node3D
 
         // Mod 系统初始化
         ModManager.Init();
+
+        // ═══════════ 原生 Hook 激活（Godot 引擎已就绪，Mod 代码即将执行）═══════════
+        ModSandbox.ActivateNativeHooks();
+
         ModManager.ApplyAll(this);
 
         // DLC 系统（脚本执行在 DlcManager.ScanAll 内完成）
