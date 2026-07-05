@@ -119,6 +119,12 @@ func _my_minigame():
 | `b.unregister_key(KEY_F1)` | 取消注册按键 |
 在 `OnLoad` 中注册，按键会在游戏处理之前触发回调，不会被其他 UI 拦截。
 
+### 🏆 成就
+| GDScript 调用 | 说明 |
+|----------|------|
+| `b.unlock_achievement(achievement_id)` | 解锁指定成就 |
+仅在成就 ID 已在 `AchivementManager` 中注册时有效。
+
 ### 📻 音源加载（绕过导入系统）
 | GDScript 调用 | 说明 |
 |----------|------|
@@ -167,6 +173,27 @@ func _render(root, rowH):
 | `b.get_setting(mod_id, key, fallback)` | 读取持久化设置 |
 | `b.set_setting(mod_id, key, value)` | 写入持久化设置 |
 
+### 🔗 Mod 间通信
+| GDScript 调用 | 说明 |
+|----------|------|
+| `b.register_endpoint(mod_id, endpoint, Callable)` | 注册通信端点，供其他 Mod 调用 |
+| `b.send_message(target_mod_id, endpoint, args)` | 向指定 Mod 发送消息，返回结果 |
+| `b.broadcast_message(endpoint, args)` | 向所有注册了该端点的 Mod 广播消息，返回字典 |
+| `b.has_endpoint(mod_id, endpoint)` | 检查某 Mod 是否注册了端点 |
+| `b.get_mods_with_endpoint(endpoint)` | 列出所有注册了某端点的 Mod ID |
+
+示例：
+```gdscript
+# Mod A — 注册端点
+b.register_endpoint("mod_a", "get_data", func(args):
+    return {"value": 42}
+)
+
+# Mod B — 调用端点
+var result = b.send_message("mod_a", "get_data", [])
+b.log("Got: " + str(result))
+```
+
 ---
 
 ## 完整工作示例
@@ -206,4 +233,23 @@ var _f1 = false
 - C# 静态类（`ModAPI`、`TechTreeData`）**无法从 GDScript 访问**。始终使用 `bridge.*`。
 - Mod 文件必须放在 `res://mods/你的Mod名字/` 下，并包含 `mod.json` 清单文件。
 - **调试日志**：游戏中按 F9 查看 Mod 日志。日志会自动保存到 `user://mod_log.txt`，打包后用户可将此文件发给 Mod 作者。
-- **控制台**：按 `~` 或 F12 打开 ModConsole，输入 `help` 查看命令，用 `mod_log` 查看日志，`save_log` 保存日志到文件。
+- **控制台**：按 `~` 或 F12 打开 ModConsole，输入 `help` 查看命令列表。常用命令：
+
+  | 命令 | 说明 |
+  |------|------|
+  | `help [命令名]` | 显示帮助 |
+  | `mod_log` | 查看完整 Mod 日志 |
+  | `save_log` | 保存日志到 user://mod_log.txt |
+  | `status` | 查看游戏全局状态 |
+  | `list_mods` | 列出已加载的 Mod |
+  | `projects` | 查看所有项目 |
+  | `money [金额]` | 设置/查看资金 |
+  | `inspiration [值]` | 设置/查看灵感 |
+  | `unlock_tech <ID> [all]` | 解锁科技 |
+  | `add_fans <数量>` | 增加粉丝 |
+  | `god` | 无敌模式（开关） |
+  | `set_speed <1-8>` | 设置游戏速度 |
+  | `save [槽位]` | 手动保存 |
+  | `load <槽位>` | 读取存档 |
+  | `reset_mods` | 重置所有 Mod |
+  | `clear` / `cls` | 清除控制台 |

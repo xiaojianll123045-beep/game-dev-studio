@@ -6,38 +6,19 @@
 
 ## 字段说明
 
-### 基础字段
-
 | 字段 | 类型 | 必填 | 描述 |
 |------|------|------|------|
-| `version` | String | 是 | 版本号，遵循 semver 格式 |
-| `author` | String | 是 | 作者名称 |
-| `type` | String | 是 | 模组类型：`data`、`script` 或 `language` |
-
-### 脚本模组字段
-
-| 字段 | 类型 | 必填 | 描述 |
-|------|------|------|------|
-| `entry_point` | String | script 类型必填 | 入口脚本文件路径 |
+| `version` | String | 否 | 版本号，默认 `"1.0"` |
+| `author` | String | 否 | 作者名称，默认空 |
+| `type` | String | 否 | 模组类型：`data`、`script` 或 `language`，默认 `"data"` |
+| `min_game_version` | String | 否 | 兼容的最低游戏版本，默认 `"0.1"` |
+| `icon` | String | 否 | 模组图标路径，默认空 |
 | `dependencies` | Array | 否 | 依赖的模组 ID 列表 |
-| `hooks` | Object | 否 | 注册的钩子列表 |
+| `optional_dependencies` | Array | 否 | 可选依赖的模组 ID 列表 |
+| `conflicts` | Array | 否 | 冲突的模组 ID 列表 |
 
-### 兼容性字段
-
-| 字段 | 类型 | 描述 |
-|------|------|------|
-| `min_game_version` | String | 兼容的最低游戏版本 |
-| `compatibility.platform` | Array | 支持的平台 |
-
-### 元数据字段
-
-| 字段 | 类型 | 描述 |
-|------|------|------|
-| `icon` | String | 模组图标路径 |
-| `screenshots` | Array | 截图路径列表 |
-| `tags` | Array | 标签列表 |
-| `license` | String | 开源协议 |
-| `repository` | String | 源码仓库地址 |
+> **注意：** 以下字段代码当前**忽略**（保留供未来使用）：
+> `entry_point`、`hooks`、`tags`、`screenshots`、`license`、`repository`、`compatibility`
 
 ---
 
@@ -59,7 +40,7 @@
 }
 ```
 
-游戏会根据当前系统语言自动加载对应的 `mod_{lang}.json`。如果找不到对应语言的文件，会加载 `mod_zh.json`（或兼容旧版从 `mod.json` 读取）。
+游戏会根据当前系统语言自动加载对应的 `mod_{lang}.json`。如果找不到对应语言的文件，会加载 `mod_zh.json`（或兼容旧版从 `mod.json` 读取 `name`/`description`）。
 
 ## 完整示例
 
@@ -70,10 +51,8 @@
   "author": "ModMaster",
   "type": "data",
   "icon": "icon.png",
-  "entry_point": "scripts/main.gd",
   "dependencies": ["core_lib"],
-  "min_game_version": "0.1",
-  "tags": ["balance", "economy"]
+  "min_game_version": "0.1"
 }
 ```
 
@@ -106,4 +85,6 @@
 - `name` 和 `description` **不要写在 `mod.json` 中**，请使用 `mod_zh.json` / `mod_en.json`
 - `id` 由文件夹名自动确定，**无需在 json 中指定**
 - `dependencies` 中指定的模组会在当前模组之前加载
-- `min_game_version` 支持语义化版本范围
+- `optional_dependencies` 中的模组存在时也会优先加载
+- `conflicts` 中指定的模组不能同时启用
+- `min_game_version` 支持语义化版本比较

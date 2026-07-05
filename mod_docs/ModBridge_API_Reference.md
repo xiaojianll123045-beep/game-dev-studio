@@ -112,6 +112,40 @@ func _my_minigame():
 	# Create your game UI here
 ```
 
+### 🏆 Achievements
+| GDScript | Description |
+|----------|-------------|
+| `b.unlock_achievement(achievement_id)` | Unlock an achievement by ID (must be registered in AchievementManager) |
+
+### ⚙ Custom Settings
+| GDScript | Description |
+|----------|-------------|
+| `b.register_setting("id", "label", Callable)` | Add a custom option in the Settings panel (below audio settings) |
+| `b.unregister_setting("id")` | Remove custom setting |
+`Callable` receives two params: `(VBoxContainer root, float rowH)`. Example:
+```gdscript
+var b = Engine.get_singleton("ModBridge")
+func OnLoad(gm, bridge):
+	b.register_setting("my_setting", "My Setting", self._render)
+func _render(root, rowH):
+	var hb = HBoxContainer.new()
+	hb.add_theme_constant_override("separation", 8)
+	hb.custom_minimum_size = Vector2(0, rowH)
+	var label = Label.new()
+	label.text = "Toggle"
+	label.add_theme_font_size_override("font_size", 11)
+	label.custom_minimum_size = Vector2(130, rowH)
+	hb.add_child(label)
+	var cb = CheckBox.new()
+	cb.text = "Enable"
+	cb.toggled.connect(func(on): print("Toggle:", on))
+	hb.add_child(cb)
+	var spacer = Control.new()
+	spacer.size_flags_horizontal = Control.SIZE_EXPAND_FILL
+	hb.add_child(spacer)
+	root.add_child(hb)
+```
+
 ### ⌨ Custom Key Binding
 | GDScript | Description |
 |----------|-------------|
@@ -136,6 +170,26 @@ Register in `OnLoad`. The callback fires before normal game input processing, so
 | `b.log_err(msg)` | Print error to console |
 | `b.get_setting(mod_id, key, fallback)` | Read persistent setting |
 | `b.set_setting(mod_id, key, value)` | Write persistent setting |
+
+### 🔗 Mod Communication
+| GDScript | Description |
+|----------|-------------|
+| `b.register_endpoint(mod_id, endpoint, Callable)` | Register a communication endpoint for other mods to call |
+| `b.send_message(target_mod_id, endpoint, args)` | Send a message to a specific mod, returns result |
+| `b.broadcast_message(endpoint, args)` | Broadcast to all mods with that endpoint, returns dict |
+| `b.has_endpoint(mod_id, endpoint)` | Check if a mod has registered an endpoint |
+| `b.get_mods_with_endpoint(endpoint)` | List all mod IDs that registered an endpoint |
+
+Example:
+```gdscript
+# Mod A — register endpoint
+b.register_endpoint("mod_a", "get_data", func(args):
+    return {"value": 42}
+)
+# Mod B — call endpoint
+var result = b.send_message("mod_a", "get_data", [])
+b.log("Got: " + str(result))
+```
 
 ---
 
@@ -176,4 +230,23 @@ Balance tweaks go in `data/balance.json`. See `mod_examples/03_balance_tweaker/`
 - C# static classes (`ModAPI`, `TechTreeData`) are NOT accessible from GDScript. Always use `bridge.*`.
 - The mod file must be in `res://mods/your_mod_name/` with a `mod.json` manifest.
 - **Debug logging**: Press F9 in-game to view the Mod log. The log is automatically saved to `user://mod_log.txt` — packaged game users can share this file with mod authors for debugging.
-- **Console**: Press `~` or F12 to open the ModConsole. Type `help` for commands, `mod_log` to view logs, `save_log` to export the log to a file.
+- **Console**: Press `~` or F12 to open the ModConsole. Common commands:
+
+  | Command | Description |
+  |---------|-------------|
+  | `help [cmd]` | Show help |
+  | `mod_log` | View full mod log |
+  | `save_log` | Save log to user://mod_log.txt |
+  | `status` | View game state |
+  | `list_mods` | List all loaded mods |
+  | `projects` | View all projects |
+  | `money [amount]` | Get/set money |
+  | `inspiration [val]` | Get/set inspiration |
+  | `unlock_tech <ID> [all]` | Unlock tech |
+  | `add_fans <count>` | Add fans |
+  | `god` | Toggle god mode |
+  | `set_speed <1-8>` | Set game speed |
+  | `save [slot]` | Save game |
+  | `load <slot>` | Load save |
+  | `reset_mods` | Reset all mods |
+  | `clear` / `cls` | Clear console |
