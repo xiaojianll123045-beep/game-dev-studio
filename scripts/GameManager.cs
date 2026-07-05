@@ -240,6 +240,9 @@ public partial class GameManager : Node3D
             Engine.UnregisterSingleton("ModBridge");
         Engine.RegisterSingleton("ModBridge", _modBridge);
 
+        // Native Hook 激活（Godot 引擎已就绪，在所有 Mod 代码执行之前）
+        ModSandbox.ActivateNativeHooks();
+
         // Mod 系统初始化
         ModManager.Init();
         ModManager.ApplyAll(this);

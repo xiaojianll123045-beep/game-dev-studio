@@ -14,6 +14,7 @@ public static class ModSandbox
 {
     // ═══════════════ 原生 Hook DLL (P/Invoke) ═══════════════
     private static bool _nativeHooksActive = false;
+    private static bool _initialized = false;
 
     [DllImport("mod_sandbox_hook.dll", CallingConvention = CallingConvention.Cdecl)]
     private static extern int sandbox_hook_init(int mode);
@@ -140,9 +141,7 @@ public static class ModSandbox
 	private static readonly Dictionary<string, NetworkQuota> _networkQuotas = new();
 	private class NetworkQuota { public int BytesSent; public float WindowStart; }
 
-    /// <summary>沙箱初始化（必须在所有系统之前、同步执行、仅执行一次）</summary>
-    private static bool _initialized = false;
-
+    /// <summary>沙箱 C# 层初始化（在所有系统之前、同步、仅一次）</summary>
     public static void Init()
     {
         if (_initialized) return;
@@ -158,9 +157,17 @@ public static class ModSandbox
 
         LoadPermissions();
         LoadGlobalWhitelist();
-        InitNativeHooks();
         RegisterConsoleCommands();
-        GD.Print($"[Sandbox] 已初始化，模式: {Mode}, NativeHook: {_nativeHooksActive}, 权限: {_permissions.Count} mods");
+        GD.Print($"[Sandbox] C# 层已初始化，模式: {Mode}, 权限: {_permissions.Count} mods");
+    }
+
+    /// <summary>激活 Native Hook 层（在 Godot 引擎完全就绪后调用）</summary>
+    public static void ActivateNativeHooks()
+    {
+        if (_nativeHooksActive) return;
+        InitNativeHooks();
+        if (_nativeHooksActive)
+            GD.Print($"[Sandbox] Native Hook 层已激活，模式: {Mode}");
     }
 
 	/// <summary>为 Mod 注册沙箱上下文（在 ModManager.ApplyMod 之前调用）</summary>
