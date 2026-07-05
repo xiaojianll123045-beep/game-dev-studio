@@ -26,21 +26,9 @@ static bool g_Initialized = false;
 enum SandboxMode { MODE_OPEN = 0, MODE_STRICT = 1, MODE_ABSOLUTE = 2 };
 static int g_Mode = MODE_STRICT;
 
-// 重定向规则：前缀匹配 → 替换前缀
-struct RedirectRule {
-    wchar_t match[512];
-    wchar_t replace[512];
-    size_t matchLen;
-};
-static RedirectRule g_Rules[64];
-static int g_RuleCount = 0;
-
-// 白名单路径（精确匹配，不重定向）
+// 白名单路径（前缀匹配，放行）
 static wchar_t g_Whitelist[128][512];
 static int g_WhitelistCount = 0;
-
-// 当前重定向目标（线程局部，用于 CreateFileW 返回后让外部读取）
-static thread_local wchar_t g_LastRedirected[1024] = {0};
 
 // 重入保护标志（线程局部，防止 Hook 内部触发自身导致无限递归）
 static thread_local bool g_InHook = false;
@@ -79,31 +67,25 @@ static bool IsWhitelisted(const wchar_t* path) {
     return false;
 }
 
-// 应用重定向规则
-static bool ApplyRedirect(wchar_t* output, const wchar_t* input) {
+// 应用拦截规则（不重定向，只判断是否允许/阻止）
+// true  = 阻止这次文件操作
+// false = 放行
+static bool ApplyBlock(const wchar_t* input) {
     if (g_Mode == MODE_OPEN) return false;
-    // 快速跳过：不拦截 user:// 目录以外的路径（避免干扰 Godot 内部和系统文件）
-    if (g_UserRootLen > 0 && wcsncmp(input, g_UserRoot, g_UserRootLen) != 0)
+
+    // 只管辖 user:// 目录，其他路径一律放行（不干扰 Godot / 系统 / 项目文件）
+    if (g_UserRootLen == 0 || wcsncmp(input, g_UserRoot, g_UserRootLen) != 0)
         return false;
 
-    wchar_t normalized[1024];
-    NormalizeW(normalized, input);
-    wchar_t lower[1024];
-    ToLowerW(lower, normalized);
+    // 严格模式：放行，由 C# 层 ModBridge 处理沙箱逻辑
+    if (g_Mode == MODE_STRICT) return false;
 
-    // 先查白名单
+    // 绝对严格模式：只放行白名单路径，其余全部阻止
+    wchar_t lower[1024];
+    ToLowerW(lower, input);
     if (IsWhitelisted(lower)) return false;
 
-    // 检查重定向规则
-    for (int i = 0; i < g_RuleCount; i++) {
-        if (g_RuleCount > 0 && i < g_RuleCount && wcsncmp(lower, g_Rules[i].match, g_Rules[i].matchLen) == 0) {
-            wcscpy(output, g_Rules[i].replace);
-            wcscat(output, normalized + g_Rules[i].matchLen);
-            return true;
-        }
-    }
-
-    return false;
+    return true; // 阻止
 }
 
 // ──────────────────── Hook 基础设施（x64 14字节间接跳转） ────────────────────
@@ -186,16 +168,6 @@ static FindFirstFileW_t    TrueFindFirstFileW = NULL;
 
 // ──────────────────── Hook 函数实现 ────────────────────
 
-static bool ShouldBlock(const wchar_t* path) {
-    if (g_Mode != MODE_ABSOLUTE) return false;
-    // 绝对严格模式：只允许沙箱目录和系统目录
-    if (wcsstr(path, L"mods_sandbox")) return false;
-    if (wcsstr(path, L"Windows") || wcsstr(path, L"Program Files")) return false;
-    wchar_t lower[1024];
-    ToLowerW(lower, path);
-    return !IsWhitelisted(lower);
-}
-
 HANDLE WINAPI HookCreateFileW(
     LPCWSTR lpFileName, DWORD dwDesiredAccess, DWORD dwShareMode,
     LPSECURITY_ATTRIBUTES lpSecurityAttributes, DWORD dwCreationDisposition,
@@ -204,23 +176,13 @@ HANDLE WINAPI HookCreateFileW(
     if (!g_Initialized || g_InHook) return TrueCreateFileW(lpFileName, dwDesiredAccess, dwShareMode, lpSecurityAttributes, dwCreationDisposition, dwFlagsAndAttributes, hTemplateFile);
     g_InHook = true;
 
-    wchar_t redirected[1024] = {0};
-    const wchar_t* usePath = lpFileName;
-
-    if (lpFileName && wcslen(lpFileName) < 1000) {
-        if (ShouldBlock(lpFileName)) {
-            g_InHook = false;
-            SetLastError(ERROR_ACCESS_DENIED);
-            return INVALID_HANDLE_VALUE;
-        }
-
-        if (ApplyRedirect(redirected, lpFileName)) {
-            usePath = redirected;
-            wcscpy(g_LastRedirected, redirected);
-        }
+    if (lpFileName && wcslen(lpFileName) < 1000 && ApplyBlock(lpFileName)) {
+        g_InHook = false;
+        SetLastError(ERROR_ACCESS_DENIED);
+        return INVALID_HANDLE_VALUE;
     }
 
-    HANDLE result = TrueCreateFileW(usePath, dwDesiredAccess, dwShareMode, lpSecurityAttributes, dwCreationDisposition, dwFlagsAndAttributes, hTemplateFile);
+    HANDLE result = TrueCreateFileW(lpFileName, dwDesiredAccess, dwShareMode, lpSecurityAttributes, dwCreationDisposition, dwFlagsAndAttributes, hTemplateFile);
     g_InHook = false;
     return result;
 }
@@ -229,15 +191,13 @@ BOOL WINAPI HookDeleteFileW(LPCWSTR lpFileName) {
     if (!g_Initialized || !lpFileName || g_InHook) return TrueDeleteFileW(lpFileName);
     g_InHook = true;
 
-    if (wcslen(lpFileName) < 1000 && ShouldBlock(lpFileName)) {
+    if (wcslen(lpFileName) < 1000 && ApplyBlock(lpFileName)) {
         g_InHook = false;
         SetLastError(ERROR_ACCESS_DENIED);
         return FALSE;
     }
 
-    wchar_t redirected[1024] = {0};
-    const wchar_t* usePath = ApplyRedirect(redirected, lpFileName) ? redirected : lpFileName;
-    BOOL ret = TrueDeleteFileW(usePath);
+    BOOL ret = TrueDeleteFileW(lpFileName);
     g_InHook = false;
     return ret;
 }
@@ -246,15 +206,13 @@ BOOL WINAPI HookCreateDirectoryW(LPCWSTR lpPathName, LPSECURITY_ATTRIBUTES lpSec
     if (!g_Initialized || !lpPathName || g_InHook) return TrueCreateDirectoryW(lpPathName, lpSecurityAttributes);
     g_InHook = true;
 
-    if (wcslen(lpPathName) < 1000 && ShouldBlock(lpPathName)) {
+    if (wcslen(lpPathName) < 1000 && ApplyBlock(lpPathName)) {
         g_InHook = false;
         SetLastError(ERROR_ACCESS_DENIED);
         return FALSE;
     }
 
-    wchar_t redirected[1024] = {0};
-    const wchar_t* usePath = ApplyRedirect(redirected, lpPathName) ? redirected : lpPathName;
-    BOOL ret = TrueCreateDirectoryW(usePath, lpSecurityAttributes);
+    BOOL ret = TrueCreateDirectoryW(lpPathName, lpSecurityAttributes);
     g_InHook = false;
     return ret;
 }
@@ -263,15 +221,13 @@ BOOL WINAPI HookRemoveDirectoryW(LPCWSTR lpPathName) {
     if (!g_Initialized || !lpPathName || g_InHook) return TrueRemoveDirectoryW(lpPathName);
     g_InHook = true;
 
-    if (wcslen(lpPathName) < 1000 && ShouldBlock(lpPathName)) {
+    if (wcslen(lpPathName) < 1000 && ApplyBlock(lpPathName)) {
         g_InHook = false;
         SetLastError(ERROR_ACCESS_DENIED);
         return FALSE;
     }
 
-    wchar_t redirected[1024] = {0};
-    const wchar_t* usePath = ApplyRedirect(redirected, lpPathName) ? redirected : lpPathName;
-    BOOL ret = TrueRemoveDirectoryW(usePath);
+    BOOL ret = TrueRemoveDirectoryW(lpPathName);
     g_InHook = false;
     return ret;
 }
@@ -327,25 +283,8 @@ __declspec(dllexport) void sandbox_set_user_root(const wchar_t* root) {
     LeaveCriticalSection(&g_Lock);
 }
 
-__declspec(dllexport) void sandbox_add_rule(const wchar_t* match, const wchar_t* replace) {
-    EnterCriticalSection(&g_Lock);
-    if (g_RuleCount < 64) {
-        wcscpy(g_Rules[g_RuleCount].match, match);
-        wcscpy(g_Rules[g_RuleCount].replace, replace);
-        wcscpy(g_Rules[g_RuleCount].match, match);
-        NormalizeW(g_Rules[g_RuleCount].match, match);
-        ToLowerW(g_Rules[g_RuleCount].match, g_Rules[g_RuleCount].match);
-        g_Rules[g_RuleCount].matchLen = wcslen(g_Rules[g_RuleCount].match);
-        NormalizeW(g_Rules[g_RuleCount].replace, replace);
-        g_RuleCount++;
-    }
-    LeaveCriticalSection(&g_Lock);
-}
-
 __declspec(dllexport) void sandbox_clear_rules() {
-    EnterCriticalSection(&g_Lock);
-    g_RuleCount = 0;
-    LeaveCriticalSection(&g_Lock);
+    // 不再使用重定向规则，保留接口兼容
 }
 
 __declspec(dllexport) void sandbox_add_whitelist(const wchar_t* path) {
@@ -365,12 +304,8 @@ __declspec(dllexport) void sandbox_clear_whitelist() {
     LeaveCriticalSection(&g_Lock);
 }
 
-__declspec(dllexport) const wchar_t* sandbox_last_redirected() {
-    return g_LastRedirected;
-}
-
 __declspec(dllexport) int sandbox_is_blocked(const wchar_t* path) {
-    return ShouldBlock(path) ? 1 : 0;
+    return ApplyBlock(path) ? 1 : 0;
 }
 
 } // extern "C"

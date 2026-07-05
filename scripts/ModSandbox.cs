@@ -29,12 +29,6 @@ public static class ModSandbox
     private static extern void sandbox_set_user_root(string root);
 
     [DllImport("mod_sandbox_hook.dll", CallingConvention = CallingConvention.Cdecl, CharSet = CharSet.Unicode)]
-    private static extern void sandbox_add_rule(string match, string replace);
-
-    [DllImport("mod_sandbox_hook.dll", CallingConvention = CallingConvention.Cdecl)]
-    private static extern void sandbox_clear_rules();
-
-    [DllImport("mod_sandbox_hook.dll", CallingConvention = CallingConvention.Cdecl, CharSet = CharSet.Unicode)]
     private static extern void sandbox_add_whitelist(string path);
 
     [DllImport("mod_sandbox_hook.dll", CallingConvention = CallingConvention.Cdecl)]
@@ -57,8 +51,6 @@ public static class ModSandbox
                 string userAbs = ProjectSettings.GlobalizePath("user://").Replace("/", "\\");
                 sandbox_set_user_root(userAbs);
 
-                // 同步所有已注册的沙箱目录规则到原生层
-                SyncRulesToNative();
                 SyncWhitelistToNative();
             }
             else
@@ -72,23 +64,6 @@ public static class ModSandbox
         {
             GD.PrintErr($"[Sandbox] 原生 Hook 加载异常: {e.Message}");
         }
-    }
-
-    private static void SyncRulesToNative()
-    {
-        if (!_nativeHooksActive) return;
-        sandbox_clear_rules();
-        // 为每个注册的 Mod 添加 user:// → sandbox 重定向规则
-        string absUser = ProjectSettings.GlobalizePath("user://").Replace("/", "\\");
-        foreach (var kv in _modSandboxDirs)
-        {
-            string sandboxAbs = kv.Value.Replace("/", "\\");
-            // GDScript 最终调用的是 Godot 转译后的绝对路径
-            // res:// 和 user:// 经过 Godot 内部转换后才到 Win32 API
-            sandbox_add_rule(absUser + "mods_sandbox", sandboxAbs + "\\");  // 自身沙箱放行
-        }
-        // 添加 user:// mods_sandbox 放行自身
-        sandbox_add_rule(absUser + "mods_sandbox", absUser + "mods_sandbox");
     }
 
     private static void SyncWhitelistToNative()
@@ -185,7 +160,6 @@ public static class ModSandbox
 		if (!Directory.Exists(sandboxDir)) Directory.CreateDirectory(sandboxDir);
         _modSandboxDirs[modId] = sandboxDir;
         if (!_permissions.ContainsKey(modId)) _permissions[modId] = new HashSet<string>(StringComparer.OrdinalIgnoreCase);
-        SyncRulesToNative();
         GD.Print($"[Sandbox] Mod 已注册: {modId} → {sandboxDir}");
 	}
 
