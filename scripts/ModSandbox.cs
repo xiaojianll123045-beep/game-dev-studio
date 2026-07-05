@@ -2,98 +2,19 @@ using Godot;
 using System;
 using System.Collections.Generic;
 using System.IO;
-using System.Runtime.InteropServices;
 using System.Text.Json;
 
 /// <summary>
-/// Mod 安全沙箱 — 文件系统虚拟化、权限控制、安全日志。
-/// 在 ModManager.ApplyAll 之前初始化，是 Mod 安全的最后一道防线。
-/// 底层通过 Win32 API Hook（mod_sandbox_hook.dll）拦截所有文件操作。
+/// Mod 安全沙箱 — 文件系统路由、权限控制、安全日志。
+/// 在 ModManager.ApplyAll 之前初始化。
+/// 通过 C# 层路由（ModBridge API）实现路径重定向，不依赖底层 Hook。
 /// </summary>
 public static class ModSandbox
 {
-    // ═══════════════ 原生 Hook DLL (P/Invoke) ═══════════════
-    private static bool _nativeHooksActive = false;
     private static bool _initialized = false;
-
-    [DllImport("mod_sandbox_hook.dll", CallingConvention = CallingConvention.Cdecl)]
-    private static extern int sandbox_hook_init(int mode);
-
-    [DllImport("mod_sandbox_hook.dll", CallingConvention = CallingConvention.Cdecl)]
-    private static extern void sandbox_hook_shutdown();
-
-    [DllImport("mod_sandbox_hook.dll", CallingConvention = CallingConvention.Cdecl)]
-    private static extern void sandbox_set_mode(int mode);
-
-    [DllImport("mod_sandbox_hook.dll", CallingConvention = CallingConvention.Cdecl, CharSet = CharSet.Unicode)]
-    private static extern void sandbox_set_user_root(string root);
-
-    [DllImport("mod_sandbox_hook.dll", CallingConvention = CallingConvention.Cdecl, CharSet = CharSet.Unicode)]
-    private static extern void sandbox_add_whitelist(string path);
-
-    [DllImport("mod_sandbox_hook.dll", CallingConvention = CallingConvention.Cdecl, CharSet = CharSet.Ansi)]
-    private static extern void sandbox_set_current_mod(string modId);
-
-    [DllImport("mod_sandbox_hook.dll", CallingConvention = CallingConvention.Cdecl, CharSet = CharSet.Unicode)]
-    private static extern void sandbox_register_mod(string modId, string sandboxDir);
-
-    [DllImport("mod_sandbox_hook.dll", CallingConvention = CallingConvention.Cdecl, CharSet = CharSet.Ansi)]
-    private static extern void sandbox_unregister_mod(string modId);
-
-    [DllImport("mod_sandbox_hook.dll", CallingConvention = CallingConvention.Cdecl, CharSet = CharSet.Unicode)]
-    private static extern int sandbox_is_blocked(string path);
-
-    private static void InitNativeHooks()
-    {
-        try
-        {
-            int result = sandbox_hook_init((int)Mode);
-            if (result == 7)
-            {
-                _nativeHooksActive = true;
-                GD.Print("[Sandbox] Win32 API Hook 已激活（CreateFileW / DeleteFileW / CreateDirectoryW / RemoveDirectoryW）");
-
-                // 设定拦截范围：仅 user:// 目录，Godot/系统文件不受 Hook 影响
-                string userAbs = ProjectSettings.GlobalizePath("user://").Replace("/", "\\");
-                sandbox_set_user_root(userAbs);
-
-                SyncWhitelistToNative();
-            }
-            else
-                GD.PrintErr("[Sandbox] 原生 Hook 初始化失败（可能缺少 mod_sandbox_hook.dll）");
-        }
-        catch (DllNotFoundException)
-        {
-            GD.Print("[Sandbox] 原生 Hook DLL 未找到，沙箱运行在 C# 层拦截模式");
-        }
-        catch (Exception e)
-        {
-            GD.PrintErr($"[Sandbox] 原生 Hook 加载异常: {e.Message}");
-        }
-    }
-
-    private static void SyncWhitelistToNative()
-    {
-        if (!_nativeHooksActive) return;
-        foreach (var path in _globalWhitelist)
-            sandbox_add_whitelist(path.Replace("/", "\\"));
-        // 系统关键路径绝对放行
-        sandbox_add_whitelist(System.Environment.GetFolderPath(System.Environment.SpecialFolder.Windows));
-        sandbox_add_whitelist(System.Environment.GetFolderPath(System.Environment.SpecialFolder.ProgramFiles));
-        sandbox_add_whitelist(System.Environment.GetFolderPath(System.Environment.SpecialFolder.System));
-    }
 	// ── 沙箱模式 ──
 	public enum SandboxMode { Open, Strict, AbsoluteStrict }
-    public static SandboxMode Mode
-    {
-        get => _mode;
-        set
-        {
-            _mode = value;
-            if (_nativeHooksActive) sandbox_set_mode((int)value);
-        }
-    }
-    private static SandboxMode _mode = SandboxMode.Strict;
+    public static SandboxMode Mode { get; set; } = SandboxMode.Strict;
 
 	// ── 安全日志 ──
 	public static string LogDir { get; private set; }
@@ -149,15 +70,7 @@ public static class ModSandbox
     }
 
     /// <summary>激活 Native Hook 层（在 Godot 引擎完全就绪后调用）</summary>
-    public static void ActivateNativeHooks()
-    {
-        if (_nativeHooksActive) return;
-        InitNativeHooks();
-        if (_nativeHooksActive)
-            GD.Print($"[Sandbox] Native Hook 层已激活，模式: {Mode}");
-    }
-
-    /// <summary>为 Mod 注册沙箱上下文（在 ModManager.ApplyMod 之前调用）</summary>
+    /// <summary>为 Mod 注册沙箱上下文</summary>
     public static void RegisterMod(string modId, string modName)
     {
         if (_modSandboxDirs.ContainsKey(modId)) return;
@@ -165,21 +78,7 @@ public static class ModSandbox
         if (!Directory.Exists(sandboxDir)) Directory.CreateDirectory(sandboxDir);
         _modSandboxDirs[modId] = sandboxDir;
         if (!_permissions.ContainsKey(modId)) _permissions[modId] = new HashSet<string>(StringComparer.OrdinalIgnoreCase);
-        // 同步到原生 DLL
-        if (_nativeHooksActive) sandbox_register_mod(modId, sandboxDir.Replace("/", "\\"));
         GD.Print($"[Sandbox] Mod 已注册: {modId} → {sandboxDir}");
-    }
-
-    /// <summary>设置当前线程的 Mod 上下文（在调用 Mod 代码之前设置）</summary>
-    public static void SetCurrentMod(string modId)
-    {
-        if (_nativeHooksActive) sandbox_set_current_mod(modId ?? "");
-    }
-
-    /// <summary>清除当前线程的 Mod 上下文</summary>
-    public static void ClearCurrentMod()
-    {
-        if (_nativeHooksActive) sandbox_set_current_mod("");
     }
 
 	/// <summary>清理 Mod 沙箱（卸载时调用）</summary>
@@ -303,7 +202,6 @@ public static class ModSandbox
     {
         _globalWhitelist.Add(path);
         SaveGlobalWhitelist();
-        if (_nativeHooksActive) sandbox_add_whitelist(path.Replace("/", "\\"));
     }
 
 	/// <summary>移除全局白名单路径</summary>

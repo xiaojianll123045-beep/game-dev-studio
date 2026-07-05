@@ -6962,10 +6962,7 @@ public partial class GameManager : Node3D
             sandboxOpt.AddThemeColorOverride("font_color", Colors.White);
             sandboxOpt.AddThemeStyleboxOverride("normal", new StyleBoxFlat { BgColor = new Color(0.15f, 0.18f, 0.22f), CornerRadiusTopLeft = 4, CornerRadiusTopRight = 4, CornerRadiusBottomLeft = 4, CornerRadiusBottomRight = 4 });
             sandboxOpt.ItemSelected += (long i) => {
-                var mode = (ModSandbox.SandboxMode)(int)i;
-                ModSandbox.Mode = mode;
-                if (mode == ModSandbox.SandboxMode.AbsoluteStrict)
-                    ModSandbox.ActivateNativeHooks();
+                ModSandbox.Mode = (ModSandbox.SandboxMode)(int)i;
             };
             AddRow(Loc.Tr("sandbox.mode_label"), sandboxOpt);
         }

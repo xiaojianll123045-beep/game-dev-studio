@@ -7,26 +7,13 @@ set ENG=C:\Users\xijil\AppData\Local\Microsoft\WinGet\Packages\GodotEngine.Godot
 echo === Dev Run ===
 echo.
 
-echo [1/3] Sandbox native DLL
-pushd "%~dp0extensions\mod_sandbox_native"
-g++ -shared -o mod_sandbox_hook.dll mod_sandbox_hook.cpp -static -static-libgcc -static-libstdc++ -O2 -Wl,--exclude-all-symbols >nul 2>&1
-if errorlevel 1 goto native_warn
-copy /Y mod_sandbox_hook.dll "%~dp0" >nul
-echo   Native DLL OK
-goto native_done
-:native_warn
-echo   Native DLL skipped - no MinGW GCC, using C# fallback
-:native_done
-popd
-echo.
-
-echo [2/3] Clean and compile C#
+echo [1/2] Clean and compile C#
 if exist "%~dp0.godot\mono\temp" rmdir /S /Q "%~dp0.godot\mono\temp"
 dotnet build "%~dp0GameTycoon.csproj"
 if errorlevel 1 goto fail
 
 echo.
-echo [3/3] Launching game
+echo [2/2] Launching game (close game window to return here)
 echo.
 call :run_game
 echo.

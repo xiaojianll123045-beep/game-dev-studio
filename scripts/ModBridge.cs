@@ -237,8 +237,8 @@ public partial class ModBridge : Node
     }
 
     // ═══════════════ 沙箱安全 API ═══════════════
-    /// <summary>通过沙箱安全读取文件（自动重定向到 Mod 沙箱目录）</summary>
-    public string sandbox_safe_read(string mod_id, string path)
+    /// <summary>通过沙箱安全读取文件</summary>
+    public string sandbox_read(string mod_id, string path)
     {
         string redirect = ModSandbox.RedirectPath(mod_id, path);
         if (redirect == null) return "";
@@ -247,8 +247,8 @@ public partial class ModBridge : Node
         return f?.GetAsText() ?? "";
     }
 
-    /// <summary>通过沙箱安全写入文件（自动重定向到 Mod 沙箱目录）</summary>
-    public bool sandbox_safe_write(string mod_id, string path, string data)
+    /// <summary>通过沙箱安全写入文件</summary>
+    public bool sandbox_write(string mod_id, string path, string data)
     {
         string redirect = ModSandbox.RedirectPath(mod_id, path);
         if (redirect == null) return false;
@@ -261,15 +261,50 @@ public partial class ModBridge : Node
         return true;
     }
 
+    /// <summary>通过沙箱检查文件是否存在</summary>
+    public bool sandbox_file_exists(string mod_id, string path)
+    {
+        string redirect = ModSandbox.RedirectPath(mod_id, path);
+        return redirect != null && FileAccess.FileExists(redirect);
+    }
+
+    /// <summary>通过沙箱删除文件</summary>
+    public bool sandbox_delete(string mod_id, string path)
+    {
+        string redirect = ModSandbox.RedirectPath(mod_id, path);
+        if (redirect == null || !FileAccess.FileExists(redirect)) return false;
+        DirAccess.RemoveAbsolute(redirect);
+        return true;
+    }
+
+    /// <summary>列出沙箱目录内容</summary>
+    public Godot.Collections.Array sandbox_list_dir(string mod_id, string path)
+    {
+        var result = new Godot.Collections.Array();
+        string redirect = ModSandbox.RedirectPath(mod_id, path);
+        if (redirect == null) return result;
+        var dir = DirAccess.Open(redirect);
+        if (dir == null) return result;
+        dir.ListDirBegin();
+        while (true)
+        {
+            string f = dir.GetNext();
+            if (string.IsNullOrEmpty(f)) break;
+            result.Add(f);
+        }
+        dir.ListDirEnd();
+        return result;
+    }
+
     /// <summary>获取 Mod 的专属沙箱目录</summary>
     public string sandbox_get_dir(string mod_id) => ModSandbox.GetModSandboxDir(mod_id) ?? "";
 
-    /// <summary>请求文件系统权限（触发 UI 弹窗）</summary>
+    /// <summary>请求文件系统权限</summary>
     public bool request_permission(string mod_id, string path, int permission_type)
     {
         return ModSandbox.RequestFilePermission(mod_id, path, (ModSandbox.PermissionType)permission_type);
     }
 
-    /// <summary>检查某路径是否已被授予权限</summary>
+    /// <summary>检查路径是否已授权</summary>
     public bool is_path_allowed(string mod_id, string path) => ModSandbox.IsPathWhitelisted(mod_id, path);
 }

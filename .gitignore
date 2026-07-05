@@ -7,4 +7,3 @@ build/
 *.tmp
 .vs/
 
-mod_sandbox_hook.dll

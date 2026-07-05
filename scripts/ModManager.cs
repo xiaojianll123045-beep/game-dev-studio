@@ -511,9 +511,7 @@ public static class ModManager
                             obj.SetScript(script);
                             gm.AddChild(obj);
                             var bridge = gm.GetNodeOrNull<ModBridge>("ModBridge");
-                            ModSandbox.SetCurrentMod(mod.Id);
                             try { obj.Call("OnLoad", gm, bridge); } catch { }
-                            ModSandbox.ClearCurrentMod();
                             ActiveScriptMods.Add(obj);
                             GD.Print($"[Mod] script mod active: {mod.Name}/{file}");
                         }
