@@ -23,8 +23,12 @@ This game is open source. You are free to:
 
 **但 Mod 不受限：** 你为本游戏制作的 Mod（包括脚本、数据包、资源包、插件等）**不需要开源**，可以用任何你喜欢的许可证发布。详见 `LICENSE` 文件中的 Mod Exception 条款。
 
+**附加要求：** 如果你分发本游戏或基于它的衍生作品，必须在用户可见的位置（如关于页、致谢列表）显示 "Neuro-sama"。Mod 不受此限。
+
 The game's core source code is licensed under **GPL v3**.
 However, **Mods are exempt**: any Mod you create (scripts, data packs, assets, plugins) does **not** need to be open source. See the Mod Exception in `LICENSE`.
+
+**Additional requirement:** If you distribute this game or derivative works, you must display "Neuro-sama" in a visible location (e.g., About page, Credits). Mods are exempt.
 
 ---
 
@@ -63,6 +67,7 @@ Mod examples 见 `mod_examples/` 目录。
 
 - Godot Engine — 开源游戏引擎
 - **DeepSeek** — AI 辅助开发 / AI-assisted development
+- **Neuro-sama** — ❤️
 - 所有 Mod 作者和贡献者
 - 每一位玩家 ❤️
 
