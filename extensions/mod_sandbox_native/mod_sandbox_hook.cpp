@@ -42,6 +42,9 @@ static int g_WhitelistCount = 0;
 // 当前重定向目标（线程局部，用于 CreateFileW 返回后让外部读取）
 static thread_local wchar_t g_LastRedirected[1024] = {0};
 
+// 重入保护标志（线程局部，防止 Hook 内部触发自身导致无限递归）
+static thread_local bool g_InHook = false;
+
 // ──────────────────── 路径工具 ────────────────────
 
 static void ToLowerW(wchar_t* dst, const wchar_t* src) {
@@ -191,77 +194,79 @@ HANDLE WINAPI HookCreateFileW(
     LPSECURITY_ATTRIBUTES lpSecurityAttributes, DWORD dwCreationDisposition,
     DWORD dwFlagsAndAttributes, HANDLE hTemplateFile)
 {
-    if (!g_Initialized) return TrueCreateFileW(lpFileName, dwDesiredAccess, dwShareMode, lpSecurityAttributes, dwCreationDisposition, dwFlagsAndAttributes, hTemplateFile);
+    if (!g_Initialized || g_InHook) return TrueCreateFileW(lpFileName, dwDesiredAccess, dwShareMode, lpSecurityAttributes, dwCreationDisposition, dwFlagsAndAttributes, hTemplateFile);
+    g_InHook = true;
 
     wchar_t redirected[1024] = {0};
     const wchar_t* usePath = lpFileName;
 
     if (lpFileName && wcslen(lpFileName) < 1000) {
         if (ShouldBlock(lpFileName)) {
+            g_InHook = false;
             SetLastError(ERROR_ACCESS_DENIED);
             return INVALID_HANDLE_VALUE;
         }
 
         if (ApplyRedirect(redirected, lpFileName)) {
-            // 确保目标目录存在
-            if (dwCreationDisposition == CREATE_NEW || dwCreationDisposition == CREATE_ALWAYS || dwCreationDisposition == OPEN_ALWAYS) {
-                wchar_t dirPath[1024];
-                wcscpy(dirPath, redirected);
-                for (int i = wcslen(dirPath) - 1; i > 0; i--) {
-                    if (dirPath[i] == L'\\') {
-                        dirPath[i] = 0;
-                        if (GetFileAttributesW(dirPath) == INVALID_FILE_ATTRIBUTES)
-                            CreateDirectoryW(dirPath, NULL);
-                        dirPath[i] = L'\\';
-                        break;
-                    }
-                }
-            }
             usePath = redirected;
             wcscpy(g_LastRedirected, redirected);
         }
     }
 
-    return TrueCreateFileW(usePath, dwDesiredAccess, dwShareMode, lpSecurityAttributes, dwCreationDisposition, dwFlagsAndAttributes, hTemplateFile);
+    HANDLE result = TrueCreateFileW(usePath, dwDesiredAccess, dwShareMode, lpSecurityAttributes, dwCreationDisposition, dwFlagsAndAttributes, hTemplateFile);
+    g_InHook = false;
+    return result;
 }
 
 BOOL WINAPI HookDeleteFileW(LPCWSTR lpFileName) {
-    if (!g_Initialized || !lpFileName) return TrueDeleteFileW(lpFileName);
+    if (!g_Initialized || !lpFileName || g_InHook) return TrueDeleteFileW(lpFileName);
+    g_InHook = true;
 
     if (wcslen(lpFileName) < 1000 && ShouldBlock(lpFileName)) {
+        g_InHook = false;
         SetLastError(ERROR_ACCESS_DENIED);
         return FALSE;
     }
 
     wchar_t redirected[1024] = {0};
     const wchar_t* usePath = ApplyRedirect(redirected, lpFileName) ? redirected : lpFileName;
-    return TrueDeleteFileW(usePath);
+    BOOL ret = TrueDeleteFileW(usePath);
+    g_InHook = false;
+    return ret;
 }
 
 BOOL WINAPI HookCreateDirectoryW(LPCWSTR lpPathName, LPSECURITY_ATTRIBUTES lpSecurityAttributes) {
-    if (!g_Initialized || !lpPathName) return TrueCreateDirectoryW(lpPathName, lpSecurityAttributes);
+    if (!g_Initialized || !lpPathName || g_InHook) return TrueCreateDirectoryW(lpPathName, lpSecurityAttributes);
+    g_InHook = true;
 
     if (wcslen(lpPathName) < 1000 && ShouldBlock(lpPathName)) {
+        g_InHook = false;
         SetLastError(ERROR_ACCESS_DENIED);
         return FALSE;
     }
 
     wchar_t redirected[1024] = {0};
     const wchar_t* usePath = ApplyRedirect(redirected, lpPathName) ? redirected : lpPathName;
-    return TrueCreateDirectoryW(usePath, lpSecurityAttributes);
+    BOOL ret = TrueCreateDirectoryW(usePath, lpSecurityAttributes);
+    g_InHook = false;
+    return ret;
 }
 
 BOOL WINAPI HookRemoveDirectoryW(LPCWSTR lpPathName) {
-    if (!g_Initialized || !lpPathName) return TrueRemoveDirectoryW(lpPathName);
+    if (!g_Initialized || !lpPathName || g_InHook) return TrueRemoveDirectoryW(lpPathName);
+    g_InHook = true;
 
     if (wcslen(lpPathName) < 1000 && ShouldBlock(lpPathName)) {
+        g_InHook = false;
         SetLastError(ERROR_ACCESS_DENIED);
         return FALSE;
     }
 
     wchar_t redirected[1024] = {0};
     const wchar_t* usePath = ApplyRedirect(redirected, lpPathName) ? redirected : lpPathName;
-    return TrueRemoveDirectoryW(usePath);
+    BOOL ret = TrueRemoveDirectoryW(usePath);
+    g_InHook = false;
+    return ret;
 }
 
 // ──────────────────── C 导出接口（P/Invoke 调用） ────────────────────
