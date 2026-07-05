@@ -45,6 +45,10 @@ static thread_local wchar_t g_LastRedirected[1024] = {0};
 // 重入保护标志（线程局部，防止 Hook 内部触发自身导致无限递归）
 static thread_local bool g_InHook = false;
 
+// user:// 目录的绝对路径（只拦截此路径下的操作，减少开销）
+static wchar_t g_UserRoot[512] = {0};
+static size_t g_UserRootLen = 0;
+
 // ──────────────────── 路径工具 ────────────────────
 
 static void ToLowerW(wchar_t* dst, const wchar_t* src) {
@@ -78,6 +82,9 @@ static bool IsWhitelisted(const wchar_t* path) {
 // 应用重定向规则
 static bool ApplyRedirect(wchar_t* output, const wchar_t* input) {
     if (g_Mode == MODE_OPEN) return false;
+    // 快速跳过：不拦截 user:// 目录以外的路径（避免干扰 Godot 内部和系统文件）
+    if (g_UserRootLen > 0 && wcsncmp(input, g_UserRoot, g_UserRootLen) != 0)
+        return false;
 
     wchar_t normalized[1024];
     NormalizeW(normalized, input);
@@ -309,6 +316,14 @@ __declspec(dllexport) void sandbox_hook_shutdown() {
 __declspec(dllexport) void sandbox_set_mode(int mode) {
     EnterCriticalSection(&g_Lock);
     g_Mode = mode;
+    LeaveCriticalSection(&g_Lock);
+}
+
+__declspec(dllexport) void sandbox_set_user_root(const wchar_t* root) {
+    EnterCriticalSection(&g_Lock);
+    wcscpy(g_UserRoot, root);
+    NormalizeW(g_UserRoot, root);
+    g_UserRootLen = wcslen(g_UserRoot);
     LeaveCriticalSection(&g_Lock);
 }
 

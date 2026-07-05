@@ -26,6 +26,9 @@ public static class ModSandbox
     private static extern void sandbox_set_mode(int mode);
 
     [DllImport("mod_sandbox_hook.dll", CallingConvention = CallingConvention.Cdecl, CharSet = CharSet.Unicode)]
+    private static extern void sandbox_set_user_root(string root);
+
+    [DllImport("mod_sandbox_hook.dll", CallingConvention = CallingConvention.Cdecl, CharSet = CharSet.Unicode)]
     private static extern void sandbox_add_rule(string match, string replace);
 
     [DllImport("mod_sandbox_hook.dll", CallingConvention = CallingConvention.Cdecl)]
@@ -49,6 +52,10 @@ public static class ModSandbox
             {
                 _nativeHooksActive = true;
                 GD.Print("[Sandbox] Win32 API Hook 已激活（CreateFileW / DeleteFileW / CreateDirectoryW / RemoveDirectoryW）");
+
+                // 设定拦截范围：仅 user:// 目录，Godot/系统文件不受 Hook 影响
+                string userAbs = ProjectSettings.GlobalizePath("user://").Replace("/", "\\");
+                sandbox_set_user_root(userAbs);
 
                 // 同步所有已注册的沙箱目录规则到原生层
                 SyncRulesToNative();
