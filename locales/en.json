@@ -1212,6 +1212,7 @@
   "sandbox.whitelist_hint": "e.g. user://saves/",
   "sandbox.save": "Save & Close",
   "sandbox.clear_all": "Clear",
+  "sandbox.disclaimer": "⚠ The sandbox cannot fully prevent malicious mods from bypassing restrictions. Only load mods you trust.",
   "team.initial": "Initial Team",
   "team.founder": "You",
   "outsource.mobile_ui": "Mobile UI Contract",

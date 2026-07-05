@@ -1672,6 +1672,7 @@
     "sandbox.whitelist_hint":  "如 user://saves/",
     "sandbox.save":  "保存并关闭",
     "sandbox.clear_all":  "清空",
+    "sandbox.disclaimer":  "⚠ 沙箱系统不能完全阻止恶意 Mod 绕过限制，请确保您信任该 Mod 的作者。",
     "skill.AI":  "AI",
     "skill.Art":  "美术",
     "skill.Audio":  "音频",

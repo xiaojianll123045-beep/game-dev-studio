@@ -456,6 +456,7 @@ public partial class MenuManager : Node
 		var closeBtn = new Button { Text = Loc.Tr("set.cancel"), Flat = true };
 		closeBtn.AddThemeFontSizeOverride("font_size", 13);
 		closeBtn.AddThemeColorOverride("font_color", Colors.Black);
+		closeBtn.AddThemeColorOverride("font_hover_color", new Color(0.4f, 0.4f, 0.4f));
 		closeBtn.AddThemeStyleboxOverride("normal", new StyleBoxFlat { BgColor = new Color(0.90f, 0.89f, 0.86f), CornerRadiusTopLeft = 6, CornerRadiusTopRight = 6, CornerRadiusBottomLeft = 6, CornerRadiusBottomRight = 6, BorderWidthLeft = 1, BorderWidthTop = 1, BorderWidthRight = 1, BorderWidthBottom = 1, BorderColor = new Color(0.45f, 0.5f, 0.55f, 0.3f) });
 		closeBtn.Size = new(bw, bh);
 		closeBtn.Position = new((pw - bw) / 2, ph - bh - 12);
@@ -912,7 +913,8 @@ public partial class MenuManager : Node
 
 		var closeBtn = new Button { Text = "✕", Position = new(pw - 40, 8), Size = new(30, 28), Flat = true };
 		closeBtn.AddThemeFontSizeOverride("font_size", 16);
-		closeBtn.AddThemeColorOverride("font_color", new Color(0.8f, 0.3f, 0.3f));
+		closeBtn.AddThemeColorOverride("font_color", Colors.Black);
+		closeBtn.AddThemeColorOverride("font_hover_color", new Color(0.4f, 0.4f, 0.4f));
 		closeBtn.Pressed += () => dp.QueueFree();
 		dp.AddChild(closeBtn);
 
@@ -1008,11 +1010,11 @@ public partial class MenuManager : Node
 		var botClose = new Button { Text = Loc.Tr("set.cancel"), Flat = true, Position = new(pw / 2 - 50, Mathf.Max(y + 20, ph - 50)), Size = new(100, 32) };
 		botClose.AddThemeFontSizeOverride("font_size", 12);
 		botClose.AddThemeColorOverride("font_color", Colors.Black);
+		botClose.AddThemeColorOverride("font_hover_color", new Color(0.4f, 0.4f, 0.4f));
 		botClose.Pressed += () => dp.QueueFree();
 		dp.AddChild(botClose);
 	}
 
-	/// <summary>弹出 Mod 沙箱配置面板</summary>
 	private void ShowModSandboxPanel(Control parent, string modId, string modName)
 	{
 		float pw = 360, ph = 320;
@@ -1037,8 +1039,8 @@ public partial class MenuManager : Node
 		dp.AddChild(title);
 		var closeBtn = new Button { Text = "✕", Position = new(pw - 36, 5), Size = new(28, 28), Flat = true };
 		closeBtn.AddThemeFontSizeOverride("font_size", 16);
-		closeBtn.AddThemeColorOverride("font_color", new Color(0.8f, 0.3f, 0.3f));
-		closeBtn.AddThemeColorOverride("font_hover_color", new Color(0.5f, 0.1f, 0.1f));
+		closeBtn.AddThemeColorOverride("font_color", Colors.Black);
+		closeBtn.AddThemeColorOverride("font_hover_color", new Color(0.4f, 0.4f, 0.4f));
 		closeBtn.Pressed += () => dp.QueueFree();
 		dp.AddChild(closeBtn);
 
@@ -1161,6 +1163,20 @@ public partial class MenuManager : Node
 			refreshPanel();
 		};
 
+		// 沙箱免责提示
+		float disclaimerY = ph - 78;
+		dp.AddChild(new ColorRect { Color = new Color(0.70f, 0.72f, 0.75f, 0.3f), Position = new(16, disclaimerY - 6), Size = new(pw - 32, 1) });
+		var disclaimer = new Label
+		{
+			Text = Loc.Tr("sandbox.disclaimer"),
+			Position = new(16, disclaimerY),
+			Size = new(pw - 32, 28)
+		};
+		disclaimer.AddThemeFontSizeOverride("font_size", 8);
+		disclaimer.AddThemeColorOverride("font_color", new Color(0.5f, 0.55f, 0.6f));
+		disclaimer.AutowrapMode = TextServer.AutowrapMode.Word;
+		dp.AddChild(disclaimer);
+
 		// 保存并关闭按钮
 		float btnY = ph - 44;
 		var saveBtn = new Button
@@ -1270,6 +1286,7 @@ public partial class MenuManager : Node
 		var botClose = new Button { Text = Loc.Tr("set.cancel"), Flat = true, Position = new(pw / 2 - 50, Mathf.Max(y + 20, ph - 50)), Size = new(100, 32) };
 		botClose.AddThemeFontSizeOverride("font_size", 12);
 		botClose.AddThemeColorOverride("font_color", Colors.Black);
+		botClose.AddThemeColorOverride("font_hover_color", new Color(0.4f, 0.4f, 0.4f));
 		botClose.Pressed += () => dp.QueueFree();
 		dp.AddChild(botClose);
 	}
