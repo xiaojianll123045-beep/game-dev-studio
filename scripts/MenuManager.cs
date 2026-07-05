@@ -547,11 +547,11 @@ public partial class MenuManager : Node
 		tip.HorizontalAlignment = HorizontalAlignment.Center;
 		_aboutPanel.AddChild(tip);
 
-		var devotion = new Label { Text = Loc.Tr("about.devotion"), Position = new(20, ly + 24), Size = new(pw - 40, 200) };
-		devotion.AddThemeFontSizeOverride("font_size", 9);
-		devotion.AddThemeColorOverride("font_color", new Color(0.40f, 0.45f, 0.50f));
-		devotion.HorizontalAlignment = HorizontalAlignment.Center;
-		devotion.AutowrapMode = TextServer.AutowrapMode.Word;
+		var devotion = new RichTextLabel { Text = Loc.Tr("about.devotion"), Position = new(20, ly + 24), Size = new(pw - 40, 200), BbcodeEnabled = true };
+		devotion.AddThemeFontSizeOverride("normal_font_size", 9);
+		devotion.AddThemeColorOverride("default_color", new Color(0.40f, 0.45f, 0.50f));
+		devotion.AddThemeColorOverride("meta_color", new Color(0.2f, 0.4f, 0.8f));
+		devotion.MetaClicked += (meta) => OS.ShellOpen(meta.ToString());
 		_aboutPanel.AddChild(devotion);
 
 		_aboutPanel.AddChild(MkLabel("Godot 4.7 Mono  |  C# .NET 8.0", pw / 2 - 150, ph - 78, 300, 18, 10, new Color(0.20f, 0.25f, 0.32f), HorizontalAlignment.Center));
