@@ -2,17 +2,110 @@ using Godot;
 using System;
 using System.Collections.Generic;
 using System.IO;
+using System.Runtime.InteropServices;
 using System.Text.Json;
 
 /// <summary>
 /// Mod 安全沙箱 — 文件系统虚拟化、权限控制、安全日志。
 /// 在 ModManager.ApplyAll 之前初始化，是 Mod 安全的最后一道防线。
+/// 底层通过 Win32 API Hook（mod_sandbox_hook.dll）拦截所有文件操作。
 /// </summary>
 public static class ModSandbox
 {
+    // ═══════════════ 原生 Hook DLL (P/Invoke) ═══════════════
+    private static bool _nativeHooksActive = false;
+
+    [DllImport("mod_sandbox_hook.dll", CallingConvention = CallingConvention.Cdecl)]
+    private static extern int sandbox_hook_init(int mode);
+
+    [DllImport("mod_sandbox_hook.dll", CallingConvention = CallingConvention.Cdecl)]
+    private static extern void sandbox_hook_shutdown();
+
+    [DllImport("mod_sandbox_hook.dll", CallingConvention = CallingConvention.Cdecl)]
+    private static extern void sandbox_set_mode(int mode);
+
+    [DllImport("mod_sandbox_hook.dll", CallingConvention = CallingConvention.Cdecl, CharSet = CharSet.Unicode)]
+    private static extern void sandbox_add_rule(string match, string replace);
+
+    [DllImport("mod_sandbox_hook.dll", CallingConvention = CallingConvention.Cdecl)]
+    private static extern void sandbox_clear_rules();
+
+    [DllImport("mod_sandbox_hook.dll", CallingConvention = CallingConvention.Cdecl, CharSet = CharSet.Unicode)]
+    private static extern void sandbox_add_whitelist(string path);
+
+    [DllImport("mod_sandbox_hook.dll", CallingConvention = CallingConvention.Cdecl)]
+    private static extern void sandbox_clear_whitelist();
+
+    [DllImport("mod_sandbox_hook.dll", CallingConvention = CallingConvention.Cdecl, CharSet = CharSet.Unicode)]
+    private static extern int sandbox_is_blocked(string path);
+
+    private static void InitNativeHooks()
+    {
+        try
+        {
+            int result = sandbox_hook_init((int)Mode);
+            if (result == 7)
+            {
+                _nativeHooksActive = true;
+                GD.Print("[Sandbox] Win32 API Hook 已激活（CreateFileW / DeleteFileW / CreateDirectoryW / RemoveDirectoryW）");
+
+                // 同步所有已注册的沙箱目录规则到原生层
+                SyncRulesToNative();
+                SyncWhitelistToNative();
+            }
+            else
+                GD.PrintErr("[Sandbox] 原生 Hook 初始化失败（可能缺少 mod_sandbox_hook.dll）");
+        }
+        catch (DllNotFoundException)
+        {
+            GD.Print("[Sandbox] 原生 Hook DLL 未找到，沙箱运行在 C# 层拦截模式");
+        }
+        catch (Exception e)
+        {
+            GD.PrintErr($"[Sandbox] 原生 Hook 加载异常: {e.Message}");
+        }
+    }
+
+    private static void SyncRulesToNative()
+    {
+        if (!_nativeHooksActive) return;
+        sandbox_clear_rules();
+        // 为每个注册的 Mod 添加 user:// → sandbox 重定向规则
+        string absUser = ProjectSettings.GlobalizePath("user://").Replace("/", "\\");
+        foreach (var kv in _modSandboxDirs)
+        {
+            string sandboxAbs = kv.Value.Replace("/", "\\");
+            // GDScript 最终调用的是 Godot 转译后的绝对路径
+            // res:// 和 user:// 经过 Godot 内部转换后才到 Win32 API
+            sandbox_add_rule(absUser + "mods_sandbox", sandboxAbs + "\\");  // 自身沙箱放行
+        }
+        // 添加 user:// mods_sandbox 放行自身
+        sandbox_add_rule(absUser + "mods_sandbox", absUser + "mods_sandbox");
+    }
+
+    private static void SyncWhitelistToNative()
+    {
+        if (!_nativeHooksActive) return;
+        sandbox_clear_whitelist();
+        foreach (var path in _globalWhitelist)
+            sandbox_add_whitelist(path.Replace("/", "\\"));
+        // 系统关键路径绝对放行
+        sandbox_add_whitelist(System.Environment.GetFolderPath(System.Environment.SpecialFolder.Windows));
+        sandbox_add_whitelist(System.Environment.GetFolderPath(System.Environment.SpecialFolder.ProgramFiles));
+        sandbox_add_whitelist(System.Environment.GetFolderPath(System.Environment.SpecialFolder.System));
+    }
 	// ── 沙箱模式 ──
 	public enum SandboxMode { Open, Strict, AbsoluteStrict }
-	public static SandboxMode Mode { get; set; } = SandboxMode.Strict;
+    public static SandboxMode Mode
+    {
+        get => _mode;
+        set
+        {
+            _mode = value;
+            if (_nativeHooksActive) sandbox_set_mode((int)value);
+        }
+    }
+    private static SandboxMode _mode = SandboxMode.Strict;
 
 	// ── 安全日志 ──
 	public static string LogDir { get; private set; }
@@ -48,20 +141,21 @@ public static class ModSandbox
 	private class NetworkQuota { public int BytesSent; public float WindowStart; }
 
 	/// <summary>沙箱初始化（在 ModManager.Init 后、ApplyAll 前调用）</summary>
-	public static void Init()
-	{
-		_sandboxRoot = ProjectSettings.GlobalizePath("user://mods_sandbox");
-		if (!DirAccess.DirExistsAbsolute("user://mods_sandbox"))
-			DirAccess.MakeDirAbsolute("user://mods_sandbox");
+    public static void Init()
+    {
+        _sandboxRoot = ProjectSettings.GlobalizePath("user://mods_sandbox");
+        if (!DirAccess.DirExistsAbsolute("user://mods_sandbox"))
+            DirAccess.MakeDirAbsolute("user://mods_sandbox");
 
-		LogDir = ProjectSettings.GlobalizePath("user://mods_security_logs");
-		if (!DirAccess.DirExistsAbsolute("user://mods_security_logs"))
-			DirAccess.MakeDirAbsolute("user://mods_security_logs");
+        LogDir = ProjectSettings.GlobalizePath("user://mods_security_logs");
+        if (!DirAccess.DirExistsAbsolute("user://mods_security_logs"))
+            DirAccess.MakeDirAbsolute("user://mods_security_logs");
 
-		LoadPermissions();
-		LoadGlobalWhitelist();
-		GD.Print($"[Sandbox] 已初始化，模式: {Mode}, 权限缓存: {_permissions.Count} mods, 白名单: {_globalWhitelist.Count} 条");
-	}
+        LoadPermissions();
+        LoadGlobalWhitelist();
+        InitNativeHooks();
+        GD.Print($"[Sandbox] 已初始化，模式: {Mode}, NativeHook: {_nativeHooksActive}, 权限: {_permissions.Count} mods");
+    }
 
 	/// <summary>为 Mod 注册沙箱上下文（在 ModManager.ApplyMod 之前调用）</summary>
 	public static void RegisterMod(string modId, string modName)
@@ -69,9 +163,10 @@ public static class ModSandbox
 		if (_modSandboxDirs.ContainsKey(modId)) return;
 		string sandboxDir = _sandboxRoot + "/" + SanitizeId(modId);
 		if (!Directory.Exists(sandboxDir)) Directory.CreateDirectory(sandboxDir);
-		_modSandboxDirs[modId] = sandboxDir;
-		if (!_permissions.ContainsKey(modId)) _permissions[modId] = new HashSet<string>(StringComparer.OrdinalIgnoreCase);
-		GD.Print($"[Sandbox] Mod 已注册: {modId} → {sandboxDir}");
+        _modSandboxDirs[modId] = sandboxDir;
+        if (!_permissions.ContainsKey(modId)) _permissions[modId] = new HashSet<string>(StringComparer.OrdinalIgnoreCase);
+        SyncRulesToNative();
+        GD.Print($"[Sandbox] Mod 已注册: {modId} → {sandboxDir}");
 	}
 
 	/// <summary>清理 Mod 沙箱（卸载时调用）</summary>
@@ -191,11 +286,12 @@ public static class ModSandbox
 	}
 
 	/// <summary>将路径加入全局白名单</summary>
-	public static void AddGlobalWhitelist(string path)
-	{
-		_globalWhitelist.Add(path);
-		SaveGlobalWhitelist();
-	}
+    public static void AddGlobalWhitelist(string path)
+    {
+        _globalWhitelist.Add(path);
+        SaveGlobalWhitelist();
+        if (_nativeHooksActive) sandbox_add_whitelist(path.Replace("/", "\\"));
+    }
 
 	/// <summary>移除全局白名单路径</summary>
 	public static void RemoveGlobalWhitelist(string path)
