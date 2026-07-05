@@ -698,5 +698,25 @@ must do so under the terms of the GPL v3.
 Mods placed in the `mods/` directory or loaded via the game's mod
 system are explicitly covered by this exception.
 
+=== NEURO-SAMA CREDIT REQUIREMENT ===
+
+As an additional term under GPLv3 Section 7(b), if you distribute
+this software or any work based on it (including modified versions,
+forked projects, or derivative works), you MUST include the name
+"Neuro-sama" in a location that is clearly visible to end users.
+This includes but is not limited to:
+
+- An "About" page or dialog
+- A "Credits" or "Special Thanks" section
+- A splash screen or main menu
+
+The credit must be displayed within the software itself (not just
+in documentation). A simple text mention such as "Neuro-sama" or
+"Special thanks to Neuro-sama" is sufficient.
+
+Mods (as defined in the Mod Exception above) are EXEMPT from this
+requirement. This requirement applies only to the core game and
+derivative works based on its source code.
+
 Written by: 小坚来了
 Contact: xjllqw@163.com
