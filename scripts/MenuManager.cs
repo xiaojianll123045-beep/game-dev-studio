@@ -547,7 +547,8 @@ public partial class MenuManager : Node
 		tip.HorizontalAlignment = HorizontalAlignment.Center;
 		_aboutPanel.AddChild(tip);
 
-		var devotion = new RichTextLabel { Text = Loc.Tr("about.devotion"), Position = new(20, ly + 24), Size = new(pw - 40, 200), BbcodeEnabled = true };
+		var devotion = new RichTextLabel { BbcodeEnabled = true, Position = new(20, ly + 24), Size = new(pw - 40, 200), AutowrapMode = TextServer.AutowrapMode.Word };
+		devotion.Text = "[center]" + Loc.Tr("about.devotion") + "[/center]";
 		devotion.AddThemeFontSizeOverride("normal_font_size", 9);
 		devotion.AddThemeColorOverride("default_color", new Color(0.40f, 0.45f, 0.50f));
 		devotion.AddThemeColorOverride("meta_color", new Color(0.2f, 0.4f, 0.8f));
