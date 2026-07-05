@@ -366,6 +366,7 @@ public partial class MenuManager : Node
 		soundCb.AddThemeFontSizeOverride("font_size", 11);
 		soundCb.AddThemeColorOverride("font_color", Colors.Black);
 		soundCb.AddThemeColorOverride("font_hover_color", new Color(0.4f, 0.4f, 0.4f));
+		soundCb.AddThemeColorOverride("font_hover_pressed_color", new Color(0.4f, 0.4f, 0.4f));
 		soundCb.AddThemeColorOverride("font_pressed_color", Colors.Black);
 		soundCb.AddThemeColorOverride("font_focus_color", Colors.Black);
 		soundCb.Toggled += (on) => { GlobalSettings.SoundEnabled = on; GlobalSettings.Save(); };
@@ -384,6 +385,7 @@ public partial class MenuManager : Node
 			musicCb.AddThemeFontSizeOverride("font_size", 11);
 			musicCb.AddThemeColorOverride("font_color", Colors.Black);
 			musicCb.AddThemeColorOverride("font_hover_color", new Color(0.4f, 0.4f, 0.4f));
+			musicCb.AddThemeColorOverride("font_hover_pressed_color", new Color(0.4f, 0.4f, 0.4f));
 			musicCb.AddThemeColorOverride("font_pressed_color", Colors.Black);
 			musicCb.AddThemeColorOverride("font_focus_color", Colors.Black);
 			musicCb.Toggled += (on) => { GlobalSettings.MusicEnabled = on; ApplyMusicVol(); GlobalSettings.Save(); };

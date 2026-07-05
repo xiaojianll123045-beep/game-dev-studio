@@ -6855,6 +6855,7 @@ public partial class GameManager : Node3D
             chk.AddThemeFontSizeOverride("font_size", 11);
             chk.AddThemeColorOverride("font_color", Colors.Black);
             chk.AddThemeColorOverride("font_hover_color", new Color(0.4f, 0.4f, 0.4f));
+            chk.AddThemeColorOverride("font_hover_pressed_color", new Color(0.4f, 0.4f, 0.4f));
             chk.AddThemeColorOverride("font_pressed_color", Colors.Black);
             chk.AddThemeColorOverride("font_focus_color", Colors.Black);
             chk.Toggled += (on) => { GlobalSettings.SoundEnabled = on; GlobalSettings.Save(); };
@@ -6872,6 +6873,7 @@ public partial class GameManager : Node3D
             chk.AddThemeFontSizeOverride("font_size", 11);
             chk.AddThemeColorOverride("font_color", Colors.Black);
             chk.AddThemeColorOverride("font_hover_color", new Color(0.4f, 0.4f, 0.4f));
+            chk.AddThemeColorOverride("font_hover_pressed_color", new Color(0.4f, 0.4f, 0.4f));
             chk.AddThemeColorOverride("font_pressed_color", Colors.Black);
             chk.AddThemeColorOverride("font_focus_color", Colors.Black);
             chk.Toggled += (on) => { GlobalSettings.MusicEnabled = on; _soundMgr?.RefreshVolume(); GlobalSettings.Save(); };
