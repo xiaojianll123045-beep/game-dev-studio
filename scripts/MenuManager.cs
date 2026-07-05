@@ -664,6 +664,7 @@ public partial class MenuManager : Node
 			DisplayServer.WindowSetFlag(DisplayServer.WindowFlags.Borderless, false);
 			DisplayServer.WindowSetMode(DisplayServer.WindowMode.Windowed);
 		}
+		GlobalSettings.Save();
 		ApplyResolution(_resIdx);
 	}
 
