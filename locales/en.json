@@ -1054,6 +1054,7 @@
   "mod_risk.disclaimer": "The game developers assume no responsibility for any loss caused by running this mod.",
   "mod_risk.dll_warn": "Cannot perform source-level malware detection — may be high-risk.\nOnly load if you trust the mod author or have verified the binary.",
   "mod_risk.script_warn": "These files can execute arbitrary system commands — extreme security risk.\nOnly load if you trust the mod author.",
+  "mod_risk.gdscript_warn": "This mod uses GDScript which cannot be fully sandbox-isolated. Trust the author.\n    Most benign mods don't use raw FileAccess.open(). Check the console log if unsure.",
   "mod_risk.confirm_risk": "Load at my own risk",
   "mod_risk.open_folder": "Open mod folder",
   "mod_risk.final_title": "Final Confirmation",

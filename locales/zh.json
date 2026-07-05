@@ -87,6 +87,7 @@
     "mod_risk.disclaimer":  "如因运行此 Mod 造成任何损失，本游戏开发人员不承担任何责任。",
     "mod_risk.dll_warn":  "无法进行源代码级别的恶意代码检测，可能为高危病毒程序。\n请确保您信任该 Mod 的开发者，或经过逆向工程确认其安全性。",
     "mod_risk.script_warn":  "这些文件可能执行任意系统命令，存在极高安全风险。\n请确保您信任该 Mod 的开发者。",
+    "mod_risk.gdscript_warn":  "该 Mod 使用 GDScript 编写，无法被沙箱完全隔离。请确保您信任该 Mod 的作者。\n    大多数良性 Mod 不会直接使用 FileAccess.open()。如有疑问可查控制台日志。",
     "mod_risk.confirm_risk":  "确认加载，我承担风险",
     "mod_risk.open_folder":  "打开此 mod 文件目录",
     "mod_risk.final_title":  "最终确认",

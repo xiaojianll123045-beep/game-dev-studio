@@ -388,6 +388,10 @@ public static class ModManager
             parts.Add(Loc.Tr("mod_risk.script_warn"));
         }
 
+        // GDScript 沙箱提示
+        if (scan.HasGDScript && scan.GDScriptCount > 0)
+            parts.Add($"\nℹ️ {Loc.Tr("mod_risk.gdscript_warn")}");
+
         parts.Add($"\n{Loc.Tr("mod_risk.disclaimer")}");
 
         string fullMsg = string.Join("\n", parts);

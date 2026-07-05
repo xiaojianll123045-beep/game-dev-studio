@@ -309,31 +309,41 @@ public static class ModSandbox
 
 	// ══════════════════ 安全日志 ══════════════════
 
-	public static void LogAccess(string modId, string action, string target, string result)
-	{
-		var entry = new SandboxLogEntry
-		{
-			ModId = modId,
-			ModName = ModManager.LoadedMods.Find(m => m.Id == modId)?.Name ?? modId,
-			Action = action,
-			Target = target,
-			Result = result,
-			Timestamp = DateTime.Now.ToString("yyyy-MM-dd HH:mm:ss")
-		};
-		_log.Add(entry);
+    public static void LogAccess(string modId, string action, string target, string result)
+    {
+        var entry = new SandboxLogEntry
+        {
+            ModId = modId,
+            ModName = ModManager.LoadedMods.Find(m => m.Id == modId)?.Name ?? modId,
+            Action = action,
+            Target = target,
+            Result = result,
+            Timestamp = DateTime.Now.ToString("yyyy-MM-dd HH:mm:ss")
+        };
+        _log.Add(entry);
 
-		if (result == "BLOCK" || result == "DENY")
-			OnBlocked?.Invoke(modId, action, target);
+        if (result == "BLOCK" || result == "DENY")
+            OnBlocked?.Invoke(modId, action, target);
 
-		// 写入日志文件（追加）
-		try
-		{
-			string logPath = LogDir + "/sandbox.log";
-			string line = $"[{entry.Timestamp}] [{result}] [{entry.ModId}] {entry.Action}: {entry.Target}\n";
-			File.AppendAllText(logPath, line);
-		}
-		catch { }
-	}
+        // 写入日志文件（追加）
+        try
+        {
+            string logPath = LogDir + "/sandbox.log";
+            string line = $"[{entry.Timestamp}] [{entry.Result}] [{entry.ModId}] {entry.Action}: {entry.Target}\n";
+            File.AppendAllText(logPath, line);
+        }
+        catch { }
+
+        // GDScript 疑似危险操作 → 控制台预警
+        if (result == "SUSPECT" || result == "BLOCK")
+            GD.Print($"[沙箱预警] Mod [{entry.ModName}] 可疑文件操作: {entry.Action} → {entry.Target}");
+    }
+
+    /// <summary>记录 GDScript Mod 的可疑路径操作</summary>
+    public static void LogSuspectPath(string modId, string path, string op)
+    {
+        LogAccess(modId, $"GDScript_{op}", path, "SUSPECT");
+    }
 
 	public static void ClearLog() => _log.Clear();
 	public static string GetLogText()
