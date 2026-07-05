@@ -1014,64 +1014,149 @@ public partial class MenuManager : Node
 	/// <summary>弹出 Mod 沙箱配置面板</summary>
 	private void ShowModSandboxPanel(Control parent, string modId, string modName)
 	{
-		float pw = 320, ph = 250;
-		var dp = new DragPanel { Position = new((GetViewport().GetVisibleRect().Size.X - pw) / 2, (GetViewport().GetVisibleRect().Size.Y - ph) / 2), Size = new(pw, ph) };
-		dp.AddThemeStyleboxOverride("panel", new StyleBoxFlat { BgColor = Colors.White, CornerRadiusTopLeft = 8, CornerRadiusTopRight = 8, CornerRadiusBottomLeft = 8, CornerRadiusBottomRight = 8 });
+		float pw = 360, ph = 320;
+		float S(float v) => v; // no scaling here
+		var vp = GetViewport().GetVisibleRect().Size;
+		var dp = new DragPanel { Position = new((vp.X - pw) / 2, (vp.Y - ph) / 2), Size = new(pw, ph) };
+		dp.AddThemeStyleboxOverride("panel", new StyleBoxFlat
+		{
+			BgColor = Colors.White,
+			BorderWidthLeft = 2, BorderWidthTop = 2, BorderWidthRight = 2, BorderWidthBottom = 2,
+			BorderColor = new Color(0.3f, 0.5f, 0.8f, 0.5f),
+			CornerRadiusTopLeft = 10, CornerRadiusTopRight = 10,
+			CornerRadiusBottomLeft = 10, CornerRadiusBottomRight = 10
+		});
 		_ui.AddChild(dp);
 
-		var title = new Label { Text = Loc.Tr("sandbox.per_mod_title") + ": " + modName, Position = new(16, 10), Size = new(pw - 32, 24) };
+		// 标题行
+		var titleBar = new ColorRect { Color = new Color(0.15f, 0.4f, 0.7f, 0.08f), Position = new(0, 0), Size = new(pw, 38) };
+		dp.AddChild(titleBar);
+		var title = new Label { Text = "🔧 " + Loc.Tr("sandbox.per_mod_title") + ": " + modName, Position = new(16, 8), Size = new(pw - 50, 26) };
 		title.AddThemeFontSizeOverride("font_size", 14);
 		title.AddThemeColorOverride("font_color", new Color(0.10f, 0.14f, 0.22f));
 		dp.AddChild(title);
+		var closeBtn = new Button { Text = "✕", Position = new(pw - 36, 5), Size = new(28, 28), Flat = true };
+		closeBtn.AddThemeFontSizeOverride("font_size", 16);
+		closeBtn.AddThemeColorOverride("font_color", new Color(0.8f, 0.3f, 0.3f));
+		closeBtn.Pressed += () => dp.QueueFree();
+		dp.AddChild(closeBtn);
 
-		var modeLabel = new Label { Text = Loc.Tr("sandbox.mode_label"), Position = new(16, 42), Size = new(pw - 32, 20) };
-		modeLabel.AddThemeFontSizeOverride("font_size", 11);
-		dp.AddChild(modeLabel);
-
+		float y = 50;
 		var cfg = ModSandbox.GetModConfig(modId);
-		string[] modes = { Loc.Tr("sandbox.mode_open"), Loc.Tr("sandbox.mode_strict"), Loc.Tr("sandbox.mode_absolute") };
+
+		// 🔒 沙箱等级
+		var modeTitle = new Label { Text = "🔒 " + Loc.Tr("sandbox.mode_label"), Position = new(16, y), Size = new(pw - 32, 20) };
+		modeTitle.AddThemeFontSizeOverride("font_size", 12);
+		modeTitle.AddThemeColorOverride("font_color", new Color(0.15f, 0.4f, 0.7f));
+		dp.AddChild(modeTitle);
+		y += 22;
+
+		string[] modeLabels = { Loc.Tr("sandbox.mode_open"), Loc.Tr("sandbox.mode_strict"), Loc.Tr("sandbox.mode_absolute") };
 		var modeOpt = new OptionButton();
-		foreach (var m in modes) modeOpt.AddItem(m);
+		foreach (var m in modeLabels) modeOpt.AddItem(m);
 		modeOpt.Selected = (int)cfg.Mode;
-		modeOpt.Position = new(16, 62);
+		modeOpt.Position = new(16, y);
 		modeOpt.Size = new(pw - 32, 26);
 		modeOpt.AddThemeFontSizeOverride("font_size", 11);
 		modeOpt.AddThemeColorOverride("font_color", Colors.White);
 		modeOpt.AddThemeStyleboxOverride("normal", new StyleBoxFlat { BgColor = new Color(0.15f, 0.18f, 0.22f), CornerRadiusTopLeft = 4, CornerRadiusTopRight = 4, CornerRadiusBottomLeft = 4, CornerRadiusBottomRight = 4 });
 		dp.AddChild(modeOpt);
+		y += 30;
 
-		var wlLabel = new Label { Text = Loc.Tr("sandbox.whitelist"), Position = new(16, 98), Size = new(pw - 32, 20) };
-		wlLabel.AddThemeFontSizeOverride("font_size", 11);
-		dp.AddChild(wlLabel);
+		// 模式说明
+		string[] modeDescs = {
+			Loc.Tr("sandbox.mode_open_desc"),
+			Loc.Tr("sandbox.mode_strict_desc"),
+			Loc.Tr("sandbox.mode_absolute_desc")
+		};
+		var descLabel = new Label { Text = modeDescs[(int)cfg.Mode], Position = new(24, y), Size = new(pw - 40, 28) };
+		descLabel.AddThemeFontSizeOverride("font_size", 9);
+		descLabel.AddThemeColorOverride("font_color", new Color(0.5f, 0.55f, 0.6f));
+		descLabel.AutowrapMode = TextServer.AutowrapMode.Word;
+		dp.AddChild(descLabel);
+		modeOpt.ItemSelected += (long i) =>
+		{
+			cfg.Mode = (ModSandbox.SandboxMode)(int)i;
+			descLabel.Text = modeDescs[(int)i];
+		};
+		y += 32;
 
-		var wlEdit = new LineEdit { Text = string.Join(", ", cfg.Whitelist), Position = new(16, 118), Size = new(pw - 32, 26), PlaceholderText = Loc.Tr("sandbox.whitelist_hint") };
-		wlEdit.AddThemeFontSizeOverride("font_size", 11);
-		dp.AddChild(wlEdit);
+		// 分隔线
+		dp.AddChild(new ColorRect { Color = new Color(0.70f, 0.72f, 0.75f, 0.3f), Position = new(16, y), Size = new(pw - 32, 1) });
+		y += 12;
 
+		// 📂 白名单
+		var wlTitle = new Label { Text = "📂 " + Loc.Tr("sandbox.whitelist"), Position = new(16, y), Size = new(pw - 32, 20) };
+		wlTitle.AddThemeFontSizeOverride("font_size", 12);
+		wlTitle.AddThemeColorOverride("font_color", new Color(0.15f, 0.4f, 0.7f));
+		dp.AddChild(wlTitle);
+		y += 22;
+
+		// 已有白名单项（只读展示）
+		float listY = y;
+		float listH = 0;
+		foreach (var p in cfg.Whitelist)
+		{
+			var pLabel = new Label { Text = "  • " + p, Position = new(20, listY), Size = new(pw - 52, 16) };
+			pLabel.AddThemeFontSizeOverride("font_size", 10);
+			pLabel.AddThemeColorOverride("font_color", new Color(0.3f, 0.55f, 0.3f));
+			dp.AddChild(pLabel);
+			listY += 16;
+			listH += 16;
+		}
+		y = listY + 4;
+
+		// 新增路径输入
+		var addEdit = new LineEdit { Text = "", Position = new(16, y), Size = new(pw - 110, 24), PlaceholderText = Loc.Tr("sandbox.whitelist_hint") };
+		addEdit.AddThemeFontSizeOverride("font_size", 11);
+		dp.AddChild(addEdit);
+		var addBtn = new Button { Text = "+", Position = new(pw - 88, y), Size = new(28, 24), Flat = true };
+		addBtn.AddThemeFontSizeOverride("font_size", 14);
+		addBtn.AddThemeColorOverride("font_color", new Color(0.2f, 0.55f, 0.3f));
+		dp.AddChild(addBtn);
+		var clearBtn = new Button { Text = Loc.Tr("sandbox.clear_all"), Position = new(pw - 56, y), Size = new(40, 24), Flat = true };
+		clearBtn.AddThemeFontSizeOverride("font_size", 9);
+		clearBtn.AddThemeColorOverride("font_color", new Color(0.8f, 0.3f, 0.3f));
+		dp.AddChild(clearBtn);
+
+		// ── 按钮逻辑 ──
+		System.Action refreshPanel = () => { dp.QueueFree(); ShowModSandboxPanel(parent, modId, modName); };
+
+		addBtn.Pressed += () =>
+		{
+			string p = addEdit.Text.Trim();
+			if (!string.IsNullOrEmpty(p))
+			{
+				cfg.Whitelist.Add(p);
+				ModSandbox.SaveModConfig(modId);
+				refreshPanel();
+			}
+		};
+		addEdit.TextChanged += (t) => { };
+		addEdit.ExpandToTextLength = false;
+
+		clearBtn.Pressed += () =>
+		{
+			cfg.Whitelist.Clear();
+			ModSandbox.SaveModConfig(modId);
+			refreshPanel();
+		};
+
+		// 保存并关闭按钮
 		float btnY = ph - 44;
-		var saveBtn = new Button { Text = Loc.Tr("sandbox.save"), Position = new(pw / 2 - 60, btnY), Size = new(120, 30), Flat = true };
+		var saveBtn = new Button
+		{
+			Text = Loc.Tr("sandbox.save"),
+			Position = new(pw / 2 - 60, btnY),
+			Size = new(120, 30),
+			Flat = true
+		};
 		saveBtn.AddThemeFontSizeOverride("font_size", 13);
 		saveBtn.AddThemeColorOverride("font_color", Colors.White);
 		saveBtn.AddThemeStyleboxOverride("normal", new StyleBoxFlat { BgColor = new Color(0.2f, 0.55f, 0.3f), CornerRadiusTopLeft = 4, CornerRadiusTopRight = 4, CornerRadiusBottomLeft = 4, CornerRadiusBottomRight = 4 });
-		saveBtn.Pressed += () =>
-		{
-			cfg.Mode = (ModSandbox.SandboxMode)modeOpt.Selected;
-			cfg.Whitelist.Clear();
-			foreach (var p in wlEdit.Text.Split(','))
-			{
-				string trimmed = p.Trim();
-				if (!string.IsNullOrEmpty(trimmed)) cfg.Whitelist.Add(trimmed);
-			}
-			ModSandbox.SaveModConfig(modId);
-			dp.QueueFree();
-		};
+		saveBtn.AddThemeStyleboxOverride("hover", new StyleBoxFlat { BgColor = new Color(0.15f, 0.45f, 0.25f), CornerRadiusTopLeft = 4, CornerRadiusTopRight = 4, CornerRadiusBottomLeft = 4, CornerRadiusBottomRight = 4 });
+		saveBtn.Pressed += () => { ModSandbox.SaveModConfig(modId); dp.QueueFree(); };
 		dp.AddChild(saveBtn);
-
-		var closeBtn = new Button { Text = "✕", Position = new(pw - 40, 6), Size = new(30, 28), Flat = true };
-		closeBtn.AddThemeFontSizeOverride("font_size", 16);
-		closeBtn.AddThemeColorOverride("font_color", new Color(0.8f, 0.3f, 0.3f));
-		closeBtn.Pressed += () => dp.QueueFree();
-		dp.AddChild(closeBtn);
 	}
 
 	private void ShowDlcList()
