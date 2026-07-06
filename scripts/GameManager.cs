@@ -6507,8 +6507,11 @@ public partial class GameManager : Node3D
             BorderColor = new Color(0.3f, 0.5f, 0.8f, 0.5f), CornerRadiusTopLeft = 10, CornerRadiusTopRight = 10,
             CornerRadiusBottomLeft = 10, CornerRadiusBottomRight = 10 });
         _uiLayer.AddChild(panel);
+        _openPanels.Push(panel);
+        _openPanel = panel;
         IsAnyModalOpen = true;
-        panel.TreeExiting += () => IsAnyModalOpen = false;
+        _modalLock = 1;
+        panel.TreeExiting += () => { IsAnyModalOpen = false; _modalLock = 0; };
 
         float y = 15;
         var titleL = new Label { Text = Loc.TrF("sprint.title", proj.Name), Position = new(S(20), y), Size = new(panel.Size.X - S(40), S(30)) };
@@ -6549,6 +6552,11 @@ public partial class GameManager : Node3D
 
             cb.Toggled += (on) =>
             {
+                if (on && available - totalPts - task.StoryPoints < 0)
+                {
+                    cb.ButtonPressed = false;
+                    return;
+                }
                 if (on) { selected.Add(task); totalPts += task.StoryPoints; }
                 else { selected.Remove(task); totalPts -= task.StoryPoints; }
                 int remain = available - totalPts;
@@ -6559,8 +6567,10 @@ public partial class GameManager : Node3D
             taskVbox.AddThemeConstantOverride("separation", 2);
             taskVbox.AddChild(label);
             taskVbox.AddChild(descL);
-            row.AddChild(cb); row.AddChild(taskVbox); row.AddChild(ptsL);
+                        row.AddChild(cb); row.AddChild(taskVbox); row.AddChild(ptsL);
             taskList.AddChild(row);
+
+
         }
 
         var confirmBtn = new Button { Text = Loc.Tr("sprint.confirm"), Position = new(S(20), panel.Size.Y - S(60)), Size = new(panel.Size.X - S(40), S(36)) };
